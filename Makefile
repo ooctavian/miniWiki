@@ -3,7 +3,7 @@ BIN:=${shell go env GOPATH}/bin
 
 install-deps:
 	go mod vendor
-	go install -tags 'pgx' github.com/golang-migrate/migrate/v4/cmd/migrate@v4.15.2
+	go install -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate@v4.15.2
 	go install github.com/jschaf/pggen/cmd/pggen@2023-01-27
 
 start-db:
@@ -24,4 +24,4 @@ generate-queries:
 	${BIN}/pggen gen go  --schema-glob "migrations/*.up.sql" --query-glob "domain/category/query/*.sql"
 
 run:
-	go run .
+	go run cmd/miniwiki/miniwiki.go

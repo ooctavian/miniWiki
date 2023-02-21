@@ -5,6 +5,8 @@ import (
 
 	"miniWiki/domain/resource/model"
 	"miniWiki/utils"
+
+	"github.com/sirupsen/logrus"
 )
 
 func createResourceHandler(resource resourceService) func(w http.ResponseWriter, r *http.Request) {
@@ -12,8 +14,8 @@ func createResourceHandler(resource resourceService) func(w http.ResponseWriter,
 		createResource := model.CreateCategory{}
 		err := utils.Decode(r.Body, &createResource)
 		if err != nil {
-			utils.Respond(w, http.StatusBadRequest, nil)
-			utils.Logger.WithContext(r.Context()).Infof("BadRequest: %v", err)
+			utils.Respond(w, http.StatusBadRequest, err.Error())
+			logrus.WithContext(r.Context()).Infof("Invalid body request: %v", err)
 			return
 		}
 
@@ -23,7 +25,7 @@ func createResourceHandler(resource resourceService) func(w http.ResponseWriter,
 
 		err = resource.CreateResource(r.Context(), request)
 		if err != nil {
-			utils.Respond(w, http.StatusInternalServerError, nil)
+			utils.HandleErrorResponse(w, err)
 			return
 		}
 

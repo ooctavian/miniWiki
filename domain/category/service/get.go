@@ -4,13 +4,14 @@ import (
 	"context"
 
 	"miniWiki/domain/category/model"
-	"miniWiki/utils"
+
+	"github.com/sirupsen/logrus"
 )
 
 func (s *Category) GetCategories(ctx context.Context) ([]model.CategoryResponse, error) {
 	getCategories, err := s.categoryQuerier.GetCategories(ctx)
 	if err != nil {
-		utils.Logger.WithContext(ctx).Errorf("Failed inserting in database: %v", err)
+		logrus.WithContext(ctx).Errorf("Failed inserting in database: %v", err)
 		return nil, err
 	}
 

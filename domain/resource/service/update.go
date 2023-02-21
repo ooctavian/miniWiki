@@ -5,7 +5,8 @@ import (
 
 	"miniWiki/domain/resource/model"
 	"miniWiki/domain/resource/query"
-	"miniWiki/utils"
+
+	"github.com/sirupsen/logrus"
 )
 
 func (s *Resource) UpdateResource(ctx context.Context, request model.UpdateResourceRequest) error {
@@ -14,11 +15,12 @@ func (s *Resource) UpdateResource(ctx context.Context, request model.UpdateResou
 		Title:       request.Resource.Title,
 		Description: request.Resource.Description,
 		Link:        request.Resource.Link,
+		CategoryID:  request.Resource.CategoryId,
 	}
 
 	_, err := s.resourceQuerier.UpdateResource(ctx, params)
 	if err != nil {
-		utils.Logger.WithContext(ctx).Infof("Failed updating in database: %v", err)
+		logrus.WithContext(ctx).Infof("Failed updating in database: %v", err)
 	}
 
 	return err

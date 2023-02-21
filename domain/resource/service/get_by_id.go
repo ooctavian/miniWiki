@@ -2,16 +2,27 @@ package service
 
 import (
 	"context"
+	"errors"
 
 	"miniWiki/domain/resource/model"
 	"miniWiki/utils"
+
+	"github.com/jackc/pgx/v4"
+	"github.com/sirupsen/logrus"
 )
 
 func (s *Resource) GetResource(ctx context.Context, request model.GetResourceRequest) (*model.ResourceResponse, error) {
 	getResourceRow, err := s.resourceQuerier.GetResourceByID(ctx, request.ResourceId)
 
 	if err != nil {
-		utils.Logger.WithContext(ctx).Errorf("Failed retrieving resource: %v", err)
+		if errors.Is(err, pgx.ErrNoRows) {
+			logrus.WithContext(ctx).Errorf("Resource not found: %v", err)
+			return nil, &utils.NotFoundError{
+				Item: "resource",
+				Id:   string(request.ResourceId),
+			}
+		}
+		logrus.WithContext(ctx).Errorf("Failed retrieving resource: %v", err)
 		return nil, err
 	}
 
@@ -19,7 +30,8 @@ func (s *Resource) GetResource(ctx context.Context, request model.GetResourceReq
 		ResourceId:  getResourceRow.ResourceID,
 		Title:       *getResourceRow.Title,
 		Description: *getResourceRow.Description,
-		Link:        *getResourceRow.Link,
+		Link:        getResourceRow.Link,
+		CategoryId:  getResourceRow.CategoryID,
 	}
 
 	return resource, nil

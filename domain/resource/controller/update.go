@@ -8,6 +8,7 @@ import (
 	"miniWiki/utils"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/sirupsen/logrus"
 )
 
 func updateResourceHandler(service resourceService) func(w http.ResponseWriter, r *http.Request) {
@@ -16,13 +17,13 @@ func updateResourceHandler(service resourceService) func(w http.ResponseWriter, 
 		err := utils.Decode(r.Body, &updateResource)
 		if err != nil {
 			utils.Respond(w, http.StatusBadRequest, nil)
-			utils.Logger.WithContext(r.Context()).Infof("BadRequest: %v", err)
+			logrus.WithContext(r.Context()).Infof("BadRequest: %v", err)
 			return
 		}
 
 		resourceId, err := strconv.Atoi(chi.URLParam(r, "id"))
 		if err != nil {
-			utils.Logger.WithContext(r.Context()).Errorf("Error converting string to int: %v", err)
+			logrus.WithContext(r.Context()).Errorf("Error converting string to int: %v", err)
 			return
 		}
 
@@ -33,7 +34,7 @@ func updateResourceHandler(service resourceService) func(w http.ResponseWriter, 
 
 		err = service.UpdateResource(r.Context(), request)
 		if err != nil {
-			utils.Respond(w, http.StatusInternalServerError, nil)
+			utils.HandleErrorResponse(w, err)
 			return
 		}
 

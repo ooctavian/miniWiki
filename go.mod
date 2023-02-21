@@ -3,12 +3,15 @@ module miniWiki
 go 1.19
 
 require (
+	github.com/brianvoe/gofakeit/v6 v6.20.1
+	github.com/caarlos0/env/v7 v7.0.0
 	github.com/go-chi/chi/v5 v5.0.8
 	github.com/go-playground/validator/v10 v10.11.2
 	github.com/jackc/pgconn v1.14.0
 	github.com/jackc/pgtype v1.14.0
 	github.com/jackc/pgx/v4 v4.18.0
 	github.com/joho/godotenv v1.5.1
+	github.com/sirupsen/logrus v1.9.0
 )
 
 require (
@@ -22,7 +25,6 @@ require (
 	github.com/jackc/puddle v1.3.0 // indirect
 	github.com/leodido/go-urn v1.2.1 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
-	github.com/sirupsen/logrus v1.9.0 // indirect
 	golang.org/x/crypto v0.6.0 // indirect
 	golang.org/x/sys v0.5.0 // indirect
 	golang.org/x/text v0.7.0 // indirect

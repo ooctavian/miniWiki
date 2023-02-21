@@ -7,6 +7,7 @@ import (
 )
 
 var (
+/*
 	Logger = &logrus.Logger{
 		Out:          os.Stderr,
 		Formatter:    new(logrus.JSONFormatter),
@@ -15,4 +16,10 @@ var (
 		ExitFunc:     os.Exit,
 		ReportCaller: false,
 	}
+*/
 )
+
+func InitLogger() {
+	logrus.SetOutput(os.Stderr)
+	logrus.SetFormatter(new(logrus.JSONFormatter))
+}

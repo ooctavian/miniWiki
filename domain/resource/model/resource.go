@@ -7,6 +7,7 @@ type ResourceResponse struct {
 	Title       string `json:"title"`
 	Description string `json:"description,omitempty"`
 	Link        string `json:"link"`
+	CategoryId  *int   `json:"categoryId,omitempty"`
 }
 
 type DeleteResourceRequest struct {
@@ -31,6 +32,7 @@ type UpdateResource struct {
 	Title       string `json:"title"`
 	Description string `json:"description"`
 	Link        string `json:"link" validate:"url"`
+	CategoryId  int    `json:"categoryId"`
 }
 
 type CreateResourceRequest struct {
@@ -41,4 +43,5 @@ type CreateCategory struct {
 	Title       string `json:"title" validate:"required"`
 	Description string `json:"description"`
 	Link        string `json:"link" validate:"required,url"`
+	CategoryId  int    `json:"categoryId"`
 }

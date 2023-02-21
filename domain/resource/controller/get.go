@@ -10,7 +10,7 @@ func getResourcesHandler(service resourceService) func(w http.ResponseWriter, r 
 	return func(w http.ResponseWriter, r *http.Request) {
 		resources, err := service.GetResources(r.Context())
 		if err != nil {
-			utils.Respond(w, http.StatusBadRequest, nil)
+			utils.HandleErrorResponse(w, err)
 			return
 		}
 

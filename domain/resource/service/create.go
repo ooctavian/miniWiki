@@ -5,7 +5,8 @@ import (
 
 	"miniWiki/domain/resource/model"
 	"miniWiki/domain/resource/query"
-	"miniWiki/utils"
+
+	"github.com/sirupsen/logrus"
 )
 
 func (s *Resource) CreateResource(ctx context.Context, request model.CreateResourceRequest) error {
@@ -13,11 +14,13 @@ func (s *Resource) CreateResource(ctx context.Context, request model.CreateResou
 		Title:       request.Resource.Title,
 		Description: request.Resource.Description,
 		Link:        request.Resource.Link,
+		CategoryID:  request.Resource.CategoryId,
 	}
 
 	_, err := s.resourceQuerier.InsertResource(ctx, params)
 	if err != nil {
-		utils.Logger.WithContext(ctx).Errorf("Failed inserting in database: %v", err)
+		logrus.WithContext(ctx).Errorf("Failed inserting in database: %v", err)
+
 	}
 	return err
 }

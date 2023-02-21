@@ -188,7 +188,7 @@ type GetResourceByIDRow struct {
 	ResourceID  int              `json:"resource_id"`
 	Title       *string          `json:"title"`
 	Description *string          `json:"description"`
-	Link        *string          `json:"link"`
+	Link        string           `json:"link"`
 	CreatedAt   pgtype.Timestamp `json:"created_at"`
 	UpdatedAt   pgtype.Timestamp `json:"updated_at"`
 	CategoryID  *int             `json:"category_id"`
@@ -311,23 +311,26 @@ func (q *DBQuerier) DeleteResourceByIDScan(results pgx.BatchResults) (pgconn.Com
 
 const insertResourceSQL = `INSERT INTO resource(title,
                      description,
-                     link)
+                     link,
+                     category_id)
 VALUES(
        $1,
        $2,
-       $3
+       $3,
+       $4
       );`
 
 type InsertResourceParams struct {
 	Title       string
 	Description string
 	Link        string
+	CategoryID  int
 }
 
 // InsertResource implements Querier.InsertResource.
 func (q *DBQuerier) InsertResource(ctx context.Context, params InsertResourceParams) (pgconn.CommandTag, error) {
 	ctx = context.WithValue(ctx, "pggen_query_name", "InsertResource")
-	cmdTag, err := q.conn.Exec(ctx, insertResourceSQL, params.Title, params.Description, params.Link)
+	cmdTag, err := q.conn.Exec(ctx, insertResourceSQL, params.Title, params.Description, params.Link, params.CategoryID)
 	if err != nil {
 		return cmdTag, fmt.Errorf("exec query InsertResource: %w", err)
 	}
@@ -336,7 +339,7 @@ func (q *DBQuerier) InsertResource(ctx context.Context, params InsertResourcePar
 
 // InsertResourceBatch implements Querier.InsertResourceBatch.
 func (q *DBQuerier) InsertResourceBatch(batch genericBatch, params InsertResourceParams) {
-	batch.Queue(insertResourceSQL, params.Title, params.Description, params.Link)
+	batch.Queue(insertResourceSQL, params.Title, params.Description, params.Link, params.CategoryID)
 }
 
 // InsertResourceScan implements Querier.InsertResourceScan.
@@ -352,20 +355,22 @@ const updateResourceSQL = `UPDATE resource
 SET title = $1,
     description = $2,
     link = $3,
+    category_id = $4,
     updated_at = NOW()
-WHERE resource_id = $4;`
+WHERE resource_id = $5;`
 
 type UpdateResourceParams struct {
 	Title       string
 	Description string
 	Link        string
+	CategoryID  int
 	ResourceID  int
 }
 
 // UpdateResource implements Querier.UpdateResource.
 func (q *DBQuerier) UpdateResource(ctx context.Context, params UpdateResourceParams) (pgconn.CommandTag, error) {
 	ctx = context.WithValue(ctx, "pggen_query_name", "UpdateResource")
-	cmdTag, err := q.conn.Exec(ctx, updateResourceSQL, params.Title, params.Description, params.Link, params.ResourceID)
+	cmdTag, err := q.conn.Exec(ctx, updateResourceSQL, params.Title, params.Description, params.Link, params.CategoryID, params.ResourceID)
 	if err != nil {
 		return cmdTag, fmt.Errorf("exec query UpdateResource: %w", err)
 	}
@@ -374,7 +379,7 @@ func (q *DBQuerier) UpdateResource(ctx context.Context, params UpdateResourcePar
 
 // UpdateResourceBatch implements Querier.UpdateResourceBatch.
 func (q *DBQuerier) UpdateResourceBatch(batch genericBatch, params UpdateResourceParams) {
-	batch.Queue(updateResourceSQL, params.Title, params.Description, params.Link, params.ResourceID)
+	batch.Queue(updateResourceSQL, params.Title, params.Description, params.Link, params.CategoryID, params.ResourceID)
 }
 
 // UpdateResourceScan implements Querier.UpdateResourceScan.
@@ -400,7 +405,7 @@ type textPreferrer struct {
 func (t textPreferrer) PreferredParamFormat() int16 { return pgtype.TextFormatCode }
 
 func (t textPreferrer) NewTypeValue() pgtype.Value {
-	return textPreferrer{pgtype.NewValue(t.ValueTranscoder).(pgtype.ValueTranscoder), t.typeName}
+	return textPreferrer{ValueTranscoder: pgtype.NewValue(t.ValueTranscoder).(pgtype.ValueTranscoder), typeName: t.typeName}
 }
 
 func (t textPreferrer) TypeName() string {

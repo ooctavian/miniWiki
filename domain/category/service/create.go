@@ -4,7 +4,8 @@ import (
 	"context"
 
 	"miniWiki/domain/category/model"
-	"miniWiki/utils"
+
+	"github.com/sirupsen/logrus"
 )
 
 func (s *Category) CreateCategory(ctx context.Context, request model.CreateCategoryRequest) error {
@@ -12,7 +13,7 @@ func (s *Category) CreateCategory(ctx context.Context, request model.CreateCateg
 	if request.Category.ParentId == nil {
 		_, err = s.categoryQuerier.InsertCategory(ctx, request.Category.Title)
 		if err != nil {
-			utils.Logger.WithContext(ctx).Errorf("Failed inserting category in database: %v", err)
+			logrus.WithContext(ctx).Errorf("Failed inserting category in database: %v", err)
 			return err
 		}
 
@@ -20,7 +21,7 @@ func (s *Category) CreateCategory(ctx context.Context, request model.CreateCateg
 	}
 	_, err = s.categoryQuerier.InsertSubCategory(ctx, request.Category.Title, *request.Category.ParentId)
 	if err != nil {
-		utils.Logger.WithContext(ctx).Errorf("Failed inserting subcategory in database: %v", err)
+		logrus.WithContext(ctx).Errorf("Failed inserting subcategory in database: %v", err)
 	}
 
 	return nil
