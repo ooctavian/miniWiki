@@ -1,7 +1,11 @@
 package service
 
-type Image struct{}
+type Image struct {
+	Destination string
+}
 
-func NewImage() *Image {
-	return &Image{}
+func NewImage(destination string) *Image {
+	return &Image{
+		Destination: destination,
+	}
 }

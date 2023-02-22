@@ -5,12 +5,14 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"reflect"
 
+	"github.com/go-playground/validator/v10"
 	"github.com/sirupsen/logrus"
 )
 
 type ErrorResponse struct {
-	Code    int    `json:"code,omitempty"`
+	Status  int    `json:"status,omitempty"`
 	Message string `json:"message,omitempty"`
 	Detail  string `json:"detail,omitempty"`
 }
@@ -29,18 +31,41 @@ func Respond(w http.ResponseWriter, code int, v interface{}) {
 }
 
 func HandleErrorResponse(w http.ResponseWriter, err error) {
-	var notFoundErr *NotFoundError
-	if ok := errors.As(err, &notFoundErr); ok {
+	if ok := errors.As(err, &NotFoundError{}); ok {
 		ErrorRespond(w, http.StatusNotFound, "Not Found", err)
 		return
 	}
 
+	var invalidUnmarshalErr *json.InvalidUnmarshalError
+	if ok := errors.As(err, &invalidUnmarshalErr); ok {
+		ErrorRespond(w, http.StatusBadRequest, "Invalid body request", err)
+		return
+	}
+
+	var unmarshalTypeErr *json.UnmarshalTypeError
+	if ok := errors.As(err, &unmarshalTypeErr); ok {
+		ErrorRespond(w, http.StatusBadRequest, "Invalid body request", err)
+		return
+	}
+
+	var syntaxErr *json.SyntaxError
+	if ok := errors.As(err, &syntaxErr); ok {
+		ErrorRespond(w, http.StatusBadRequest, "Invalid body request", err)
+		return
+	}
+
+	if ok := errors.As(err, &validator.ValidationErrors{}); ok {
+		ErrorRespond(w, http.StatusBadRequest, "Invalid body request", err)
+		return
+	}
+
+	logrus.Info("%v", reflect.TypeOf(err).String())
 	ErrorRespond(w, http.StatusInternalServerError, "Internal Server Error", err)
 }
 
 func ErrorRespond(w http.ResponseWriter, code int, message string, err error) {
 	response := ErrorResponse{
-		Code:    code,
+		Status:  code,
 		Message: message,
 		Detail:  err.Error(),
 	}

@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"errors"
+	"fmt"
 
 	"miniWiki/domain/resource/model"
 	"miniWiki/utils"
@@ -17,9 +18,9 @@ func (s *Resource) GetResource(ctx context.Context, request model.GetResourceReq
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			logrus.WithContext(ctx).Errorf("Resource not found: %v", err)
-			return nil, &utils.NotFoundError{
+			return nil, utils.NotFoundError{
 				Item: "resource",
-				Id:   string(request.ResourceId),
+				Id:   fmt.Sprint(request.ResourceId),
 			}
 		}
 		logrus.WithContext(ctx).Errorf("Failed retrieving resource: %v", err)

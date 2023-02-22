@@ -2,9 +2,10 @@ package controller
 
 import (
 	"bytes"
+	"errors"
+	"fmt"
 	"io"
 	"net/http"
-	"os"
 
 	"miniWiki/domain/image/model"
 	"miniWiki/utils"
@@ -16,7 +17,12 @@ import (
 func uploadResourceImageHandler(service imageService) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		resourceId := chi.URLParam(r, "id")
-		r.ParseMultipartForm(10 << 20)
+		err := r.ParseMultipartForm(10 << 20)
+		if err != nil {
+			logrus.WithContext(r.Context()).Error(err)
+			utils.HandleErrorResponse(w, err)
+			return
+		}
 		file, _, err := r.FormFile("File")
 		if err != nil {
 			logrus.Infof("Error Retrieving the File %v", err)
@@ -25,13 +31,17 @@ func uploadResourceImageHandler(service imageService) func(w http.ResponseWriter
 		}
 
 		contentType := http.DetectContentType(StreamToByte(file))
-		if contentType != "image/png" || contentType != "image/jpeg" {
-			logrus.Infof("Unsupported image format %v", contentType)
+		if contentType != "image/png" && contentType != "image/jpeg" {
+			logrus.Infof("Unsupported image format: %v", contentType)
+			utils.ErrorRespond(w, http.StatusBadRequest,
+				fmt.Sprintf("Unsupported image format: %v", contentType),
+				errors.New("only png and jpeg images are supported"))
 			utils.Respond(w, http.StatusBadRequest, nil)
+			return
 		}
 
 		req := model.UploadRequest{
-			ImageFolder: os.Getenv("IMAGES_DIR") + "resources",
+			ImageFolder: "resources",
 			ImageName:   resourceId,
 			Image:       file,
 		}
@@ -48,6 +58,9 @@ func uploadResourceImageHandler(service imageService) func(w http.ResponseWriter
 
 func StreamToByte(stream io.Reader) []byte {
 	buf := new(bytes.Buffer)
-	buf.ReadFrom(stream)
+	_, err := buf.ReadFrom(stream)
+	if err != nil {
+		logrus.Error(err)
+	}
 	return buf.Bytes()
 }

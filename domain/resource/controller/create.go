@@ -14,7 +14,7 @@ func createResourceHandler(resource resourceService) func(w http.ResponseWriter,
 		createResource := model.CreateCategory{}
 		err := utils.Decode(r.Body, &createResource)
 		if err != nil {
-			utils.Respond(w, http.StatusBadRequest, err.Error())
+			utils.HandleErrorResponse(w, err)
 			logrus.WithContext(r.Context()).Infof("Invalid body request: %v", err)
 			return
 		}

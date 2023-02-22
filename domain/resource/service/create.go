@@ -20,7 +20,7 @@ func (s *Resource) CreateResource(ctx context.Context, request model.CreateResou
 	_, err := s.resourceQuerier.InsertResource(ctx, params)
 	if err != nil {
 		logrus.WithContext(ctx).Errorf("Failed inserting in database: %v", err)
-
 	}
+
 	return err
 }

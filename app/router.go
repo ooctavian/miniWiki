@@ -1,9 +1,10 @@
-package miniWiki
+package app
 
 import (
 	"context"
 	"net/http"
 
+	"miniWiki/config"
 	cController "miniWiki/domain/category/controller"
 	cQuery "miniWiki/domain/category/query"
 	cService "miniWiki/domain/category/service"
@@ -24,9 +25,9 @@ type Conn interface {
 	Exec(ctx context.Context, sql string, arguments ...interface{}) (pgconn.CommandTag, error)
 }
 
-func InitRouter(conn Conn) http.Handler {
+func initRouter(conn Conn, cfg config.Config) http.Handler {
 	resourceService := rService.NewResource(rQuery.NewQuerier(conn))
-	imageService := iService.NewImage()
+	imageService := iService.NewImage(cfg.Database.ImageDir)
 	categoryService := cService.NewCategory(cQuery.NewQuerier(conn))
 
 	r := chi.NewRouter()

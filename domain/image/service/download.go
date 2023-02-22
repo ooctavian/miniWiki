@@ -14,11 +14,11 @@ import (
 )
 
 func (s Image) Download(ctx context.Context, request model.DownloadRequest) (io.Reader, error) {
-	f, err := os.OpenFile(fmt.Sprintf("%s/%s", request.ImageFolder, request.ImageName), os.O_RDONLY, 0600)
+	f, err := os.OpenFile(fmt.Sprintf("%s%s/%s", s.Destination, request.ImageFolder, request.ImageName), os.O_RDONLY, 0600)
 	if err != nil {
 		if errors.Is(err, os.ErrNotExist) {
 			logrus.WithContext(ctx).Errorf("File not found %v", err)
-			return nil, &utils.NotFoundError{
+			return nil, utils.NotFoundError{
 				Item: "image",
 				Id:   request.ImageName,
 			}

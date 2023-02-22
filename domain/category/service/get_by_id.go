@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"errors"
+	"fmt"
 
 	"miniWiki/domain/category/model"
 	"miniWiki/utils"
@@ -17,9 +18,9 @@ func (s *Category) GetCategory(ctx context.Context, request model.GetCategoryReq
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			logrus.WithContext(ctx).Errorf("Category not found: %v", err)
-			return nil, &utils.NotFoundError{
+			return nil, utils.NotFoundError{
 				Item: "category",
-				Id:   string(request.CategoryId),
+				Id:   fmt.Sprint(request.CategoryId),
 			}
 		}
 		logrus.WithContext(ctx).Errorf("Failed retrieving category: %v", err)

@@ -3,7 +3,6 @@ package controller
 import (
 	"io"
 	"net/http"
-	"os"
 
 	"miniWiki/domain/image/model"
 	"miniWiki/utils"
@@ -17,7 +16,7 @@ func downloadResourceImageHandler(service imageService) func(w http.ResponseWrit
 		resourceId := chi.URLParam(r, "id")
 
 		request := model.DownloadRequest{
-			ImageFolder: os.Getenv("IMAGES_DIR") + "resources",
+			ImageFolder: "resources",
 			ImageName:   resourceId,
 		}
 
@@ -30,6 +29,9 @@ func downloadResourceImageHandler(service imageService) func(w http.ResponseWrit
 
 		w.WriteHeader(http.StatusOK)
 		w.Header().Set("Content-Type", "image/png")
-		io.Copy(w, f)
+		_, err = io.Copy(w, f)
+		if err != nil {
+			logrus.WithContext(r.Context()).Error(err)
+		}
 	}
 }

@@ -1,6 +1,8 @@
-package miniWiki
+package config
 
 import (
+	"time"
+
 	"github.com/caarlos0/env/v7"
 	"github.com/joho/godotenv"
 )
@@ -12,15 +14,17 @@ type Config struct {
 }
 
 type DatabaseConfig struct {
-	DatabaseUrl string `env:"DATABASE_URL,required"`
+	DatabaseURL string `env:"DATABASE_URL,required"`
 	ImageDir    string `env:"IMAGE_DIR" envDefault:"images/"`
 }
 
 type ServerConfig struct {
-	Port string `env:"PORT" envDefault:"4444"`
+	Port    string        `env:"PORT" envDefault:"4444"`
+	Timeout time.Duration `env:"Timeout" envDefault:"10s"`
 }
 
 type LoggerConfig struct {
+	Level string `env:"LOG_LEVEL" envDefault:"Info"`
 }
 
 func InitConfig() (*Config, error) {

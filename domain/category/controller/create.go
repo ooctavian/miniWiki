@@ -14,7 +14,7 @@ func createCategoryHandler(service categoryService) func(w http.ResponseWriter, 
 		createCategory := model.CreateCategory{}
 		err := utils.Decode(r.Body, &createCategory)
 		if err != nil {
-			utils.Respond(w, http.StatusBadRequest, nil)
+			utils.HandleErrorResponse(w, err)
 			logrus.WithContext(r.Context()).Infof("BadRequest: %v", err)
 			return
 		}

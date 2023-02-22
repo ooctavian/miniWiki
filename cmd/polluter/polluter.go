@@ -5,7 +5,7 @@ import (
 	"flag"
 	"log"
 
-	"miniWiki"
+	"miniWiki/config"
 	cQuery "miniWiki/domain/category/query"
 	rQuery "miniWiki/domain/resource/query"
 
@@ -14,11 +14,12 @@ import (
 )
 
 func main() {
-	cfg, err := miniWiki.InitConfig()
+	cfg, err := config.InitConfig()
 	if err != nil {
 		panic(err)
 	}
-	pool, _ := pgxpool.Connect(context.Background(), cfg.Database.DatabaseUrl)
+	pool, _ := pgxpool.Connect(context.Background(), cfg.Database.DatabaseURL)
+	defer pool.Close()
 	ctx := context.Background()
 	categoryQuerier := cQuery.NewQuerier(pool)
 	resourceQuerier := rQuery.NewQuerier(pool)
@@ -29,23 +30,27 @@ func main() {
 
 	for i := 0; i < n/2; i++ {
 		_, err := categoryQuerier.InsertCategory(ctx, gofakeit.BuzzWord())
-		log.Println(err)
+		if err != nil {
+			log.Println(err)
+		}
 	}
 
 	for i := 0; i < n/2; i++ {
-		_, err := categoryQuerier.InsertSubCategory(ctx, gofakeit.BuzzWord(), gofakeit.Number(1, n/2))
-		log.Println(err)
+		_, err := categoryQuerier.InsertSubCategory(ctx, gofakeit.LoremIpsumSentence(2), gofakeit.Number(1, n/2))
+		if err != nil {
+			log.Println(err)
+		}
 	}
 
 	for i := 0; i < n/2; i++ {
 		_, err := resourceQuerier.InsertResource(ctx, rQuery.InsertResourceParams{
-			Title:       gofakeit.LoremIpsumWord(),
+			Title:       gofakeit.LoremIpsumSentence(2),
 			Description: gofakeit.LoremIpsumSentence(15),
 			Link:        gofakeit.URL(),
 			CategoryID:  gofakeit.Number(1, n),
 		})
-		log.Println(err)
+		if err != nil {
+			log.Println(err)
+		}
 	}
-
-	pool.Close()
 }

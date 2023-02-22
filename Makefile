@@ -5,6 +5,8 @@ install-deps:
 	go mod vendor
 	go install -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate@v4.15.2
 	go install github.com/jschaf/pggen/cmd/pggen@2023-01-27
+	go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.51.2
+
 
 start-db:
 	docker-compose up --remove-orphans -d 2>/dev/null
@@ -22,6 +24,13 @@ migrate-down:
 generate-queries:
 	${BIN}/pggen gen go  --schema-glob "migrations/*.up.sql" --query-glob "domain/resource/query/*.sql"
 	${BIN}/pggen gen go  --schema-glob "migrations/*.up.sql" --query-glob "domain/category/query/*.sql"
+
+seed-db:
+	go run cmd/polluter/polluter.go
+
+lint:
+	${BIN}/golangci-lint run
+
 
 run:
 	go run cmd/miniwiki/miniwiki.go

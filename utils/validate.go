@@ -17,6 +17,6 @@ func isUrl(fl validator.FieldLevel) bool {
 
 func NewValidator() *validator.Validate {
 	v := validator.New()
-	v.RegisterValidation("url", isUrl)
+	v.RegisterValidation("url", isUrl) //nolint: errcheck // always returns without error
 	return v
 }

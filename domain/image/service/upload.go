@@ -12,7 +12,13 @@ import (
 )
 
 func (s Image) Upload(ctx context.Context, request model.UploadRequest) error {
-	outputFile, err := os.OpenFile(fmt.Sprintf("%s/%s", request.ImageFolder, request.ImageName), os.O_WRONLY|os.O_CREATE, 0600)
+	outputFile, err := os.OpenFile(
+		fmt.Sprintf("%s%s/%s",
+			s.Destination,
+			request.ImageFolder,
+			request.ImageName),
+		os.O_WRONLY|os.O_CREATE,
+		0600)
 	if err != nil {
 		logrus.WithContext(ctx).Errorf("Error opening local file: %v", err)
 		return err
