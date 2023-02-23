@@ -1,1 +1,1 @@
-DROP PROCEDURE GetResourcesFilter;
+DROP FUNCTION GetResourcesFilter;
