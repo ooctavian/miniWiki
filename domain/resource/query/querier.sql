@@ -5,7 +5,9 @@ WHERE resource_id = pggen.arg('resource_id');
 
 -- name: GetResources :many
 SELECT *
-FROM resource;
+FROM getresourcesfilter(ftitle := pggen.arg('title'),
+    flink := pggen.arg('link'),
+    categories := pggen.arg('categories'));
 
 -- name: DeleteResourceById :exec
 DELETE

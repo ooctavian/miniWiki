@@ -2,6 +2,7 @@ package app
 
 import (
 	"os"
+	"strings"
 
 	"miniWiki/config"
 
@@ -15,6 +16,8 @@ func initLogger(cfg config.Config) error {
 	}
 	logrus.SetLevel(lvl)
 	logrus.SetOutput(os.Stdout)
-	logrus.SetFormatter(new(logrus.JSONFormatter))
+	if strings.ToLower(cfg.Logger.Formatter) == "json" {
+		logrus.SetFormatter(new(logrus.JSONFormatter))
+	}
 	return err
 }

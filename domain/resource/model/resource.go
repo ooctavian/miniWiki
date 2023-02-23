@@ -18,6 +18,16 @@ type GetResourceRequest struct {
 	ResourceId int `json:"resourceId"`
 }
 
+type GetResourcesRequest struct {
+	Filters GetResourcesFilters
+}
+
+type GetResourcesFilters struct {
+	Title      *string `schema:"title"`
+	Link       *string `schema:"link"`
+	Categories []int   `schema:"categories"`
+}
+
 type UpdateResourceRequest struct {
 	Resource   UpdateResource
 	ResourceId int

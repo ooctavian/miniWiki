@@ -11,7 +11,7 @@ import (
 type resourceService interface {
 	CreateResource(ctx context.Context, request model.CreateResourceRequest) error
 	DeleteResource(ctx context.Context, request model.DeleteResourceRequest) error
-	GetResources(ctx context.Context) ([]model.ResourceResponse, error)
+	GetResources(ctx context.Context, request model.GetResourcesRequest) ([]model.ResourceResponse, error)
 	GetResource(ctx context.Context, request model.GetResourceRequest) (*model.ResourceResponse, error)
 	UpdateResource(ctx context.Context, request model.UpdateResourceRequest) error
 }

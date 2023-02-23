@@ -24,7 +24,8 @@ type ServerConfig struct {
 }
 
 type LoggerConfig struct {
-	Level string `env:"LOG_LEVEL" envDefault:"Info"`
+	Level     string `env:"LOG_LEVEL" envDefault:"info"`
+	Formatter string `env:"FORMATTER" envDefault:"json"`
 }
 
 func InitConfig() (*Config, error) {

@@ -31,6 +31,5 @@ seed-db:
 lint:
 	${BIN}/golangci-lint run
 
-
 run:
 	go run cmd/miniwiki/miniwiki.go
