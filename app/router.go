@@ -25,7 +25,7 @@ type Conn interface {
 	Exec(ctx context.Context, sql string, arguments ...interface{}) (pgconn.CommandTag, error)
 }
 
-func initRouter(conn Conn, cfg config.Config) http.Handler {
+func InitRouter(conn Conn, cfg config.Config) http.Handler {
 	resourceService := rService.NewResource(rQuery.NewQuerier(conn))
 	imageService := iService.NewImage(cfg.Database.ImageDir)
 	categoryService := cService.NewCategory(cQuery.NewQuerier(conn))

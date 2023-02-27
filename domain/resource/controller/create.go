@@ -11,7 +11,7 @@ import (
 
 func createResourceHandler(resource resourceService) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
-		createResource := model.CreateCategory{}
+		createResource := model.CreateResource{}
 		err := utils.Decode(r.Body, &createResource)
 		if err != nil {
 			utils.HandleErrorResponse(w, err)

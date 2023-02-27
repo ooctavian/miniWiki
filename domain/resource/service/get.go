@@ -23,6 +23,10 @@ func (s *Resource) GetResources(ctx context.Context, request model.GetResourcesR
 		return nil, err
 	}
 
+	if len(getResourcesRow) < 1 {
+		return []model.ResourceResponse{}, nil
+	}
+
 	var resources []model.ResourceResponse
 
 	for _, r := range getResourcesRow {

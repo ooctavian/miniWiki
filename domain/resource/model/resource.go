@@ -46,10 +46,10 @@ type UpdateResource struct {
 }
 
 type CreateResourceRequest struct {
-	Resource CreateCategory
+	Resource CreateResource
 }
 
-type CreateCategory struct {
+type CreateResource struct {
 	Title       string `json:"title" validate:"required"`
 	Description string `json:"description"`
 	Link        string `json:"link" validate:"required,url"`

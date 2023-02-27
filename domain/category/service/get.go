@@ -15,6 +15,10 @@ func (s *Category) GetCategories(ctx context.Context) ([]model.CategoryResponse,
 		return nil, err
 	}
 
+	if len(getCategories) < 1 {
+		return []model.CategoryResponse{}, nil
+	}
+
 	var response []model.CategoryResponse
 	for _, c := range getCategories {
 		response = append(response,

@@ -8,6 +8,7 @@ import (
 	"reflect"
 
 	"github.com/go-playground/validator/v10"
+	"github.com/gorilla/schema"
 	"github.com/sirupsen/logrus"
 )
 
@@ -56,6 +57,11 @@ func HandleErrorResponse(w http.ResponseWriter, err error) {
 
 	if ok := errors.As(err, &validator.ValidationErrors{}); ok {
 		ErrorRespond(w, http.StatusBadRequest, "Invalid body request", err)
+		return
+	}
+
+	if ok := errors.As(err, &schema.MultiError{}); ok {
+		ErrorRespond(w, http.StatusBadRequest, "Invalid query parameters", err)
 		return
 	}
 
