@@ -3,9 +3,10 @@ package service
 import (
 	"context"
 	"errors"
-	"fmt"
+	"strconv"
 
 	"miniWiki/domain/resource/model"
+	"miniWiki/domain/resource/query"
 	"miniWiki/utils"
 
 	"github.com/jackc/pgx/v4"
@@ -13,27 +14,43 @@ import (
 )
 
 func (s *Resource) GetResource(ctx context.Context, request model.GetResourceRequest) (*model.ResourceResponse, error) {
-	getResourceRow, err := s.resourceQuerier.GetResourceByID(ctx, request.ResourceId)
+	resource, err := s.getResource(ctx, request.ResourceId, request.AccountId)
+	if err != nil {
+		return nil, err
+	}
 
+	response := &model.ResourceResponse{
+		ResourceId:  resource.ResourceID,
+		Title:       *resource.Title,
+		Description: *resource.Description,
+		Link:        resource.Link,
+		CategoryId:  resource.CategoryID,
+		AuthorId:    *resource.AuthorID,
+	}
+
+	return response, nil
+}
+
+func (s *Resource) getResource(ctx context.Context, resourceId int, accountId int) (*query.GetResourceByIDRow, error) {
+	resource, err := s.resourceQuerier.GetResourceByID(ctx, resourceId)
+
+	//NOTE: Should it be extracted in another function ?
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			logrus.WithContext(ctx).Errorf("Resource not found: %v", err)
 			return nil, utils.NotFoundError{
 				Item: "resource",
-				Id:   fmt.Sprint(request.ResourceId),
+				Id:   strconv.Itoa(resourceId),
 			}
 		}
 		logrus.WithContext(ctx).Errorf("Failed retrieving resource: %v", err)
 		return nil, err
 	}
 
-	resource := &model.ResourceResponse{
-		ResourceId:  getResourceRow.ResourceID,
-		Title:       *getResourceRow.Title,
-		Description: *getResourceRow.Description,
-		Link:        getResourceRow.Link,
-		CategoryId:  getResourceRow.CategoryID,
+	if resource.State == query.ResourceStatePRIVATE &&
+		*resource.AuthorID != accountId {
+		return nil, utils.ForbiddenError{}
 	}
 
-	return resource, nil
+	return &resource, nil
 }

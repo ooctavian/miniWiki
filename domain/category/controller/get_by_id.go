@@ -5,6 +5,7 @@ import (
 	"strconv"
 
 	"miniWiki/domain/category/model"
+	"miniWiki/middleware"
 	"miniWiki/utils"
 
 	"github.com/go-chi/chi/v5"
@@ -21,6 +22,7 @@ func getResourceHandler(service categoryService) func(w http.ResponseWriter, r *
 
 		request := model.GetCategoryRequest{
 			CategoryId: categoryId,
+			AccountId:  middleware.GetAccountId(r),
 		}
 		category, err := service.GetCategory(r.Context(), request)
 

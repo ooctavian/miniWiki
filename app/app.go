@@ -3,6 +3,7 @@ package app
 import (
 	"context"
 	"errors"
+	"log"
 	"net/http"
 	"os"
 	"os/signal"
@@ -53,7 +54,7 @@ func New() (*Application, error) {
 	createDir(cfg.Database.ImageDir + "/resources")
 	pool, err := pgxpool.Connect(ctx, cfg.Database.DatabaseURL)
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 		return nil, err
 	}
 	app := &Application{

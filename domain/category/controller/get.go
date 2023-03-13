@@ -3,12 +3,18 @@ package controller
 import (
 	"net/http"
 
+	"miniWiki/domain/category/model"
+	"miniWiki/middleware"
 	"miniWiki/utils"
 )
 
 func getResourcesHandler(service categoryService) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
-		categories, err := service.GetCategories(r.Context())
+		req := model.GetCategoriesRequest{
+			AccountId: middleware.GetAccountId(r),
+		}
+
+		categories, err := service.GetCategories(r.Context(), req)
 		if err != nil {
 			utils.HandleErrorResponse(w, err)
 			return

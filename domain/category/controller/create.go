@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"miniWiki/domain/category/model"
+	"miniWiki/middleware"
 	"miniWiki/utils"
 
 	"github.com/sirupsen/logrus"
@@ -12,7 +13,7 @@ import (
 func createCategoryHandler(service categoryService) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		createCategory := model.CreateCategory{}
-		err := utils.Decode(r.Body, &createCategory)
+		err := utils.DecodeJson(r.Body, &createCategory)
 		if err != nil {
 			utils.HandleErrorResponse(w, err)
 			logrus.WithContext(r.Context()).Infof("BadRequest: %v", err)
@@ -20,7 +21,8 @@ func createCategoryHandler(service categoryService) func(w http.ResponseWriter, 
 		}
 
 		request := model.CreateCategoryRequest{
-			Category: createCategory,
+			Category:  createCategory,
+			AccountId: middleware.GetAccountId(r),
 		}
 
 		err = service.CreateCategory(r.Context(), request)

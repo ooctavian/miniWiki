@@ -30,10 +30,10 @@ type Querier interface {
 	// GetResourcesScan scans the result of an executed GetResourcesBatch query.
 	GetResourcesScan(results pgx.BatchResults) ([]GetResourcesRow, error)
 
-	DeleteResourceByID(ctx context.Context, resourceID int) (pgconn.CommandTag, error)
+	DeleteResourceByID(ctx context.Context, resourceID int, accountID int) (pgconn.CommandTag, error)
 	// DeleteResourceByIDBatch enqueues a DeleteResourceByID query into batch to be executed
 	// later by the batch.
-	DeleteResourceByIDBatch(batch genericBatch, resourceID int)
+	DeleteResourceByIDBatch(batch genericBatch, resourceID int, accountID int)
 	// DeleteResourceByIDScan scans the result of an executed DeleteResourceByIDBatch query.
 	DeleteResourceByIDScan(results pgx.BatchResults) (pgconn.CommandTag, error)
 
@@ -50,6 +50,20 @@ type Querier interface {
 	UpdateResourceBatch(batch genericBatch, params UpdateResourceParams)
 	// UpdateResourceScan scans the result of an executed UpdateResourceBatch query.
 	UpdateResourceScan(results pgx.BatchResults) (pgconn.CommandTag, error)
+
+	UpdateResourceImage(ctx context.Context, params UpdateResourceImageParams) (pgconn.CommandTag, error)
+	// UpdateResourceImageBatch enqueues a UpdateResourceImage query into batch to be executed
+	// later by the batch.
+	UpdateResourceImageBatch(batch genericBatch, params UpdateResourceImageParams)
+	// UpdateResourceImageScan scans the result of an executed UpdateResourceImageBatch query.
+	UpdateResourceImageScan(results pgx.BatchResults) (pgconn.CommandTag, error)
+
+	GetResourceImage(ctx context.Context, resourceID int) (GetResourceImageRow, error)
+	// GetResourceImageBatch enqueues a GetResourceImage query into batch to be executed
+	// later by the batch.
+	GetResourceImageBatch(batch genericBatch, resourceID int)
+	// GetResourceImageScan scans the result of an executed GetResourceImageBatch query.
+	GetResourceImageScan(results pgx.BatchResults) (GetResourceImageRow, error)
 }
 
 type DBQuerier struct {
@@ -142,8 +156,24 @@ func PrepareAllQueries(ctx context.Context, p preparer) error {
 	if _, err := p.Prepare(ctx, updateResourceSQL, updateResourceSQL); err != nil {
 		return fmt.Errorf("prepare query 'UpdateResource': %w", err)
 	}
+	if _, err := p.Prepare(ctx, updateResourceImageSQL, updateResourceImageSQL); err != nil {
+		return fmt.Errorf("prepare query 'UpdateResourceImage': %w", err)
+	}
+	if _, err := p.Prepare(ctx, getResourceImageSQL, getResourceImageSQL); err != nil {
+		return fmt.Errorf("prepare query 'GetResourceImage': %w", err)
+	}
 	return nil
 }
+
+// ResourceState represents the Postgres enum "resource_state".
+type ResourceState string
+
+const (
+	ResourceStatePUBLIC  ResourceState = "PUBLIC"
+	ResourceStatePRIVATE ResourceState = "PRIVATE"
+)
+
+func (r ResourceState) String() string { return string(r) }
 
 // typeResolver looks up the pgtype.ValueTranscoder by Postgres type name.
 type typeResolver struct {
@@ -192,6 +222,9 @@ type GetResourceByIDRow struct {
 	CreatedAt   pgtype.Timestamp `json:"created_at"`
 	UpdatedAt   pgtype.Timestamp `json:"updated_at"`
 	CategoryID  *int             `json:"category_id"`
+	State       ResourceState    `json:"state"`
+	AuthorID    *int             `json:"author_id"`
+	Image       *string          `json:"image"`
 }
 
 // GetResourceByID implements Querier.GetResourceByID.
@@ -199,7 +232,7 @@ func (q *DBQuerier) GetResourceByID(ctx context.Context, resourceID int) (GetRes
 	ctx = context.WithValue(ctx, "pggen_query_name", "GetResourceByID")
 	row := q.conn.QueryRow(ctx, getResourceByIDSQL, resourceID)
 	var item GetResourceByIDRow
-	if err := row.Scan(&item.ResourceID, &item.Title, &item.Description, &item.Link, &item.CreatedAt, &item.UpdatedAt, &item.CategoryID); err != nil {
+	if err := row.Scan(&item.ResourceID, &item.Title, &item.Description, &item.Link, &item.CreatedAt, &item.UpdatedAt, &item.CategoryID, &item.State, &item.AuthorID, &item.Image); err != nil {
 		return item, fmt.Errorf("query GetResourceByID: %w", err)
 	}
 	return item, nil
@@ -214,19 +247,24 @@ func (q *DBQuerier) GetResourceByIDBatch(batch genericBatch, resourceID int) {
 func (q *DBQuerier) GetResourceByIDScan(results pgx.BatchResults) (GetResourceByIDRow, error) {
 	row := results.QueryRow()
 	var item GetResourceByIDRow
-	if err := row.Scan(&item.ResourceID, &item.Title, &item.Description, &item.Link, &item.CreatedAt, &item.UpdatedAt, &item.CategoryID); err != nil {
+	if err := row.Scan(&item.ResourceID, &item.Title, &item.Description, &item.Link, &item.CreatedAt, &item.UpdatedAt, &item.CategoryID, &item.State, &item.AuthorID, &item.Image); err != nil {
 		return item, fmt.Errorf("scan GetResourceByIDBatch row: %w", err)
 	}
 	return item, nil
 }
 
 const getResourcesSQL = `SELECT *
-FROM getresourcesfilter(ftitle := $1, flink := $2, categories := $3);`
+FROM getresourcesfilter(ftitle := $1,
+    flink := $2,
+    categories := $3)
+WHERE state = 'PUBLIC' OR
+      author_id = $4;`
 
 type GetResourcesParams struct {
 	Title      string
 	Link       string
 	Categories []int
+	AccountID  int
 }
 
 type GetResourcesRow struct {
@@ -237,12 +275,15 @@ type GetResourcesRow struct {
 	CreatedAt   pgtype.Timestamp `json:"created_at"`
 	UpdatedAt   pgtype.Timestamp `json:"updated_at"`
 	CategoryID  *int             `json:"category_id"`
+	State       ResourceState    `json:"state"`
+	AuthorID    *int             `json:"author_id"`
+	Image       *string          `json:"image"`
 }
 
 // GetResources implements Querier.GetResources.
 func (q *DBQuerier) GetResources(ctx context.Context, params GetResourcesParams) ([]GetResourcesRow, error) {
 	ctx = context.WithValue(ctx, "pggen_query_name", "GetResources")
-	rows, err := q.conn.Query(ctx, getResourcesSQL, params.Title, params.Link, params.Categories)
+	rows, err := q.conn.Query(ctx, getResourcesSQL, params.Title, params.Link, params.Categories, params.AccountID)
 	if err != nil {
 		return nil, fmt.Errorf("query GetResources: %w", err)
 	}
@@ -250,7 +291,7 @@ func (q *DBQuerier) GetResources(ctx context.Context, params GetResourcesParams)
 	items := []GetResourcesRow{}
 	for rows.Next() {
 		var item GetResourcesRow
-		if err := rows.Scan(&item.ResourceID, &item.Title, &item.Description, &item.Link, &item.CreatedAt, &item.UpdatedAt, &item.CategoryID); err != nil {
+		if err := rows.Scan(&item.ResourceID, &item.Title, &item.Description, &item.Link, &item.CreatedAt, &item.UpdatedAt, &item.CategoryID, &item.State, &item.AuthorID, &item.Image); err != nil {
 			return nil, fmt.Errorf("scan GetResources row: %w", err)
 		}
 		items = append(items, item)
@@ -263,7 +304,7 @@ func (q *DBQuerier) GetResources(ctx context.Context, params GetResourcesParams)
 
 // GetResourcesBatch implements Querier.GetResourcesBatch.
 func (q *DBQuerier) GetResourcesBatch(batch genericBatch, params GetResourcesParams) {
-	batch.Queue(getResourcesSQL, params.Title, params.Link, params.Categories)
+	batch.Queue(getResourcesSQL, params.Title, params.Link, params.Categories, params.AccountID)
 }
 
 // GetResourcesScan implements Querier.GetResourcesScan.
@@ -276,7 +317,7 @@ func (q *DBQuerier) GetResourcesScan(results pgx.BatchResults) ([]GetResourcesRo
 	items := []GetResourcesRow{}
 	for rows.Next() {
 		var item GetResourcesRow
-		if err := rows.Scan(&item.ResourceID, &item.Title, &item.Description, &item.Link, &item.CreatedAt, &item.UpdatedAt, &item.CategoryID); err != nil {
+		if err := rows.Scan(&item.ResourceID, &item.Title, &item.Description, &item.Link, &item.CreatedAt, &item.UpdatedAt, &item.CategoryID, &item.State, &item.AuthorID, &item.Image); err != nil {
 			return nil, fmt.Errorf("scan GetResourcesBatch row: %w", err)
 		}
 		items = append(items, item)
@@ -289,12 +330,13 @@ func (q *DBQuerier) GetResourcesScan(results pgx.BatchResults) ([]GetResourcesRo
 
 const deleteResourceByIDSQL = `DELETE
 FROM resource
-WHERE resource_id = $1;`
+WHERE resource_id = $1
+AND author_id = $2;`
 
 // DeleteResourceByID implements Querier.DeleteResourceByID.
-func (q *DBQuerier) DeleteResourceByID(ctx context.Context, resourceID int) (pgconn.CommandTag, error) {
+func (q *DBQuerier) DeleteResourceByID(ctx context.Context, resourceID int, accountID int) (pgconn.CommandTag, error) {
 	ctx = context.WithValue(ctx, "pggen_query_name", "DeleteResourceByID")
-	cmdTag, err := q.conn.Exec(ctx, deleteResourceByIDSQL, resourceID)
+	cmdTag, err := q.conn.Exec(ctx, deleteResourceByIDSQL, resourceID, accountID)
 	if err != nil {
 		return cmdTag, fmt.Errorf("exec query DeleteResourceByID: %w", err)
 	}
@@ -302,8 +344,8 @@ func (q *DBQuerier) DeleteResourceByID(ctx context.Context, resourceID int) (pgc
 }
 
 // DeleteResourceByIDBatch implements Querier.DeleteResourceByIDBatch.
-func (q *DBQuerier) DeleteResourceByIDBatch(batch genericBatch, resourceID int) {
-	batch.Queue(deleteResourceByIDSQL, resourceID)
+func (q *DBQuerier) DeleteResourceByIDBatch(batch genericBatch, resourceID int, accountID int) {
+	batch.Queue(deleteResourceByIDSQL, resourceID, accountID)
 }
 
 // DeleteResourceByIDScan implements Querier.DeleteResourceByIDScan.
@@ -318,12 +360,16 @@ func (q *DBQuerier) DeleteResourceByIDScan(results pgx.BatchResults) (pgconn.Com
 const insertResourceSQL = `INSERT INTO resource(title,
                      description,
                      link,
-                     category_id)
+                     category_id,
+                     author_id,
+                     state)
 VALUES(
        $1,
        $2,
        $3,
-       $4
+       $4,
+       $5,
+       $6
       );`
 
 type InsertResourceParams struct {
@@ -331,12 +377,14 @@ type InsertResourceParams struct {
 	Description string
 	Link        string
 	CategoryID  int
+	AuthorID    int
+	State       ResourceState
 }
 
 // InsertResource implements Querier.InsertResource.
 func (q *DBQuerier) InsertResource(ctx context.Context, params InsertResourceParams) (pgconn.CommandTag, error) {
 	ctx = context.WithValue(ctx, "pggen_query_name", "InsertResource")
-	cmdTag, err := q.conn.Exec(ctx, insertResourceSQL, params.Title, params.Description, params.Link, params.CategoryID)
+	cmdTag, err := q.conn.Exec(ctx, insertResourceSQL, params.Title, params.Description, params.Link, params.CategoryID, params.AuthorID, params.State)
 	if err != nil {
 		return cmdTag, fmt.Errorf("exec query InsertResource: %w", err)
 	}
@@ -345,7 +393,7 @@ func (q *DBQuerier) InsertResource(ctx context.Context, params InsertResourcePar
 
 // InsertResourceBatch implements Querier.InsertResourceBatch.
 func (q *DBQuerier) InsertResourceBatch(batch genericBatch, params InsertResourceParams) {
-	batch.Queue(insertResourceSQL, params.Title, params.Description, params.Link, params.CategoryID)
+	batch.Queue(insertResourceSQL, params.Title, params.Description, params.Link, params.CategoryID, params.AuthorID, params.State)
 }
 
 // InsertResourceScan implements Querier.InsertResourceScan.
@@ -362,21 +410,23 @@ SET title = $1,
     description = $2,
     link = $3,
     category_id = $4,
+    state = $5,
     updated_at = NOW()
-WHERE resource_id = $5;`
+WHERE resource_id = $6;`
 
 type UpdateResourceParams struct {
 	Title       string
 	Description string
 	Link        string
 	CategoryID  int
+	State       ResourceState
 	ResourceID  int
 }
 
 // UpdateResource implements Querier.UpdateResource.
 func (q *DBQuerier) UpdateResource(ctx context.Context, params UpdateResourceParams) (pgconn.CommandTag, error) {
 	ctx = context.WithValue(ctx, "pggen_query_name", "UpdateResource")
-	cmdTag, err := q.conn.Exec(ctx, updateResourceSQL, params.Title, params.Description, params.Link, params.CategoryID, params.ResourceID)
+	cmdTag, err := q.conn.Exec(ctx, updateResourceSQL, params.Title, params.Description, params.Link, params.CategoryID, params.State, params.ResourceID)
 	if err != nil {
 		return cmdTag, fmt.Errorf("exec query UpdateResource: %w", err)
 	}
@@ -385,7 +435,7 @@ func (q *DBQuerier) UpdateResource(ctx context.Context, params UpdateResourcePar
 
 // UpdateResourceBatch implements Querier.UpdateResourceBatch.
 func (q *DBQuerier) UpdateResourceBatch(batch genericBatch, params UpdateResourceParams) {
-	batch.Queue(updateResourceSQL, params.Title, params.Description, params.Link, params.CategoryID, params.ResourceID)
+	batch.Queue(updateResourceSQL, params.Title, params.Description, params.Link, params.CategoryID, params.State, params.ResourceID)
 }
 
 // UpdateResourceScan implements Querier.UpdateResourceScan.
@@ -395,6 +445,77 @@ func (q *DBQuerier) UpdateResourceScan(results pgx.BatchResults) (pgconn.Command
 		return cmdTag, fmt.Errorf("exec UpdateResourceBatch: %w", err)
 	}
 	return cmdTag, err
+}
+
+const updateResourceImageSQL = `UPDATE resource
+SET image = $1
+WHERE resource_id = $2
+AND author_id = $3;`
+
+type UpdateResourceImageParams struct {
+	ImageUrl   string
+	ResourceID int
+	AuthorID   int
+}
+
+// UpdateResourceImage implements Querier.UpdateResourceImage.
+func (q *DBQuerier) UpdateResourceImage(ctx context.Context, params UpdateResourceImageParams) (pgconn.CommandTag, error) {
+	ctx = context.WithValue(ctx, "pggen_query_name", "UpdateResourceImage")
+	cmdTag, err := q.conn.Exec(ctx, updateResourceImageSQL, params.ImageUrl, params.ResourceID, params.AuthorID)
+	if err != nil {
+		return cmdTag, fmt.Errorf("exec query UpdateResourceImage: %w", err)
+	}
+	return cmdTag, err
+}
+
+// UpdateResourceImageBatch implements Querier.UpdateResourceImageBatch.
+func (q *DBQuerier) UpdateResourceImageBatch(batch genericBatch, params UpdateResourceImageParams) {
+	batch.Queue(updateResourceImageSQL, params.ImageUrl, params.ResourceID, params.AuthorID)
+}
+
+// UpdateResourceImageScan implements Querier.UpdateResourceImageScan.
+func (q *DBQuerier) UpdateResourceImageScan(results pgx.BatchResults) (pgconn.CommandTag, error) {
+	cmdTag, err := results.Exec()
+	if err != nil {
+		return cmdTag, fmt.Errorf("exec UpdateResourceImageBatch: %w", err)
+	}
+	return cmdTag, err
+}
+
+const getResourceImageSQL = `SELECT author_id, image, state
+FROM resource
+WHERE resource_id = $1;`
+
+type GetResourceImageRow struct {
+	AuthorID *int          `json:"author_id"`
+	Image    *string       `json:"image"`
+	State    ResourceState `json:"state"`
+}
+
+// GetResourceImage implements Querier.GetResourceImage.
+func (q *DBQuerier) GetResourceImage(ctx context.Context, resourceID int) (GetResourceImageRow, error) {
+	ctx = context.WithValue(ctx, "pggen_query_name", "GetResourceImage")
+	row := q.conn.QueryRow(ctx, getResourceImageSQL, resourceID)
+	var item GetResourceImageRow
+	if err := row.Scan(&item.AuthorID, &item.Image, &item.State); err != nil {
+		return item, fmt.Errorf("query GetResourceImage: %w", err)
+	}
+	return item, nil
+}
+
+// GetResourceImageBatch implements Querier.GetResourceImageBatch.
+func (q *DBQuerier) GetResourceImageBatch(batch genericBatch, resourceID int) {
+	batch.Queue(getResourceImageSQL, resourceID)
+}
+
+// GetResourceImageScan implements Querier.GetResourceImageScan.
+func (q *DBQuerier) GetResourceImageScan(results pgx.BatchResults) (GetResourceImageRow, error) {
+	row := results.QueryRow()
+	var item GetResourceImageRow
+	if err := row.Scan(&item.AuthorID, &item.Image, &item.State); err != nil {
+		return item, fmt.Errorf("scan GetResourceImageBatch row: %w", err)
+	}
+	return item, nil
 }
 
 // textPreferrer wraps a pgtype.ValueTranscoder and sets the preferred encoding

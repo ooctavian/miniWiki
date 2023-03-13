@@ -13,7 +13,7 @@ import (
 )
 
 func (s *Category) GetCategory(ctx context.Context, request model.GetCategoryRequest) (*model.CategoryResponse, error) {
-	getCategory, err := s.categoryQuerier.GetCategoryByID(ctx, request.CategoryId)
+	category, err := s.categoryQuerier.GetCategoryByID(ctx, request.CategoryId)
 
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
@@ -27,11 +27,11 @@ func (s *Category) GetCategory(ctx context.Context, request model.GetCategoryReq
 		return nil, err
 	}
 
-	resource := &model.CategoryResponse{
-		CategoryId: getCategory.CategoryID,
-		Title:      getCategory.Title,
-		ParentId:   getCategory.ParentID,
+	response := &model.CategoryResponse{
+		CategoryId: category.CategoryID,
+		Title:      category.Title,
+		ParentId:   category.ParentID,
 	}
 
-	return resource, nil
+	return response, nil
 }

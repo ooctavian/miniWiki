@@ -9,7 +9,7 @@ import (
 )
 
 func (s *Category) DeleteCategory(ctx context.Context, request model.DeleteCategoryRequest) error {
-	_, err := s.categoryQuerier.DeleteCategoryByID(ctx, request.CategoryId)
+	_, err := s.categoryQuerier.DeleteCategoryByID(ctx, request.CategoryId, request.AccountId)
 
 	if err != nil {
 		logrus.WithContext(ctx).Errorf("Failed deleting category: %v", err)

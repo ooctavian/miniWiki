@@ -10,6 +10,7 @@ type Config struct {
 	Database DatabaseConfig
 	Server   ServerConfig
 	Logger   LoggerConfig
+	Argon2id Argon2idConfig
 }
 
 type DatabaseConfig struct {
@@ -25,6 +26,14 @@ type ServerConfig struct {
 type LoggerConfig struct {
 	Level     string `env:"LOG_LEVEL" envDefault:"info"`
 	Formatter string `env:"FORMATTER" envDefault:"json"`
+}
+
+type Argon2idConfig struct {
+	Memory      uint32 `env:"ARGON2ID_MEMORY" envDefault:"65536"`
+	Iterations  uint32 `env:"ARGON2ID_ITERATIONS" envDefault:"3"`
+	Parallelism uint8  `env:"ARGON2ID_PARALLELISM" envDefault:"2"`
+	SaltLength  uint32 `env:"ARGON2ID_SALT_LENGTH" envDefault:"16"`
+	KeyLength   uint32 `env:"ARGON2ID_KEY_LENGTH" envDefault:"32"`
 }
 
 func InitConfig() (*Config, error) {

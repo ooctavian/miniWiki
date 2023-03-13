@@ -11,7 +11,7 @@ import (
 type categoryService interface {
 	CreateCategory(ctx context.Context, request model.CreateCategoryRequest) error
 	DeleteCategory(ctx context.Context, request model.DeleteCategoryRequest) error
-	GetCategories(ctx context.Context) ([]model.CategoryResponse, error)
+	GetCategories(ctx context.Context, request model.GetCategoriesRequest) ([]model.CategoryResponse, error)
 	GetCategory(ctx context.Context, request model.GetCategoryRequest) (*model.CategoryResponse, error)
 	UpdateCategory(ctx context.Context, request model.UpdateCategoryRequest) error
 }

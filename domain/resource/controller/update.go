@@ -5,6 +5,7 @@ import (
 	"strconv"
 
 	"miniWiki/domain/resource/model"
+	"miniWiki/middleware"
 	"miniWiki/utils"
 
 	"github.com/go-chi/chi/v5"
@@ -14,7 +15,7 @@ import (
 func updateResourceHandler(service resourceService) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		updateResource := model.UpdateResource{}
-		err := utils.Decode(r.Body, &updateResource)
+		err := utils.DecodeJson(r.Body, &updateResource)
 		if err != nil {
 			utils.Respond(w, http.StatusBadRequest, nil)
 			logrus.WithContext(r.Context()).Infof("BadRequest: %v", err)
@@ -30,6 +31,7 @@ func updateResourceHandler(service resourceService) func(w http.ResponseWriter, 
 		request := model.UpdateResourceRequest{
 			Resource:   updateResource,
 			ResourceId: resourceId,
+			AccountId:  middleware.GetAccountId(r),
 		}
 
 		err = service.UpdateResource(r.Context(), request)

@@ -2,6 +2,7 @@ package controller
 
 import (
 	"context"
+	"io"
 
 	"miniWiki/domain/resource/model"
 
@@ -14,12 +15,16 @@ type resourceService interface {
 	GetResources(ctx context.Context, request model.GetResourcesRequest) ([]model.ResourceResponse, error)
 	GetResource(ctx context.Context, request model.GetResourceRequest) (*model.ResourceResponse, error)
 	UpdateResource(ctx context.Context, request model.UpdateResourceRequest) error
+	UploadResourceImage(ctx context.Context, request model.UploadResourceImageRequest) error
+	DownloadResourceImage(ctx context.Context, request model.DownloadResourceImageRequest) (io.Reader, error)
 }
 
-func MakeResourceRouter(r chi.Router, service resourceService) {
-	r.Post("/", createResourceHandler(service))
-	r.Patch("/{id}", updateResourceHandler(service))
-	r.Delete("/{id}", deleteResourceHandler(service))
-	r.Get("/{id}", getResourceHandler(service))
-	r.Get("/", getResourcesHandler(service))
+func MakeResourceRouter(r chi.Router, rService resourceService) {
+	r.Get("/{id}", getResourceHandler(rService))
+	r.Get("/", getResourcesHandler(rService))
+	r.Post("/", createResourceHandler(rService))
+	r.Patch("/{id}", updateResourceHandler(rService))
+	r.Delete("/{id}", deleteResourceHandler(rService))
+	r.Post("/{id}/image", uploadResourceImageHandler(rService))
+	r.Get("/{id}/image", downloadResourceImageHandler(rService))
 }

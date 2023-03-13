@@ -5,6 +5,7 @@ import (
 	"strconv"
 
 	"miniWiki/domain/category/model"
+	"miniWiki/middleware"
 	"miniWiki/utils"
 
 	"github.com/go-chi/chi/v5"
@@ -19,7 +20,10 @@ func deleteResourceHandler(service categoryService) func(w http.ResponseWriter, 
 			return
 		}
 
-		req := model.DeleteCategoryRequest{CategoryId: categoryId}
+		req := model.DeleteCategoryRequest{
+			CategoryId: categoryId,
+			AccountId:  middleware.GetAccountId(r),
+		}
 
 		err = service.DeleteCategory(r.Context(), req)
 

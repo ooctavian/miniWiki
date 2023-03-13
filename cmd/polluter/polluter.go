@@ -11,14 +11,22 @@ import (
 
 	"github.com/brianvoe/gofakeit/v6"
 	"github.com/jackc/pgx/v4/pgxpool"
+	"github.com/joho/godotenv"
 )
 
 func main() {
+	err := godotenv.Load()
+	if err != nil {
+		panic(err)
+	}
 	cfg, err := config.InitConfig()
 	if err != nil {
 		panic(err)
 	}
-	pool, _ := pgxpool.Connect(context.Background(), cfg.Database.DatabaseURL)
+	pool, err := pgxpool.Connect(context.Background(), cfg.Database.DatabaseURL)
+	if err != nil {
+		panic(err)
+	}
 	defer pool.Close()
 	ctx := context.Background()
 	categoryQuerier := cQuery.NewQuerier(pool)

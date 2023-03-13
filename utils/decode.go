@@ -11,7 +11,7 @@ var (
 	schemaDecoder = schema.NewDecoder()
 )
 
-func Decode(body io.ReadCloser, v interface{}) error {
+func DecodeJson(body io.ReadCloser, v interface{}) error {
 	err := json.NewDecoder(body).Decode(v)
 	if err != nil {
 		return err
@@ -20,7 +20,7 @@ func Decode(body io.ReadCloser, v interface{}) error {
 	return validate.Struct(v)
 }
 
-func QueryDecode(v interface{}, query map[string][]string) error {
+func DecodeQuery(v interface{}, query map[string][]string) error {
 	err := schemaDecoder.Decode(v, query)
 	if err != nil {
 		return err

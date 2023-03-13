@@ -10,11 +10,12 @@ import (
 )
 
 func (s *Resource) GetResources(ctx context.Context, request model.GetResourcesRequest) ([]model.ResourceResponse, error) {
-	getResourcesRow, err := s.resourceQuerier.GetResources(ctx,
+	resources, err := s.resourceQuerier.GetResources(ctx,
 		query.GetResourcesParams{
-			Title:      ptrToString(request.Filters.Title),
-			Link:       ptrToString(request.Filters.Link),
+			Title:      request.Filters.Title,
+			Link:       request.Filters.Link,
 			Categories: request.Filters.Categories,
+			AccountID:  request.AccountId,
 		},
 	)
 
@@ -23,29 +24,23 @@ func (s *Resource) GetResources(ctx context.Context, request model.GetResourcesR
 		return nil, err
 	}
 
-	if len(getResourcesRow) < 1 {
+	if len(resources) < 1 {
 		return []model.ResourceResponse{}, nil
 	}
 
-	var resources []model.ResourceResponse
+	var response []model.ResourceResponse
 
-	for _, r := range getResourcesRow {
-		resources = append(resources,
+	for _, r := range resources {
+		response = append(response,
 			model.ResourceResponse{
 				ResourceId:  *r.ResourceID,
 				Title:       *r.Title,
 				Description: *r.Description,
 				Link:        *r.Link,
 				CategoryId:  r.CategoryID,
+				AuthorId:    *r.AuthorID,
 			})
 	}
 
-	return resources, nil
-}
-
-func ptrToString(s *string) string {
-	if s == nil {
-		return ""
-	}
-	return *s
+	return response, nil
 }

@@ -5,6 +5,7 @@ import (
 	"strconv"
 
 	"miniWiki/domain/resource/model"
+	"miniWiki/middleware"
 	"miniWiki/utils"
 
 	"github.com/go-chi/chi/v5"
@@ -18,8 +19,10 @@ func getResourceHandler(service resourceService) func(w http.ResponseWriter, r *
 			logrus.WithContext(r.Context()).Errorf("Error converting string to int: %v", err)
 			return
 		}
+
 		request := model.GetResourceRequest{
 			ResourceId: resourceId,
+			AccountId:  middleware.GetAccountId(r),
 		}
 
 		resource, err := service.GetResource(r.Context(), request)

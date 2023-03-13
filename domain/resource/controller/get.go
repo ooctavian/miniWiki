@@ -4,13 +4,14 @@ import (
 	"net/http"
 
 	"miniWiki/domain/resource/model"
+	"miniWiki/middleware"
 	"miniWiki/utils"
 )
 
 func getResourcesHandler(service resourceService) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		filters := model.GetResourcesFilters{}
-		err := utils.QueryDecode(&filters, r.URL.Query())
+		err := utils.DecodeQuery(&filters, r.URL.Query())
 		if err != nil {
 			utils.HandleErrorResponse(w, err)
 			return
@@ -18,8 +19,10 @@ func getResourcesHandler(service resourceService) func(w http.ResponseWriter, r 
 
 		resources, err := service.GetResources(r.Context(),
 			model.GetResourcesRequest{
-				Filters: filters,
+				Filters:   filters,
+				AccountId: middleware.GetAccountId(r),
 			})
+
 		if err != nil {
 			utils.HandleErrorResponse(w, err)
 			return

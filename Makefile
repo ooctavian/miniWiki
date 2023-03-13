@@ -10,7 +10,6 @@ install-deps: vendor
 	go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.51.2
 	#go install github.com/vektra/mockery/v2@v2.20.0
 
-
 start-db:
 	docker-compose up --remove-orphans -d 2>/dev/null
 	until pg_isready -qh localhost -U postgres; do sleep 0.1; done
@@ -25,8 +24,10 @@ migrate-down:
 	${BIN}/migrate -path migrations/ -database ${DATABASE_URL} down
 
 generate-queries:
-	${BIN}/pggen gen go  --schema-glob "migrations/*.up.sql" --query-glob "domain/resource/query/*.sql"
-	${BIN}/pggen gen go  --schema-glob "migrations/*.up.sql" --query-glob "domain/category/query/*.sql"
+	${BIN}/pggen gen go --schema-glob "migrations/*.up.sql" --query-glob "domain/resource/query/*.sql"
+	${BIN}/pggen gen go --schema-glob "migrations/*.up.sql" --query-glob "domain/category/query/*.sql"
+	${BIN}/pggen gen go --schema-glob "migrations/*.up.sql" --query-glob "domain/account/query/*.sql" --go-type 'domain_email=string' --go-type 'varchar=string'
+	${BIN}/pggen gen go --schema-glob "migrations/*.up.sql" --query-glob "domain/auth/query/*.sql" --go-type 'domain_email=string' --go-type 'timestamp=time.Time' --go-type 'varchar=string'
 
 seed-db:
 	go run cmd/polluter/polluter.go

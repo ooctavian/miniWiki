@@ -1,9 +1,11 @@
 package utils
 
 import (
+	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"net/http"
 	"reflect"
 
@@ -60,12 +62,22 @@ func HandleErrorResponse(w http.ResponseWriter, err error) {
 		return
 	}
 
+	if ok := errors.As(err, &unsupportedContentType{}); ok {
+		ErrorRespond(w, http.StatusBadRequest, "Invalid request", err)
+		return
+	}
+
+	if ok := errors.As(err, &ForbiddenError{}); ok {
+		ErrorRespond(w, http.StatusForbidden, "Not allowed", err)
+		return
+	}
+
 	if ok := errors.As(err, &schema.MultiError{}); ok {
 		ErrorRespond(w, http.StatusBadRequest, "Invalid query parameters", err)
 		return
 	}
 
-	logrus.Info("%v", reflect.TypeOf(err).String())
+	logrus.Infof("%v", reflect.TypeOf(err).String())
 	ErrorRespond(w, http.StatusInternalServerError, "Internal Server Error", err)
 }
 
@@ -78,6 +90,18 @@ func ErrorRespond(w http.ResponseWriter, code int, message string, err error) {
 	Respond(w, code, response)
 }
 
+func RespondWithFile(w http.ResponseWriter, file io.Reader) {
+	buf := streamToByte(file)
+	contentType := http.DetectContentType(buf)
+	w.WriteHeader(http.StatusOK)
+	w.Header().Set("Content-Type", contentType)
+	_, err := io.Copy(w, bytes.NewReader(buf))
+	if err != nil {
+		logrus.Info(err)
+		return
+	}
+}
+
 type NotFoundError struct {
 	Item string
 	Id   string
@@ -85,4 +109,24 @@ type NotFoundError struct {
 
 func (e NotFoundError) Error() string {
 	return fmt.Sprintf("Couldn't find %s with id %s", e.Item, e.Id)
+}
+
+type ForbiddenError struct{}
+
+func (e ForbiddenError) Error() string {
+	return "forbidden"
+}
+
+type unsupportedContentType struct {
+	contentType string
+}
+
+func newUnsupportedContentType(contentType string) unsupportedContentType {
+	return unsupportedContentType{
+		contentType: contentType,
+	}
+}
+
+func (e unsupportedContentType) Error() string {
+	return fmt.Sprintf("Unsupported content-type : %s", e.contentType)
 }

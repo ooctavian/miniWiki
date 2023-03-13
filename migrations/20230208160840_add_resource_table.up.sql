@@ -3,6 +3,6 @@ CREATE TABLE resource(
     title TEXT,
     description TEXT,
     link TEXT,
-    created_at timestamp DEFAULT NOW(),
-    updated_at timestamp DEFAULT NOW()
+    created_at TIMESTAMP DEFAULT NOW(),
+    updated_at TIMESTAMP DEFAULT NOW()
 )

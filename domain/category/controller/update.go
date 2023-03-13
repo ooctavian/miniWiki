@@ -5,6 +5,7 @@ import (
 	"strconv"
 
 	"miniWiki/domain/category/model"
+	"miniWiki/middleware"
 	"miniWiki/utils"
 
 	"github.com/go-chi/chi/v5"
@@ -14,14 +15,13 @@ import (
 func updateResourceHandler(service categoryService) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		updateCategory := model.UpdateCategory{}
-		err := utils.Decode(r.Body, &updateCategory)
+		err := utils.DecodeJson(r.Body, &updateCategory)
 		if err != nil {
-			utils.Respond(w, http.StatusBadRequest, nil)
-			logrus.WithContext(r.Context()).Infof("BadRequest: %v", err)
+			utils.HandleErrorResponse(w, err)
 			return
 		}
 
-		resourceId, err := strconv.Atoi(chi.URLParam(r, "id"))
+		categoryId, err := strconv.Atoi(chi.URLParam(r, "id"))
 		if err != nil {
 			logrus.WithContext(r.Context()).Errorf("Error converting string to int: %v", err)
 			return
@@ -29,7 +29,8 @@ func updateResourceHandler(service categoryService) func(w http.ResponseWriter, 
 
 		request := model.UpdateCategoryRequest{
 			Category:   updateCategory,
-			CategoryId: resourceId,
+			CategoryId: categoryId,
+			AccountId:  middleware.GetAccountId(r),
 		}
 
 		err = service.UpdateCategory(r.Context(), request)
