@@ -3,32 +3,29 @@ package controller
 import (
 	"net/http"
 
-	"miniWiki/domain/resource/model"
+	"miniWiki/domain/profile/model"
 	"miniWiki/middleware"
 	"miniWiki/utils"
 
 	"github.com/sirupsen/logrus"
 )
 
-func createResourceHandler(resource resourceService) func(w http.ResponseWriter, r *http.Request) {
+func createProfileHandler(service profileService) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
-		createResource := model.CreateResource{
-			State: "PUBLIC",
-		}
-
-		err := utils.DecodeJson(r.Body, &createResource)
+		createProfile := model.CreateProfile{}
+		err := utils.DecodeJson(r.Body, &createProfile)
 		if err != nil {
 			utils.HandleErrorResponse(w, err)
 			logrus.WithContext(r.Context()).Infof("Invalid body request: %v", err)
 			return
 		}
 
-		request := model.CreateResourceRequest{
-			Resource:  createResource,
+		request := model.CreateProfileRequest{
+			Profile:   createProfile,
 			AccountId: middleware.GetAccountId(r),
 		}
 
-		err = resource.CreateResource(r.Context(), request)
+		err = service.CreateProfile(r.Context(), request)
 		if err != nil {
 			utils.HandleErrorResponse(w, err)
 			return

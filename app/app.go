@@ -2,7 +2,6 @@ package app
 
 import (
 	"context"
-	"errors"
 	"log"
 	"net/http"
 	"os"
@@ -15,15 +14,6 @@ import (
 	"github.com/joho/godotenv"
 	"github.com/sirupsen/logrus"
 )
-
-func createDir(dirName string) {
-	if _, err := os.Stat(dirName); errors.Is(err, os.ErrNotExist) {
-		err := os.MkdirAll(dirName, os.ModePerm)
-		if err != nil {
-			logrus.Fatalf("Creating dir error: %v", err)
-		}
-	}
-}
 
 type Application struct {
 	Config   *config.Config
@@ -51,7 +41,6 @@ func New() (*Application, error) {
 
 	ctx := context.Background()
 
-	createDir(cfg.Database.ImageDir + "/resources")
 	pool, err := pgxpool.Connect(ctx, cfg.Database.DatabaseURL)
 	if err != nil {
 		log.Fatal(err)

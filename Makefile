@@ -26,6 +26,7 @@ migrate-down:
 generate-queries:
 	${BIN}/pggen gen go --schema-glob "migrations/*.up.sql" --query-glob "domain/resource/query/*.sql"
 	${BIN}/pggen gen go --schema-glob "migrations/*.up.sql" --query-glob "domain/category/query/*.sql"
+	${BIN}/pggen gen go --schema-glob "migrations/*.up.sql" --query-glob "domain/profile/query/*.sql"
 	${BIN}/pggen gen go --schema-glob "migrations/*.up.sql" --query-glob "domain/account/query/*.sql" --go-type 'domain_email=string' --go-type 'varchar=string'
 	${BIN}/pggen gen go --schema-glob "migrations/*.up.sql" --query-glob "domain/auth/query/*.sql" --go-type 'domain_email=string' --go-type 'timestamp=time.Time' --go-type 'varchar=string'
 

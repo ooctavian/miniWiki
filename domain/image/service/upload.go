@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -12,6 +13,7 @@ import (
 )
 
 func (s Image) Upload(ctx context.Context, request model.UploadRequest) error {
+	createDir(request.ImageFolder)
 	outputFile, err := os.OpenFile(
 		fmt.Sprintf("%s%s/%s",
 			s.Destination,
@@ -29,4 +31,13 @@ func (s Image) Upload(ctx context.Context, request model.UploadRequest) error {
 		logrus.WithContext(ctx).Errorf("Error writing image: %v", err)
 	}
 	return err
+}
+
+func createDir(dirName string) {
+	if _, err := os.Stat(dirName); errors.Is(err, os.ErrNotExist) {
+		err := os.MkdirAll(dirName, os.ModePerm)
+		if err != nil {
+			logrus.Fatalf("Creating dir error: %v", err)
+		}
+	}
 }

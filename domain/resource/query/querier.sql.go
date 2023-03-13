@@ -57,13 +57,6 @@ type Querier interface {
 	UpdateResourceImageBatch(batch genericBatch, params UpdateResourceImageParams)
 	// UpdateResourceImageScan scans the result of an executed UpdateResourceImageBatch query.
 	UpdateResourceImageScan(results pgx.BatchResults) (pgconn.CommandTag, error)
-
-	GetResourceImage(ctx context.Context, resourceID int) (GetResourceImageRow, error)
-	// GetResourceImageBatch enqueues a GetResourceImage query into batch to be executed
-	// later by the batch.
-	GetResourceImageBatch(batch genericBatch, resourceID int)
-	// GetResourceImageScan scans the result of an executed GetResourceImageBatch query.
-	GetResourceImageScan(results pgx.BatchResults) (GetResourceImageRow, error)
 }
 
 type DBQuerier struct {
@@ -158,9 +151,6 @@ func PrepareAllQueries(ctx context.Context, p preparer) error {
 	}
 	if _, err := p.Prepare(ctx, updateResourceImageSQL, updateResourceImageSQL); err != nil {
 		return fmt.Errorf("prepare query 'UpdateResourceImage': %w", err)
-	}
-	if _, err := p.Prepare(ctx, getResourceImageSQL, getResourceImageSQL); err != nil {
-		return fmt.Errorf("prepare query 'GetResourceImage': %w", err)
 	}
 	return nil
 }
@@ -480,42 +470,6 @@ func (q *DBQuerier) UpdateResourceImageScan(results pgx.BatchResults) (pgconn.Co
 		return cmdTag, fmt.Errorf("exec UpdateResourceImageBatch: %w", err)
 	}
 	return cmdTag, err
-}
-
-const getResourceImageSQL = `SELECT author_id, image, state
-FROM resource
-WHERE resource_id = $1;`
-
-type GetResourceImageRow struct {
-	AuthorID *int          `json:"author_id"`
-	Image    *string       `json:"image"`
-	State    ResourceState `json:"state"`
-}
-
-// GetResourceImage implements Querier.GetResourceImage.
-func (q *DBQuerier) GetResourceImage(ctx context.Context, resourceID int) (GetResourceImageRow, error) {
-	ctx = context.WithValue(ctx, "pggen_query_name", "GetResourceImage")
-	row := q.conn.QueryRow(ctx, getResourceImageSQL, resourceID)
-	var item GetResourceImageRow
-	if err := row.Scan(&item.AuthorID, &item.Image, &item.State); err != nil {
-		return item, fmt.Errorf("query GetResourceImage: %w", err)
-	}
-	return item, nil
-}
-
-// GetResourceImageBatch implements Querier.GetResourceImageBatch.
-func (q *DBQuerier) GetResourceImageBatch(batch genericBatch, resourceID int) {
-	batch.Queue(getResourceImageSQL, resourceID)
-}
-
-// GetResourceImageScan implements Querier.GetResourceImageScan.
-func (q *DBQuerier) GetResourceImageScan(results pgx.BatchResults) (GetResourceImageRow, error) {
-	row := results.QueryRow()
-	var item GetResourceImageRow
-	if err := row.Scan(&item.AuthorID, &item.Image, &item.State); err != nil {
-		return item, fmt.Errorf("scan GetResourceImageBatch row: %w", err)
-	}
-	return item, nil
 }
 
 // textPreferrer wraps a pgtype.ValueTranscoder and sets the preferred encoding

@@ -14,6 +14,9 @@ import (
 	cQuery "miniWiki/domain/category/query"
 	cService "miniWiki/domain/category/service"
 	iService "miniWiki/domain/image/service"
+	pController "miniWiki/domain/profile/controller"
+	pQuery "miniWiki/domain/profile/query"
+	pService "miniWiki/domain/profile/service"
 	rController "miniWiki/domain/resource/controller"
 	rQuery "miniWiki/domain/resource/query"
 	rService "miniWiki/domain/resource/service"
@@ -44,35 +47,38 @@ func InitRouter(conn *pgxpool.Pool, cfg config.Config) http.Handler {
 		accQuery.NewQuerier(conn),
 		argon2id,
 	)
+	profileService := pService.NewProfile(pQuery.NewQuerier(conn), imageService)
+
+	sessionMiddleware := middleware.SessionMiddleware(authQuerier)
 
 	r := chi.NewRouter()
 	r.Group(func(gr chi.Router) {
-		gr.Route(
-			"/resources",
-			func(rr chi.Router) {
-				rr.Use(middleware.SessionMiddleware(authQuerier))
-				rController.MakeResourceRouter(rr, resourceService)
+		gr.Route("/resources", func(rr chi.Router) {
+			rr.Use(sessionMiddleware)
+			rController.MakeResourceRouter(rr, resourceService)
+		})
+		gr.Route("/profile", func(rr chi.Router) {
+			rr.Use(sessionMiddleware)
+			pController.MakeProfileRouter(rr, profileService)
+		})
+		gr.Route("/categories", func(cr chi.Router) {
+			cr.Use(sessionMiddleware)
+			cController.MakeCategoryRouter(cr, categoryService)
+		})
+		gr.Route("/account", func(ar chi.Router) {
+			accController.MakeAccountRouter(ar, accountService)
+			ar.Group(func(apr chi.Router) {
+				apr.Use(sessionMiddleware)
+				accController.MakePrivateAccountRouter(apr, accountService)
 			})
-		gr.Route(
-			"/categories",
-			func(cr chi.Router) {
-				cr.Use(middleware.SessionMiddleware(authQuerier))
-				cController.MakeCategoryRouter(cr, categoryService)
+		})
+		gr.Route("/", func(ar chi.Router) {
+			auController.MakeAuthRouter(ar, authService)
+			ar.Group(func(sr chi.Router) {
+				sr.Use(sessionMiddleware)
+				auController.MakeProtectedAuthRouter(sr, authService)
 			})
-		gr.Route(
-			"/account",
-			func(ar chi.Router) {
-				accController.MakeAccountRouter(ar, accountService)
-			})
-		gr.Route(
-			"/",
-			func(ar chi.Router) {
-				auController.MakeAuthRouter(ar, authService)
-				ar.Group(func(sr chi.Router) {
-					sr.Use(middleware.SessionMiddleware(authQuerier))
-					auController.MakeProtectedAuthRouter(sr, authService)
-				})
-			})
+		})
 	})
 	return r
 }
