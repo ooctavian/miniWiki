@@ -6,6 +6,8 @@ import (
 
 	"miniWiki/app"
 	"miniWiki/config"
+	model2 "miniWiki/domain/account/model"
+	"miniWiki/domain/auth/model"
 
 	"github.com/jackc/pgx/v4/pgxpool"
 	"github.com/joho/godotenv"
@@ -23,7 +25,7 @@ type IntegrationTestSuite struct {
 }
 
 func (s *IntegrationTestSuite) SetupSuite() {
-	err := godotenv.Load("../.env")
+	err := godotenv.Load("../.env.test")
 	s.NoError(err)
 	cfg, err := config.InitConfig()
 	s.NoError(err)
@@ -34,4 +36,56 @@ func (s *IntegrationTestSuite) SetupSuite() {
 	s.db = db
 	s.srv = httptest.NewServer(app.InitRouter(db, *cfg))
 	s.clt = newTestClient(s.srv.URL, s.T())
+	s.CreateAccount()
+}
+
+func (s *IntegrationTestSuite) CreateAccount() {
+	account := model2.CreateAccount{
+		Email:    testAccountEmail,
+		Password: testAccountPassword,
+	}
+	s.clt.Post("/account", account)
+}
+
+func (s *IntegrationTestSuite) GetAuthenticatedClient() testClient {
+	credentials := model.LoginAccount{
+		Email:    testAccountEmail,
+		Password: testAccountPassword,
+	}
+	res := s.clt.Post("/login", credentials)
+	clt, err := s.clt.WithCookies(res.Cookies())
+	s.NoError(err)
+	return clt
+}
+
+func (s *IntegrationTestSuite) TearDownTest() {
+	_, err := s.db.Exec(s.ctx, "DELETE FROM resource")
+	s.NoError(err)
+	_, err = s.db.Exec(s.ctx, "DELETE FROM category")
+	s.NoError(err)
+	_, err = s.db.Exec(s.ctx, "DELETE FROM profile")
+	s.NoError(err)
+	_, err = s.db.Exec(s.ctx, "DELETE FROM session")
+	s.NoError(err)
+	_, err = s.db.Exec(s.ctx, "DELETE FROM account")
+	s.NoError(err)
+	_, err = s.db.Exec(s.ctx, "ALTER SEQUENCE category_category_id_seq RESTART WITH 1;")
+	s.NoError(err)
+	_, err = s.db.Exec(s.ctx, "UPDATE category SET category_id=nextval('category_category_id_seq');")
+	s.NoError(err)
+	_, err = s.db.Exec(s.ctx, "ALTER SEQUENCE resource_resource_id_seq RESTART WITH 1;")
+	s.NoError(err)
+	_, err = s.db.Exec(s.ctx, "UPDATE resource SET resource_id=nextval('resource_resource_id_seq');")
+	s.NoError(err)
+	_, err = s.db.Exec(s.ctx, "ALTER SEQUENCE account_account_id_seq RESTART WITH 1;")
+	s.NoError(err)
+	_, err = s.db.Exec(s.ctx, "UPDATE account SET account_id=nextval('account_account_id_seq');")
+	s.NoError(err)
+}
+
+func (s *IntegrationTestSuite) TearDownSuite() {
+	_, err := s.db.Exec(s.ctx, "DELETE FROM session")
+	s.NoError(err)
+	_, err = s.db.Exec(s.ctx, "DELETE FROM account")
+	s.NoError(err)
 }

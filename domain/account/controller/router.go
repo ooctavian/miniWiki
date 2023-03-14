@@ -12,6 +12,7 @@ type accountService interface {
 	CreateAccount(ctx context.Context, request model.CreateAccountRequest) error
 	UpdateAccount(ctx context.Context, request model.UpdateAccountRequest) error
 	GetAccount(ctx context.Context, request model.GetAccountRequest) (*model.AccountResponse, error)
+	DeactivateAccount(ctx context.Context, request model.DeactivateAccountRequest) error
 }
 
 func MakeAccountRouter(r chi.Router, service accountService) {
@@ -21,4 +22,5 @@ func MakeAccountRouter(r chi.Router, service accountService) {
 func MakePrivateAccountRouter(r chi.Router, service accountService) {
 	r.Patch("/", updateAccountHandler(service))
 	r.Get("/", getAccountHandler(service))
+	r.Delete("/", deactivateAccountHandler(service))
 }

@@ -29,8 +29,9 @@ import (
 
 func InitRouter(conn *pgxpool.Pool, cfg config.Config) http.Handler {
 	categoryQuerier := cQuery.NewQuerier(conn)
+	resourceQuerier := rQuery.NewQuerier(conn)
 	imageService := iService.NewImage(cfg.Database.ImageDir)
-	resourceService := rService.NewResource(rQuery.NewQuerier(conn), categoryQuerier, imageService)
+	resourceService := rService.NewResource(resourceQuerier, categoryQuerier, imageService)
 	categoryService := cService.NewCategory(categoryQuerier)
 	argon2id := security.NewArgon2id(
 		cfg.Argon2id.Memory,
@@ -40,7 +41,7 @@ func InitRouter(conn *pgxpool.Pool, cfg config.Config) http.Handler {
 		cfg.Argon2id.KeyLength,
 		security.GenerateRandomBytes,
 	)
-	accountService := accService.NewAccount(accQuery.NewQuerier(conn), argon2id)
+	accountService := accService.NewAccount(accQuery.NewQuerier(conn), resourceQuerier, argon2id)
 	authQuerier := auQuery.NewQuerier(conn)
 	authService := auService.NewAuth(
 		authQuerier,

@@ -250,7 +250,8 @@ func (q *DBQuerier) CreateProfileScan(results pgx.BatchResults) (pgconn.CommandT
 }
 
 const updateAliasSQL = `UPDATE profile
-SET alias = $1
+SET alias = $1,
+    updated_at = NOW()
 WHERE account_id = $2;`
 
 // UpdateAlias implements Querier.UpdateAlias.
@@ -278,7 +279,8 @@ func (q *DBQuerier) UpdateAliasScan(results pgx.BatchResults) (pgconn.CommandTag
 }
 
 const updateNameSQL = `UPDATE profile
-SET name = $1
+SET name = $1,
+    updated_at = NOW()
 WHERE account_id = $2;`
 
 // UpdateName implements Querier.UpdateName.
@@ -306,7 +308,8 @@ func (q *DBQuerier) UpdateNameScan(results pgx.BatchResults) (pgconn.CommandTag,
 }
 
 const updateProfilePictureSQL = `UPDATE profile
-SET picture_url = $1
+SET picture_url = $1,
+    updated_at = NOW()
 WHERE account_id = $2;`
 
 // UpdateProfilePicture implements Querier.UpdateProfilePicture.

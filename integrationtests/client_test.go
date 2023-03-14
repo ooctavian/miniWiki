@@ -5,6 +5,8 @@ import (
 	"encoding/json"
 	"io"
 	"net/http"
+	"net/http/cookiejar"
+	"net/url"
 	"testing"
 	"time"
 
@@ -19,9 +21,11 @@ type testClient struct {
 
 func newTestClient(url string, t *testing.T) *testClient {
 	return &testClient{
-		client: &http.Client{Timeout: 10 * time.Second},
-		url:    url,
-		test:   t,
+		client: &http.Client{
+			Timeout: 10 * time.Second,
+		},
+		url:  url,
+		test: t,
 	}
 }
 
@@ -64,4 +68,18 @@ func (t testClient) GetBody(response *http.Response) string {
 	body, err := io.ReadAll(response.Body)
 	assert.NoError(t.test, err)
 	return string(body)
+}
+
+func (t testClient) WithCookies(cookies []*http.Cookie) (testClient, error) {
+	jar, err := cookiejar.New(nil)
+	if err != nil {
+		return testClient{}, err
+	}
+	u, err := url.Parse(t.url)
+	if err != nil {
+		return testClient{}, err
+	}
+	jar.SetCookies(u, cookies)
+	t.client.Jar = jar
+	return t, nil
 }

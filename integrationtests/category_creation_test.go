@@ -1,6 +1,7 @@
 package integrationtests
 
 import (
+	"net/http"
 	"testing"
 
 	"miniWiki/domain/category/model"
@@ -8,33 +9,34 @@ import (
 	"github.com/stretchr/testify/suite"
 )
 
+var (
+	testCreateCategory = model.CreateCategory{
+		Title: testCategoryTitle,
+	}
+)
+
 type CategoryCreationSuite struct {
 	IntegrationTestSuite
 }
 
-var (
-	testCreateCategory = model.CreateCategory{
-		Title:    testCategoryTitle,
-		ParentId: nil,
-	}
-
-	testCreateSubcategory = model.CreateCategory{
-		Title:    testSubcategoryTitle,
-		ParentId: &testSubcategoryParentId,
-	}
-)
-
 func (s *CategoryCreationSuite) TestCategoryCreation() {
-	res := s.clt.Post("/categories", testCreateCategory)
-	s.Equal(res.StatusCode, 201)
+	c := s.GetAuthenticatedClient()
+	res := c.Post("/categories", testCreateCategory)
+	s.Equal(http.StatusCreated, res.StatusCode)
 }
 
-func (s *CategoryCreationSuite) TestSubategoryCreation() {
-	res := s.clt.Post("/categories", testCreateCategory)
-	s.Equal(res.StatusCode, 201)
+func (s *CategoryCreationSuite) TestSubcategoryCreation() {
+	c := s.GetAuthenticatedClient()
+	res := c.Post("/categories", testCreateCategory)
+	s.Equal(http.StatusCreated, res.StatusCode)
 
-	res = s.clt.Post("/categories", testCreateSubcategory)
-	s.Equal(res.StatusCode, 201)
+	req := model.CreateCategory{
+		Title:    testSubcategoryTitle,
+		ParentId: testSubcategoryParentId,
+	}
+
+	res = c.Post("/categories", req)
+	s.Equal(http.StatusCreated, res.StatusCode)
 }
 
 func TestCategoryCreationSuite(t *testing.T) {

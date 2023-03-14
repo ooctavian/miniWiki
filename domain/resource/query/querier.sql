@@ -45,6 +45,12 @@ WHERE resource_id = pggen.arg('resource_id');
 
 --name: UpdateResourceImage :exec
 UPDATE resource
-SET image = pggen.arg('image_url')
+SET image = pggen.arg('image_url'),
+    updated_at = NOW()
 WHERE resource_id = pggen.arg('resource_id')
 AND author_id = pggen.arg('author_id');
+
+--name: MakeAccountResourcesPrivate :exec
+UPDATE resource
+SET state = 'PRIVATE'
+WHERE  author_id = pggen.arg('author_id');

@@ -11,7 +11,7 @@ import (
 func (s *Account) GetAccount(ctx context.Context, request model.GetAccountRequest) (*model.AccountResponse, error) {
 	acc, err := s.accountQuerier.GetAccountByID(ctx, request.AccountId)
 	if err != nil {
-		logrus.WithContext(ctx).Errorf("Failed creating account: %v", err)
+		logrus.WithContext(ctx).Errorf("Failed getting account: %v", err)
 		return nil, err
 	}
 

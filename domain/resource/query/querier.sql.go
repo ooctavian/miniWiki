@@ -57,6 +57,13 @@ type Querier interface {
 	UpdateResourceImageBatch(batch genericBatch, params UpdateResourceImageParams)
 	// UpdateResourceImageScan scans the result of an executed UpdateResourceImageBatch query.
 	UpdateResourceImageScan(results pgx.BatchResults) (pgconn.CommandTag, error)
+
+	MakeAccountResourcesPrivate(ctx context.Context, authorID int) (pgconn.CommandTag, error)
+	// MakeAccountResourcesPrivateBatch enqueues a MakeAccountResourcesPrivate query into batch to be executed
+	// later by the batch.
+	MakeAccountResourcesPrivateBatch(batch genericBatch, authorID int)
+	// MakeAccountResourcesPrivateScan scans the result of an executed MakeAccountResourcesPrivateBatch query.
+	MakeAccountResourcesPrivateScan(results pgx.BatchResults) (pgconn.CommandTag, error)
 }
 
 type DBQuerier struct {
@@ -151,6 +158,9 @@ func PrepareAllQueries(ctx context.Context, p preparer) error {
 	}
 	if _, err := p.Prepare(ctx, updateResourceImageSQL, updateResourceImageSQL); err != nil {
 		return fmt.Errorf("prepare query 'UpdateResourceImage': %w", err)
+	}
+	if _, err := p.Prepare(ctx, makeAccountResourcesPrivateSQL, makeAccountResourcesPrivateSQL); err != nil {
+		return fmt.Errorf("prepare query 'MakeAccountResourcesPrivate': %w", err)
 	}
 	return nil
 }
@@ -438,7 +448,8 @@ func (q *DBQuerier) UpdateResourceScan(results pgx.BatchResults) (pgconn.Command
 }
 
 const updateResourceImageSQL = `UPDATE resource
-SET image = $1
+SET image = $1,
+    updated_at = NOW()
 WHERE resource_id = $2
 AND author_id = $3;`
 
@@ -468,6 +479,34 @@ func (q *DBQuerier) UpdateResourceImageScan(results pgx.BatchResults) (pgconn.Co
 	cmdTag, err := results.Exec()
 	if err != nil {
 		return cmdTag, fmt.Errorf("exec UpdateResourceImageBatch: %w", err)
+	}
+	return cmdTag, err
+}
+
+const makeAccountResourcesPrivateSQL = `UPDATE resource
+SET state = 'PRIVATE'
+WHERE  author_id = $1;`
+
+// MakeAccountResourcesPrivate implements Querier.MakeAccountResourcesPrivate.
+func (q *DBQuerier) MakeAccountResourcesPrivate(ctx context.Context, authorID int) (pgconn.CommandTag, error) {
+	ctx = context.WithValue(ctx, "pggen_query_name", "MakeAccountResourcesPrivate")
+	cmdTag, err := q.conn.Exec(ctx, makeAccountResourcesPrivateSQL, authorID)
+	if err != nil {
+		return cmdTag, fmt.Errorf("exec query MakeAccountResourcesPrivate: %w", err)
+	}
+	return cmdTag, err
+}
+
+// MakeAccountResourcesPrivateBatch implements Querier.MakeAccountResourcesPrivateBatch.
+func (q *DBQuerier) MakeAccountResourcesPrivateBatch(batch genericBatch, authorID int) {
+	batch.Queue(makeAccountResourcesPrivateSQL, authorID)
+}
+
+// MakeAccountResourcesPrivateScan implements Querier.MakeAccountResourcesPrivateScan.
+func (q *DBQuerier) MakeAccountResourcesPrivateScan(results pgx.BatchResults) (pgconn.CommandTag, error) {
+	cmdTag, err := results.Exec()
+	if err != nil {
+		return cmdTag, fmt.Errorf("exec MakeAccountResourcesPrivateBatch: %w", err)
 	}
 	return cmdTag, err
 }

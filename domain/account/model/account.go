@@ -25,6 +25,10 @@ type GetAccountRequest struct {
 	AccountId int
 }
 
+type DeactivateAccountRequest struct {
+	AccountId int
+}
+
 type AccountResponse struct {
 	Email     string    `json:"email"`
 	CreatedAt time.Time `json:"createdAt"`
