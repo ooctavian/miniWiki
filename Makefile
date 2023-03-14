@@ -30,9 +30,6 @@ generate-queries:
 	${BIN}/pggen gen go --schema-glob "migrations/*.up.sql" --query-glob "domain/account/query/*.sql" --go-type 'domain_email=string' --go-type 'varchar=string'
 	${BIN}/pggen gen go --schema-glob "migrations/*.up.sql" --query-glob "domain/auth/query/*.sql" --go-type 'domain_email=string' --go-type 'timestamp=time.Time' --go-type 'varchar=string'
 
-seed-db:
-	go run cmd/polluter/polluter.go
-
 lint:
 	${BIN}/golangci-lint run
 
