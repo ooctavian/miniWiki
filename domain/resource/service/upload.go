@@ -21,7 +21,10 @@ func (s *Resource) UploadResourceImage(ctx context.Context, request model.Upload
 	}
 	err := s.imageService.Upload(ctx, req)
 	if err != nil {
-		logrus.WithContext(ctx).Info("Error uploading file", err)
+		logrus.
+			WithContext(ctx).
+			WithField("resource_id", request.ResourceId).
+			Info("Error uploading file", err)
 		return err
 	}
 
@@ -32,7 +35,9 @@ func (s *Resource) UploadResourceImage(ctx context.Context, request model.Upload
 	}
 	_, err = s.resourceQuerier.UpdateResourceImage(ctx, params)
 	if err != nil {
-		logrus.WithContext(ctx).WithField("resource_id", request.ResourceId).Info(err)
+		logrus.WithContext(ctx).
+			WithField("resource_id", request.ResourceId).
+			Info(err)
 		return err
 	}
 

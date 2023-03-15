@@ -38,6 +38,7 @@ func (s *Resource) GetResources(ctx context.Context, request model.GetResourcesR
 				Description: *r.Description,
 				Link:        *r.Link,
 				CategoryId:  r.CategoryID,
+				State:       string(r.State),
 				AuthorId:    *r.AuthorID,
 			})
 	}

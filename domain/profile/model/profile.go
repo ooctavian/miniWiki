@@ -39,5 +39,5 @@ type GetProfileRequest struct {
 type ProfileResponse struct {
 	Name       string  `json:"name"`
 	Alias      *string `json:"alias,omitempty"`
-	ProfileUrl *string `json:"profileUrl,omitempty"`
+	PictureUrl *string `json:"pictureUrl,omitempty"`
 }

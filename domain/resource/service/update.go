@@ -10,10 +10,10 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-func (s *Resource) UpdateResource(ctx context.Context, request model.UpdateResourceRequest) error {
+func (s *Resource) UpdateResource(ctx context.Context, request model.UpdateResourceRequest) (*model.ResourceResponse, error) {
 	resource, err := s.getResource(ctx, request.ResourceId, request.AccountId)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	// NOTE: This could be avoided with copier
@@ -29,7 +29,7 @@ func (s *Resource) UpdateResource(ctx context.Context, request model.UpdateResou
 	if request.Resource.CategoryId != nil {
 		err = s.validateCategoryOwner(ctx, *request.Resource.CategoryId, request.AccountId)
 		if err != nil {
-			return err
+			return nil, err
 		}
 		params.CategoryID = *request.Resource.CategoryId
 	}
@@ -53,9 +53,12 @@ func (s *Resource) UpdateResource(ctx context.Context, request model.UpdateResou
 	_, err = s.resourceQuerier.UpdateResource(ctx, params)
 	if err != nil {
 		logrus.WithContext(ctx).Infof("Failed updating in database: %v", err)
+		return nil, err
 	}
 
-	return err
+	return &model.ResourceResponse{
+		ResourceId: resource.ResourceID,
+	}, err
 }
 
 func ptrToString(s *string) string {

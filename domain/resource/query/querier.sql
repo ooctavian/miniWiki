@@ -17,7 +17,7 @@ FROM resource
 WHERE resource_id = pggen.arg('resource_id')
 AND author_id = pggen.arg('account_id');
 
--- name: InsertResource :exec
+-- name: InsertResource :one
 INSERT INTO resource(title,
                      description,
                      link,
@@ -31,7 +31,8 @@ VALUES(
        pggen.arg('category_id'),
        pggen.arg('author_id'),
        pggen.arg('state')
-      );
+      )
+RETURNING resource_id;
 
 -- name: UpdateResource :exec
 UPDATE resource

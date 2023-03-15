@@ -24,3 +24,7 @@ func MakeProfileRouter(r chi.Router, service profileService) {
 	r.Post("/picture", uploadProfilePictureHandler(service))
 	r.Get("/picture", downloadProfilePictureHandler(service))
 }
+
+func MakeProfilesRouter(r chi.Router, service profileService) {
+	r.Get("/{id}", getProfileByIdHandler(service))
+}

@@ -8,7 +8,6 @@ install-deps: vendor
 	go install -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate@v4.15.2
 	go install github.com/jschaf/pggen/cmd/pggen@2023-01-27
 	go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.51.2
-	#go install github.com/vektra/mockery/v2@v2.20.0
 
 start-db:
 	docker-compose up --remove-orphans -d 2>/dev/null

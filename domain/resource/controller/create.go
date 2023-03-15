@@ -2,6 +2,7 @@ package controller
 
 import (
 	"net/http"
+	"strconv"
 
 	"miniWiki/domain/resource/model"
 	"miniWiki/middleware"
@@ -28,12 +29,13 @@ func createResourceHandler(resource resourceService) func(w http.ResponseWriter,
 			AccountId: middleware.GetAccountId(r),
 		}
 
-		err = resource.CreateResource(r.Context(), request)
+		res, err := resource.CreateResource(r.Context(), request)
 		if err != nil {
 			utils.HandleErrorResponse(w, err)
 			return
 		}
 
+		w.Header().Add("Location", "/resources/"+strconv.Itoa(res.ResourceId))
 		utils.Respond(w, http.StatusCreated, nil)
 	}
 }

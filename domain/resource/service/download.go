@@ -26,7 +26,10 @@ func (s *Resource) DownloadResourceImage(ctx context.Context, request model.Down
 				Id:   strconv.Itoa(request.ResourceId),
 			}
 		}
-		logrus.WithContext(ctx).Errorf("Failed retrieving resource: %v", err)
+		logrus.
+			WithContext(ctx).
+			WithField("resource_id", request.ResourceId).
+			Errorf("Failed retrieving resource: %v", err)
 		return nil, err
 	}
 

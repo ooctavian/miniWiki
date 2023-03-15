@@ -58,9 +58,9 @@ func InitRouter(conn *pgxpool.Pool, cfg config.Config) http.Handler {
 			rr.Use(sessionMiddleware)
 			rController.MakeResourceRouter(rr, resourceService)
 		})
-		gr.Route("/profile", func(rr chi.Router) {
+		gr.Route("/profiles", func(rr chi.Router) {
 			rr.Use(sessionMiddleware)
-			pController.MakeProfileRouter(rr, profileService)
+			pController.MakeProfilesRouter(rr, profileService)
 		})
 		gr.Route("/categories", func(cr chi.Router) {
 			cr.Use(sessionMiddleware)
@@ -71,6 +71,10 @@ func InitRouter(conn *pgxpool.Pool, cfg config.Config) http.Handler {
 			ar.Group(func(apr chi.Router) {
 				apr.Use(sessionMiddleware)
 				accController.MakePrivateAccountRouter(apr, accountService)
+			})
+			ar.Route("/profile", func(rr chi.Router) {
+				rr.Use(sessionMiddleware)
+				pController.MakeProfileRouter(rr, profileService)
 			})
 		})
 		gr.Route("/", func(ar chi.Router) {

@@ -37,12 +37,12 @@ type Querier interface {
 	// DeleteCategoryByIDScan scans the result of an executed DeleteCategoryByIDBatch query.
 	DeleteCategoryByIDScan(results pgx.BatchResults) (pgconn.CommandTag, error)
 
-	InsertCategory(ctx context.Context, params InsertCategoryParams) (pgconn.CommandTag, error)
+	InsertCategory(ctx context.Context, params InsertCategoryParams) (int, error)
 	// InsertCategoryBatch enqueues a InsertCategory query into batch to be executed
 	// later by the batch.
 	InsertCategoryBatch(batch genericBatch, params InsertCategoryParams)
 	// InsertCategoryScan scans the result of an executed InsertCategoryBatch query.
-	InsertCategoryScan(results pgx.BatchResults) (pgconn.CommandTag, error)
+	InsertCategoryScan(results pgx.BatchResults) (int, error)
 
 	UpdateCategory(ctx context.Context, params UpdateCategoryParams) (pgconn.CommandTag, error)
 	// UpdateCategoryBatch enqueues a UpdateCategory query into batch to be executed
@@ -312,7 +312,8 @@ func (q *DBQuerier) DeleteCategoryByIDScan(results pgx.BatchResults) (pgconn.Com
 const insertCategorySQL = `INSERT INTO category(title, parent_id, author_id)
 VALUES($1,
        NULLIF($2,0),
-       $3);`
+       $3)
+RETURNING category_id;`
 
 type InsertCategoryParams struct {
 	Title    string
@@ -321,13 +322,14 @@ type InsertCategoryParams struct {
 }
 
 // InsertCategory implements Querier.InsertCategory.
-func (q *DBQuerier) InsertCategory(ctx context.Context, params InsertCategoryParams) (pgconn.CommandTag, error) {
+func (q *DBQuerier) InsertCategory(ctx context.Context, params InsertCategoryParams) (int, error) {
 	ctx = context.WithValue(ctx, "pggen_query_name", "InsertCategory")
-	cmdTag, err := q.conn.Exec(ctx, insertCategorySQL, params.Title, params.ParentID, params.AuthorID)
-	if err != nil {
-		return cmdTag, fmt.Errorf("exec query InsertCategory: %w", err)
+	row := q.conn.QueryRow(ctx, insertCategorySQL, params.Title, params.ParentID, params.AuthorID)
+	var item int
+	if err := row.Scan(&item); err != nil {
+		return item, fmt.Errorf("query InsertCategory: %w", err)
 	}
-	return cmdTag, err
+	return item, nil
 }
 
 // InsertCategoryBatch implements Querier.InsertCategoryBatch.
@@ -336,12 +338,13 @@ func (q *DBQuerier) InsertCategoryBatch(batch genericBatch, params InsertCategor
 }
 
 // InsertCategoryScan implements Querier.InsertCategoryScan.
-func (q *DBQuerier) InsertCategoryScan(results pgx.BatchResults) (pgconn.CommandTag, error) {
-	cmdTag, err := results.Exec()
-	if err != nil {
-		return cmdTag, fmt.Errorf("exec InsertCategoryBatch: %w", err)
+func (q *DBQuerier) InsertCategoryScan(results pgx.BatchResults) (int, error) {
+	row := results.QueryRow()
+	var item int
+	if err := row.Scan(&item); err != nil {
+		return item, fmt.Errorf("scan InsertCategoryBatch row: %w", err)
 	}
-	return cmdTag, err
+	return item, nil
 }
 
 const updateCategorySQL = `UPDATE category

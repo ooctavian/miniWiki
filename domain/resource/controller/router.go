@@ -10,11 +10,11 @@ import (
 )
 
 type resourceService interface {
-	CreateResource(ctx context.Context, request model.CreateResourceRequest) error
+	CreateResource(ctx context.Context, request model.CreateResourceRequest) (*model.ResourceResponse, error)
 	DeleteResource(ctx context.Context, request model.DeleteResourceRequest) error
 	GetResources(ctx context.Context, request model.GetResourcesRequest) ([]model.ResourceResponse, error)
 	GetResource(ctx context.Context, request model.GetResourceRequest) (*model.ResourceResponse, error)
-	UpdateResource(ctx context.Context, request model.UpdateResourceRequest) error
+	UpdateResource(ctx context.Context, request model.UpdateResourceRequest) (*model.ResourceResponse, error)
 	UploadResourceImage(ctx context.Context, request model.UploadResourceImageRequest) error
 	DownloadResourceImage(ctx context.Context, request model.DownloadResourceImageRequest) (io.Reader, error)
 }

@@ -37,12 +37,12 @@ type Querier interface {
 	// DeleteResourceByIDScan scans the result of an executed DeleteResourceByIDBatch query.
 	DeleteResourceByIDScan(results pgx.BatchResults) (pgconn.CommandTag, error)
 
-	InsertResource(ctx context.Context, params InsertResourceParams) (pgconn.CommandTag, error)
+	InsertResource(ctx context.Context, params InsertResourceParams) (int, error)
 	// InsertResourceBatch enqueues a InsertResource query into batch to be executed
 	// later by the batch.
 	InsertResourceBatch(batch genericBatch, params InsertResourceParams)
 	// InsertResourceScan scans the result of an executed InsertResourceBatch query.
-	InsertResourceScan(results pgx.BatchResults) (pgconn.CommandTag, error)
+	InsertResourceScan(results pgx.BatchResults) (int, error)
 
 	UpdateResource(ctx context.Context, params UpdateResourceParams) (pgconn.CommandTag, error)
 	// UpdateResourceBatch enqueues a UpdateResource query into batch to be executed
@@ -370,7 +370,8 @@ VALUES(
        $4,
        $5,
        $6
-      );`
+      )
+RETURNING resource_id;`
 
 type InsertResourceParams struct {
 	Title       string
@@ -382,13 +383,14 @@ type InsertResourceParams struct {
 }
 
 // InsertResource implements Querier.InsertResource.
-func (q *DBQuerier) InsertResource(ctx context.Context, params InsertResourceParams) (pgconn.CommandTag, error) {
+func (q *DBQuerier) InsertResource(ctx context.Context, params InsertResourceParams) (int, error) {
 	ctx = context.WithValue(ctx, "pggen_query_name", "InsertResource")
-	cmdTag, err := q.conn.Exec(ctx, insertResourceSQL, params.Title, params.Description, params.Link, params.CategoryID, params.AuthorID, params.State)
-	if err != nil {
-		return cmdTag, fmt.Errorf("exec query InsertResource: %w", err)
+	row := q.conn.QueryRow(ctx, insertResourceSQL, params.Title, params.Description, params.Link, params.CategoryID, params.AuthorID, params.State)
+	var item int
+	if err := row.Scan(&item); err != nil {
+		return item, fmt.Errorf("query InsertResource: %w", err)
 	}
-	return cmdTag, err
+	return item, nil
 }
 
 // InsertResourceBatch implements Querier.InsertResourceBatch.
@@ -397,12 +399,13 @@ func (q *DBQuerier) InsertResourceBatch(batch genericBatch, params InsertResourc
 }
 
 // InsertResourceScan implements Querier.InsertResourceScan.
-func (q *DBQuerier) InsertResourceScan(results pgx.BatchResults) (pgconn.CommandTag, error) {
-	cmdTag, err := results.Exec()
-	if err != nil {
-		return cmdTag, fmt.Errorf("exec InsertResourceBatch: %w", err)
+func (q *DBQuerier) InsertResourceScan(results pgx.BatchResults) (int, error) {
+	row := results.QueryRow()
+	var item int
+	if err := row.Scan(&item); err != nil {
+		return item, fmt.Errorf("scan InsertResourceBatch row: %w", err)
 	}
-	return cmdTag, err
+	return item, nil
 }
 
 const updateResourceSQL = `UPDATE resource

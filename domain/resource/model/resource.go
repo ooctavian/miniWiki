@@ -7,6 +7,7 @@ type ResourceResponse struct {
 	Title       string `json:"title"`
 	Description string `json:"description,omitempty"`
 	Link        string `json:"link"`
+	State       string `json:"state"`
 	CategoryId  *int   `json:"categoryId,omitempty"`
 	AuthorId    int    `json:"authorId"`
 }

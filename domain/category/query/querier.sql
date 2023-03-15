@@ -14,11 +14,12 @@ FROM category
 WHERE category_id = pggen.arg('category_id')
 AND author_id = pggen.arg('author_id');
 
--- name: InsertCategory :exec
+-- name: InsertCategory :one
 INSERT INTO category(title, parent_id, author_id)
 VALUES(pggen.arg('title'),
        NULLIF(pggen.arg('parent_id'),0),
-       pggen.arg('author_id'));
+       pggen.arg('author_id'))
+RETURNING category_id;
 
 -- name: UpdateCategory :exec
 UPDATE category

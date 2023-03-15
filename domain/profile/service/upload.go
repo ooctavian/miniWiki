@@ -21,7 +21,9 @@ func (s *Profile) UploadProfilePicture(ctx context.Context, request model.Upload
 
 	err := s.imageService.Upload(ctx, req)
 	if err != nil {
-		logrus.WithContext(ctx).Info("Error uploading file", err)
+		logrus.WithContext(ctx).
+			WithField("account_id", request.AccountId).
+			Info("Error uploading file", err)
 		return err
 	}
 

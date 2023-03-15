@@ -18,22 +18,23 @@ func (s *Profile) GetProfile(ctx context.Context, request model.GetProfileReques
 	//NOTE: Should it be extracted in another function ?
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
-			logrus.WithContext(ctx).Errorf("Resource not found: %v", err)
+			logrus.WithContext(ctx).
+				WithField("account_id", profile.AccountID).
+				Errorf("Profile not found: %v", err)
 			return nil, utils.NotFoundError{
 				Item: "profile",
 				Id:   strconv.Itoa(request.AccountId),
 			}
 		}
-		logrus.WithContext(ctx).Errorf("Failed retrieving resource: %v", err)
+		logrus.WithContext(ctx).Errorf("Failed retrieving profile: %v", err)
 		return nil, err
 	}
 
 	response := &model.ProfileResponse{
 		Name:       profile.Name,
 		Alias:      profile.Alias,
-		ProfileUrl: profile.PictureUrl,
+		PictureUrl: profile.PictureUrl,
 	}
 
 	return response, nil
-
 }
