@@ -1,4 +1,4 @@
-package utils
+package transport
 
 import (
 	"bytes"
@@ -14,10 +14,14 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+// swagger:model ErrorResponse
 type ErrorResponse struct {
-	Status  int    `json:"status,omitempty"`
+	// Status code of response
+	Status int `json:"status,omitempty"`
+	// Message, usually for the user
 	Message string `json:"message,omitempty"`
-	Detail  string `json:"detail,omitempty"`
+	// Detail, more detailed message about the problem
+	Detail string `json:"detail,omitempty"`
 }
 
 func Respond(w http.ResponseWriter, code int, v interface{}) {
@@ -62,7 +66,7 @@ func HandleErrorResponse(w http.ResponseWriter, err error) {
 		return
 	}
 
-	if ok := errors.As(err, &unsupportedContentType{}); ok {
+	if ok := errors.As(err, &unsupportedContentTypeError{}); ok {
 		ErrorRespond(w, http.StatusBadRequest, "Invalid request", err)
 		return
 	}
@@ -117,16 +121,16 @@ func (e ForbiddenError) Error() string {
 	return "forbidden"
 }
 
-type unsupportedContentType struct {
+type unsupportedContentTypeError struct {
 	contentType string
 }
 
-func newUnsupportedContentType(contentType string) unsupportedContentType {
-	return unsupportedContentType{
+func newUnsupportedContentType(contentType string) unsupportedContentTypeError {
+	return unsupportedContentTypeError{
 		contentType: contentType,
 	}
 }
 
-func (e unsupportedContentType) Error() string {
+func (e unsupportedContentTypeError) Error() string {
 	return fmt.Sprintf("Unsupported content-type : %s", e.contentType)
 }

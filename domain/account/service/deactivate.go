@@ -15,5 +15,10 @@ func (s *Account) DeactivateAccount(ctx context.Context, request model.Deactivat
 		return err
 	}
 
+	_, err = s.accountQuerier.UpdateAccountStatus(ctx, false, request.AccountId)
+	if err != nil {
+		logrus.WithContext(ctx).Errorf("Failed changing account status: %v", err)
+		return err
+	}
 	return nil
 }

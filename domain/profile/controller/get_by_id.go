@@ -5,11 +5,40 @@ import (
 	"strconv"
 
 	"miniWiki/domain/profile/model"
-	"miniWiki/utils"
+	"miniWiki/transport"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/sirupsen/logrus"
 )
+
+// swagger:operation GET /profile/{id} Profile getProfileById
+//
+// Get profile by id.
+//
+// ---
+// parameters:
+// - name: id
+//   in: path
+//   description: profile ID
+//   required: true
+//   type: string
+// responses:
+//   '200':
+//     description: 'Profile info'
+//     schema:
+//         "$ref": "#/definitions/ProfileResponse"
+//   '400':
+//     description: Invalid body request.
+//     schema:
+//       "$ref": "#/definitions/ErrorResponse"
+//   '401':
+//     description: Unauthorized.
+//     schema:
+//       "$ref": "#/definitions/ErrorResponse"
+//   '500':
+//     description: Internal server error.
+//     schema:
+//       "$ref": "#/definitions/ErrorResponse"
 
 func getProfileByIdHandler(service profileService) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
@@ -25,10 +54,10 @@ func getProfileByIdHandler(service profileService) func(w http.ResponseWriter, r
 
 		res, err := service.GetProfile(r.Context(), request)
 		if err != nil {
-			utils.HandleErrorResponse(w, err)
+			transport.HandleErrorResponse(w, err)
 			return
 		}
 
-		utils.Respond(w, http.StatusOK, res)
+		transport.Respond(w, http.StatusOK, res)
 	}
 }

@@ -2,8 +2,15 @@ package model
 
 import "time"
 
+// swagger:model LoginAccount
 type LoginAccount struct {
-	Email    string `json:"email"`
+	// Email of the account
+	// example: lorem@example.com
+	// required: true
+	Email string `json:"email"`
+	// Password
+	// example: verysecurepassword
+	// required: true
 	Password string `json:"password"`
 }
 

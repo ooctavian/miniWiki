@@ -5,15 +5,47 @@ import (
 
 	"miniWiki/domain/resource/model"
 	"miniWiki/middleware"
+	"miniWiki/transport"
 	"miniWiki/utils"
 )
+
+// swagger:operation GET /resources Resource getResources
+//
+// Get all available resources filtered. By default, it gives them all.
+//
+// ---
+// parameters:
+// - name: title
+//   in: query
+//   description: Match or partial match of title
+// - name: link
+//   in: query
+//   description: Match or partial match of link
+// - name: categories
+//   in: query
+//   description: comma separated list of categories
+// responses:
+//   '200':
+//     description: List of resources
+//     schema:
+//       type: array
+//       items:
+//         "$ref": "#/definitions/ResourceResponse"
+//   '401':
+//     description: Unauthorized
+//     schema:
+//       "$ref": "#/definitions/ErrorResponse"
+//   '500':
+//     description: Internal server error
+//     schema:
+//       "$ref": "#/definitions/ErrorResponse"
 
 func getResourcesHandler(service resourceService) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		filters := model.GetResourcesFilters{}
 		err := utils.DecodeQuery(&filters, r.URL.Query())
 		if err != nil {
-			utils.HandleErrorResponse(w, err)
+			transport.HandleErrorResponse(w, err)
 			return
 		}
 
@@ -24,10 +56,10 @@ func getResourcesHandler(service resourceService) func(w http.ResponseWriter, r 
 			})
 
 		if err != nil {
-			utils.HandleErrorResponse(w, err)
+			transport.HandleErrorResponse(w, err)
 			return
 		}
 
-		utils.Respond(w, http.StatusOK, resources)
+		transport.Respond(w, http.StatusOK, resources)
 	}
 }

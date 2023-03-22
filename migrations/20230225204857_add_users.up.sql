@@ -6,6 +6,7 @@ CREATE TABLE account(
     account_id BIGSERIAL PRIMARY KEY,
     email domain_email UNIQUE,
     password TEXT,
+    active bool DEFAULT TRUE,
     created_at TIMESTAMP DEFAULT NOW(),
     updated_at TIMESTAMP DEFAULT NOW()
 );
@@ -32,11 +33,7 @@ CREATE TABLE session(
 
 CREATE TYPE resource_state AS ENUM ('PUBLIC', 'PRIVATE');
 ALTER TABLE resource ADD COLUMN state resource_state DEFAULT 'PUBLIC';
-ALTER TABLE resource ADD COLUMN author_id BIGINT REFERENCES account(account_id);
-ALTER TABLE category ADD COLUMN author_id BIGINT REFERENCES account(account_id);
-
+ALTER TABLE resource ADD COLUMN author_id BIGINT REFERENCES account(account_id) NOT NULL;
 ALTER TABLE resource DROP CONSTRAINT ulink;
-ALTER TABLE category DROP CONSTRAINT utitle;
 ALTER TABLE resource ADD CONSTRAINT ulink UNIQUE (link,author_id);
-ALTER TABLE category ADD CONSTRAINT utitle UNIQUE (title,author_id);
 

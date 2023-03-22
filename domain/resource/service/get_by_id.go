@@ -7,7 +7,7 @@ import (
 
 	"miniWiki/domain/resource/model"
 	"miniWiki/domain/resource/query"
-	"miniWiki/utils"
+	"miniWiki/transport"
 
 	"github.com/jackc/pgx/v4"
 	"github.com/sirupsen/logrus"
@@ -39,7 +39,7 @@ func (s *Resource) getResource(ctx context.Context, resourceId int, accountId in
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			logrus.WithContext(ctx).Errorf("Resource not found: %v", err)
-			return nil, utils.NotFoundError{
+			return nil, transport.NotFoundError{
 				Item: "resource",
 				Id:   strconv.Itoa(resourceId),
 			}
@@ -50,7 +50,7 @@ func (s *Resource) getResource(ctx context.Context, resourceId int, accountId in
 
 	if resource.State == query.ResourceStatePRIVATE &&
 		*resource.AuthorID != accountId {
-		return nil, utils.ForbiddenError{}
+		return nil, transport.ForbiddenError{}
 	}
 
 	return &resource, nil

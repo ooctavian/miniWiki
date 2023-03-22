@@ -2,35 +2,69 @@ package controller
 
 import (
 	"net/http"
+	"strconv"
 
 	"miniWiki/domain/category/model"
-	"miniWiki/middleware"
+	"miniWiki/transport"
 	"miniWiki/utils"
 
 	"github.com/sirupsen/logrus"
 )
+
+// swagger:operation POST /categories Category createCategory
+//
+// Create a category.
+//
+// ---
+// parameters:
+// - name: 'Category'
+//   in: body
+//   schema:
+//     "$ref": '#/definitions/CreateCategory'
+// responses:
+//   '201':
+//     description: 'Category created.'
+//     headers:
+//       Location:
+//         type: string
+//         description: The path of the new category created .
+//   '400':
+//     description: Invalid body request.
+//     schema:
+//       "$ref": "#/definitions/ErrorResponse"
+//   '401':
+//     description: Unauthorized.
+//     schema:
+//       "$ref": "#/definitions/ErrorResponse"
+//   '403':
+//     description: Forbidden.
+//     schema:
+//       "$ref": "#/definitions/ErrorResponse"
+//   '500':
+//     description: Internal server error.
+//     schema:
+//       "$ref": "#/definitions/ErrorResponse"
 
 func createCategoryHandler(service categoryService) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		createCategory := model.CreateCategory{}
 		err := utils.DecodeJson(r.Body, &createCategory)
 		if err != nil {
-			utils.HandleErrorResponse(w, err)
+			transport.HandleErrorResponse(w, err)
 			logrus.WithContext(r.Context()).Infof("BadRequest: %v", err)
 			return
 		}
 
 		request := model.CreateCategoryRequest{
-			Category:  createCategory,
-			AccountId: middleware.GetAccountId(r),
+			Category: createCategory,
 		}
 
-		err = service.CreateCategory(r.Context(), request)
+		res, err := service.CreateCategory(r.Context(), request)
 		if err != nil {
-			utils.HandleErrorResponse(w, err)
+			transport.HandleErrorResponse(w, err)
 			return
 		}
-
-		utils.Respond(w, http.StatusCreated, nil)
+		w.Header().Add("Location", "/categories/"+strconv.Itoa(*res))
+		transport.Respond(w, http.StatusCreated, nil)
 	}
 }

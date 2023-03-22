@@ -9,7 +9,8 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-func (s *Resource) GetResources(ctx context.Context, request model.GetResourcesRequest) ([]model.ResourceResponse, error) {
+func (s *Resource) GetResources(ctx context.Context,
+	request model.GetResourcesRequest) ([]model.ResourceResponse, error) {
 	resources, err := s.resourceQuerier.GetResources(ctx,
 		query.GetResourcesParams{
 			Title:      request.Filters.Title,

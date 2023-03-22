@@ -1,15 +1,16 @@
 package service
 
 import (
-	"miniWiki/domain/category/query"
+	"gorm.io/gorm"
 )
 
 type Category struct {
-	categoryQuerier *query.DBQuerier
+	db *gorm.DB
 }
 
-func NewCategory(querier *query.DBQuerier) *Category {
-	category := &Category{}
-	category.categoryQuerier = querier
+func NewCategory(db *gorm.DB) *Category {
+	category := &Category{
+		db: db,
+	}
 	return category
 }

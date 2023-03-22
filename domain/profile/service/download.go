@@ -8,19 +8,20 @@ import (
 
 	model2 "miniWiki/domain/image/model"
 	"miniWiki/domain/profile/model"
-	"miniWiki/utils"
+	"miniWiki/transport"
 
 	"github.com/jackc/pgx/v4"
 	"github.com/sirupsen/logrus"
 )
 
-func (s *Profile) DownloadResourceImage(ctx context.Context, request model.DownloadProfilePictureRequest) (io.Reader, error) {
+func (s *Profile) DownloadResourceImage(ctx context.Context,
+	request model.DownloadProfilePictureRequest) (io.Reader, error) {
 	profile, err := s.profileQuerier.GetProfile(ctx, request.AccountId)
 
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			logrus.WithContext(ctx).Errorf("Profile not found: %v", err)
-			return nil, utils.NotFoundError{
+			return nil, transport.NotFoundError{
 				Item: "profile",
 				Id:   strconv.Itoa(request.AccountId),
 			}

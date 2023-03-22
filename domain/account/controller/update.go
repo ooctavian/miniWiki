@@ -5,10 +5,41 @@ import (
 
 	"miniWiki/domain/account/model"
 	"miniWiki/middleware"
+	"miniWiki/transport"
 	"miniWiki/utils"
 
 	"github.com/sirupsen/logrus"
 )
+
+// swagger:operation PATCH /account Account updateAccount
+//
+// Update the current logged in account.
+//
+// ---
+// parameters:
+// - name: 'Account'
+//   in: body
+//   schema:
+//     "$ref": '#/definitions/UpdateAccount'
+// responses:
+//   '204':
+//     description: 'Account updated.'
+//   '400':
+//     description: Invalid body request.
+//     schema:
+//       "$ref": "#/definitions/ErrorResponse"
+//   '401':
+//     description: Unauthorized.
+//     schema:
+//       "$ref": "#/definitions/ErrorResponse"
+//   '403':
+//     description: Forbidden.
+//     schema:
+//       "$ref": "#/definitions/ErrorResponse"
+//   '500':
+//     description: Internal server error.
+//     schema:
+//       "$ref": "#/definitions/ErrorResponse"
 
 func updateAccountHandler(service accountService) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
@@ -16,7 +47,7 @@ func updateAccountHandler(service accountService) func(w http.ResponseWriter, r 
 
 		err := utils.DecodeJson(r.Body, &account)
 		if err != nil {
-			utils.HandleErrorResponse(w, err)
+			transport.HandleErrorResponse(w, err)
 			logrus.WithContext(r.Context()).Infof("Invalid body request: %v", err)
 			return
 		}
@@ -28,10 +59,10 @@ func updateAccountHandler(service accountService) func(w http.ResponseWriter, r 
 
 		err = service.UpdateAccount(r.Context(), request)
 		if err != nil {
-			utils.HandleErrorResponse(w, err)
+			transport.HandleErrorResponse(w, err)
 			return
 		}
 
-		utils.Respond(w, http.StatusOK, nil)
+		transport.Respond(w, http.StatusOK, nil)
 	}
 }

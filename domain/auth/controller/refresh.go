@@ -5,10 +5,32 @@ import (
 
 	"miniWiki/domain/auth/model"
 	"miniWiki/middleware"
-	"miniWiki/utils"
+	"miniWiki/transport"
 
 	"github.com/sirupsen/logrus"
 )
+
+// swagger:operation POST /refresh Auth refresh
+//
+// Refersh session token.
+//
+// ---
+// responses:
+//   '200':
+//     description: 'Token refreshed.'
+//     headers:
+//       Set-Cookie:
+//         type: string
+//         description: A cookie with session id.
+//         example: session_id=abcde12345; Path=/; HttpOnly
+//   '400':
+//     description: Invalid body request.
+//     schema:
+//       "$ref": "#/definitions/ErrorResponse"
+//   '500':
+//     description: Internal server error.
+//     schema:
+//       "$ref": "#/definitions/ErrorResponse"
 
 func refreshHandler(service authService) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
@@ -23,7 +45,7 @@ func refreshHandler(service authService) func(w http.ResponseWriter, r *http.Req
 		res, err := service.Refresh(r.Context(), req)
 		if err != nil {
 			logrus.WithContext(r.Context()).Error(err)
-			utils.HandleErrorResponse(w, err)
+			transport.HandleErrorResponse(w, err)
 			return
 		}
 
@@ -33,7 +55,6 @@ func refreshHandler(service authService) func(w http.ResponseWriter, r *http.Req
 			Expires: res.ExpiresAt,
 		})
 
-		utils.Respond(w, http.StatusOK, nil)
-		return
+		transport.Respond(w, http.StatusOK, nil)
 	}
 }

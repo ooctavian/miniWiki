@@ -8,7 +8,7 @@ import (
 	"os"
 
 	"miniWiki/domain/image/model"
-	"miniWiki/utils"
+	"miniWiki/transport"
 
 	"github.com/sirupsen/logrus"
 )
@@ -18,7 +18,7 @@ func (s Image) Download(ctx context.Context, request model.DownloadRequest) (io.
 	if err != nil {
 		if errors.Is(err, os.ErrNotExist) {
 			logrus.WithContext(ctx).Errorf("File not found %v", err)
-			return nil, utils.NotFoundError{
+			return nil, transport.NotFoundError{
 				Item: "image",
 				Id:   request.ImageName,
 			}

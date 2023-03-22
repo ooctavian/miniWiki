@@ -5,8 +5,33 @@ import (
 
 	"miniWiki/domain/account/model"
 	"miniWiki/middleware"
-	"miniWiki/utils"
+	"miniWiki/transport"
 )
+
+// swagger:operation GET /account Account getAccount
+//
+// Get details of current logged account.
+//
+// ---
+// responses:
+//   '200':
+//     description: 'Account info'
+//     schema:
+//       type: array
+//       items:
+//         "$ref": "#/definitions/AccountResponse"
+//   '400':
+//     description: Invalid body request.
+//     schema:
+//       "$ref": "#/definitions/ErrorResponse"
+//   '401':
+//     description: Unauthorized.
+//     schema:
+//       "$ref": "#/definitions/ErrorResponse"
+//   '500':
+//     description: Internal server error.
+//     schema:
+//       "$ref": "#/definitions/ErrorResponse"
 
 func getAccountHandler(service accountService) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
@@ -16,10 +41,10 @@ func getAccountHandler(service accountService) func(w http.ResponseWriter, r *ht
 
 		res, err := service.GetAccount(r.Context(), request)
 		if err != nil {
-			utils.HandleErrorResponse(w, err)
+			transport.HandleErrorResponse(w, err)
 			return
 		}
 
-		utils.Respond(w, http.StatusOK, res)
+		transport.Respond(w, http.StatusOK, res)
 	}
 }

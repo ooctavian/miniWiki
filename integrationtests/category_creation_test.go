@@ -1,4 +1,4 @@
-package integrationtests
+package integrationtests_test
 
 import (
 	"net/http"
@@ -29,10 +29,10 @@ func (s *CategoryCreationSuite) TestSubcategoryCreation() {
 	c := s.GetAuthenticatedClient()
 	res := c.Post("/categories", testCreateCategory)
 	s.Equal(http.StatusCreated, res.StatusCode)
-
+	id := s.parseId(res, 2)
 	req := model.CreateCategory{
 		Title:    testSubcategoryTitle,
-		ParentId: testSubcategoryParentId,
+		ParentId: id,
 	}
 
 	res = c.Post("/categories", req)

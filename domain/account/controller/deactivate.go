@@ -5,8 +5,33 @@ import (
 
 	"miniWiki/domain/account/model"
 	"miniWiki/middleware"
-	"miniWiki/utils"
+	"miniWiki/transport"
 )
+
+// swagger:operation DELETE /account Account deactivateAccount
+//
+// Deactivate account. All posts become private.
+//
+// ---
+// responses:
+//   '200':
+//     description: 'Account deleted.'
+//   '400':
+//     description: Invalid body request.
+//     schema:
+//       "$ref": "#/definitions/ErrorResponse"
+//   '401':
+//     description: Unauthorized.
+//     schema:
+//       "$ref": "#/definitions/ErrorResponse"
+//   '403':
+//     description: Forbidden.
+//     schema:
+//       "$ref": "#/definitions/ErrorResponse"
+//   '500':
+//     description: Internal server error.
+//     schema:
+//       "$ref": "#/definitions/ErrorResponse"
 
 func deactivateAccountHandler(service accountService) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
@@ -16,10 +41,10 @@ func deactivateAccountHandler(service accountService) func(w http.ResponseWriter
 
 		err := service.DeactivateAccount(r.Context(), request)
 		if err != nil {
-			utils.HandleErrorResponse(w, err)
+			transport.HandleErrorResponse(w, err)
 			return
 		}
 
-		utils.Respond(w, http.StatusOK, nil)
+		transport.Respond(w, http.StatusOK, nil)
 	}
 }

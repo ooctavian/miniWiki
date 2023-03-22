@@ -6,10 +6,45 @@ import (
 
 	"miniWiki/domain/resource/model"
 	"miniWiki/middleware"
+	"miniWiki/transport"
 	"miniWiki/utils"
 
 	"github.com/sirupsen/logrus"
 )
+
+// swagger:operation POST /resources Resource createResource
+//
+// Create a resource.
+//
+// ---
+// parameters:
+// - name: 'Resource'
+//   in: body
+//   schema:
+//     "$ref": '#/definitions/CreateResource'
+// responses:
+//   '201':
+//     description: 'Resource created.'
+//     headers:
+//       Location:
+//         type: string
+//         description: The path of the new resource created.
+//   '400':
+//     description: Invalid body request.
+//     schema:
+//       "$ref": "#/definitions/ErrorResponse"
+//   '401':
+//     description: Unauthorized.
+//     schema:
+//       "$ref": "#/definitions/ErrorResponse"
+//   '403':
+//     description: Forbidden.
+//     schema:
+//       "$ref": "#/definitions/ErrorResponse"
+//   '500':
+//     description: Internal server error.
+//     schema:
+//       "$ref": "#/definitions/ErrorResponse"
 
 func createResourceHandler(resource resourceService) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
@@ -19,7 +54,7 @@ func createResourceHandler(resource resourceService) func(w http.ResponseWriter,
 
 		err := utils.DecodeJson(r.Body, &createResource)
 		if err != nil {
-			utils.HandleErrorResponse(w, err)
+			transport.HandleErrorResponse(w, err)
 			logrus.WithContext(r.Context()).Infof("Invalid body request: %v", err)
 			return
 		}
@@ -31,11 +66,11 @@ func createResourceHandler(resource resourceService) func(w http.ResponseWriter,
 
 		res, err := resource.CreateResource(r.Context(), request)
 		if err != nil {
-			utils.HandleErrorResponse(w, err)
+			transport.HandleErrorResponse(w, err)
 			return
 		}
 
 		w.Header().Add("Location", "/resources/"+strconv.Itoa(res.ResourceId))
-		utils.Respond(w, http.StatusCreated, nil)
+		transport.Respond(w, http.StatusCreated, nil)
 	}
 }

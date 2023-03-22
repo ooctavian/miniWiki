@@ -5,39 +5,72 @@ import (
 	"net/http"
 	"time"
 
-	sQuery "miniWiki/domain/auth/query"
-	"miniWiki/utils"
+	"miniWiki/domain/auth/model"
+	"miniWiki/domain/auth/service"
+	"miniWiki/transport"
+
+	"github.com/sirupsen/logrus"
 )
+
+type accKey struct{}
+type sKey struct{}
 
 var (
-	sKey   = "session_id"
-	accKey = "acc_id"
+	sessionCookieName = "session_id"
 )
 
-func SessionMiddleware(querier sQuery.Querier) func(next http.Handler) http.Handler {
+func SessionMiddleware(auth *service.Auth) func(next http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			sCookie, err := r.Cookie(sKey)
+			sCookie, err := r.Cookie(sessionCookieName)
 
 			if err != nil || sCookie.Value == "" {
-				utils.Respond(w, http.StatusUnauthorized, nil)
+				transport.Respond(w, http.StatusUnauthorized, nil)
 				return
 			}
-			session, err := querier.GetSession(r.Context(), sCookie.Value)
+			session, err := auth.GetSession(r.Context(), sCookie.Value)
 
 			if err != nil {
-				utils.Respond(w, http.StatusInternalServerError, nil)
+				transport.Respond(w, http.StatusInternalServerError, nil)
 				return
 			}
 
-			if session.ExpireAt.Before(time.Now()) ||
-				*session.UserAgent != r.UserAgent() {
-				utils.Respond(w, http.StatusUnauthorized, nil)
+			if *session.UserAgent != r.UserAgent() {
+				transport.Respond(w, http.StatusUnauthorized, nil)
+				return
+			}
+			var res *model.SessionResponse
+			if session.ExpireAt.Before(time.Now()) {
+				res, err = auth.Refresh(r.Context(), model.RefreshRequest{
+					AccountId: *session.AccountID,
+					SessionId: session.SessionID,
+					IpAddress: r.RemoteAddr,
+				})
+				if err != nil {
+					logrus.WithContext(r.Context()).Error(err)
+					transport.HandleErrorResponse(w, err)
+					return
+				}
+
+				http.SetCookie(w, &http.Cookie{
+					Name:    sessionCookieName,
+					Value:   res.SessionId,
+					Expires: res.ExpiresAt,
+				})
+			}
+
+			status, err := auth.GetAccountStatus(r.Context(), *session.AccountID)
+			if *status == false {
+				transport.Respond(w, http.StatusUnauthorized, nil)
 				return
 			}
 
-			ctx := SetSessionId(r.Context(), session.SessionID)
-			ctx = SetAccountId(ctx, *session.AccountID)
+			ctx := SetAccountId(r.Context(), *session.AccountID)
+			if res != nil {
+				ctx = SetSessionId(ctx, res.SessionId)
+			} else {
+				ctx = SetSessionId(ctx, session.SessionID)
+			}
 
 			next.ServeHTTP(w, r.WithContext(ctx))
 		})
@@ -45,24 +78,24 @@ func SessionMiddleware(querier sQuery.Querier) func(next http.Handler) http.Hand
 }
 
 func GetSessionId(r *http.Request) string {
-	return r.Context().Value(sKey).(string)
+	return r.Context().Value(sKey{}).(string)
 }
 
 func SetSessionId(ctx context.Context, val string) context.Context {
-	return context.WithValue(ctx, sKey, val)
+	return context.WithValue(ctx, sKey{}, val)
 }
 
 func SetAccountId(ctx context.Context, val int) context.Context {
-	return context.WithValue(ctx, accKey, val)
+	return context.WithValue(ctx, accKey{}, val)
 }
 
 func GetAccountId(r *http.Request) int {
-	return r.Context().Value(accKey).(int)
+	return r.Context().Value(accKey{}).(int)
 }
 
 func LogoutSession(w http.ResponseWriter) {
 	c := &http.Cookie{
-		Name:     sKey,
+		Name:     sessionCookieName,
 		Value:    "",
 		Path:     "/",
 		Expires:  time.Unix(0, 0),

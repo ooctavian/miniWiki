@@ -1,4 +1,4 @@
 ALTER TABLE resource ADD CONSTRAINT ulink UNIQUE (link);
 ALTER TABLE resource ALTER COLUMN link SET NOT NULL;
-ALTER TABLE category ADD CONSTRAINT utitle UNIQUE (title);
+ALTER TABLE category ADD CONSTRAINT utitle UNIQUE (title,parent_id);
 ALTER TABLE category ALTER COLUMN title SET NOT NULL;

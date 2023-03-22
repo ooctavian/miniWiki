@@ -3,35 +3,28 @@ package service
 import (
 	"context"
 	"errors"
-	"fmt"
+	"strconv"
 
 	"miniWiki/domain/category/model"
-	"miniWiki/utils"
+	"miniWiki/transport"
 
-	"github.com/jackc/pgx/v4"
 	"github.com/sirupsen/logrus"
+	"gorm.io/gorm"
 )
 
-func (s *Category) GetCategory(ctx context.Context, request model.GetCategoryRequest) (*model.CategoryResponse, error) {
-	category, err := s.categoryQuerier.GetCategoryByID(ctx, request.CategoryId)
-
+func (s *Category) GetCategory(ctx context.Context, request model.GetCategoryRequest) (*model.Category, error) {
+	var category model.Category
+	err := s.db.First(&category, request.CategoryId).Error
 	if err != nil {
-		if errors.Is(err, pgx.ErrNoRows) {
-			logrus.WithContext(ctx).Errorf("Category not found: %v", err)
-			return nil, utils.NotFoundError{
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, transport.NotFoundError{
 				Item: "category",
-				Id:   fmt.Sprint(request.CategoryId),
+				Id:   strconv.Itoa(request.CategoryId),
 			}
 		}
-		logrus.WithContext(ctx).Errorf("Failed retrieving category: %v", err)
+		logrus.WithContext(ctx).Info("Error getting category by id: %v", err)
 		return nil, err
 	}
 
-	response := &model.CategoryResponse{
-		CategoryId: category.CategoryID,
-		Title:      category.Title,
-		ParentId:   category.ParentID,
-	}
-
-	return response, nil
+	return &category, nil
 }

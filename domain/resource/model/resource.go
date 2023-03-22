@@ -1,24 +1,45 @@
 package model
 
-import "io"
+import (
+	"io"
+	"time"
 
+	"miniWiki/domain/category/model"
+)
+
+// ResourceResponse Resource information
+// swagger:model ResourceResponse
 type ResourceResponse struct {
-	ResourceId  int    `json:"resourceId"`
-	Title       string `json:"title"`
+	// Id of resource
+	// example: 1
+	ResourceId int `json:"resourceId"`
+	// Title of resource
+	// example: Lorem ipsum
+	Title string `json:"title"`
+	// Description of resource
+	// example: Lorem Ipsum is simply dummy text of the printing and typesetting industry.
 	Description string `json:"description,omitempty"`
-	Link        string `json:"link"`
-	State       string `json:"state"`
-	CategoryId  *int   `json:"categoryId,omitempty"`
-	AuthorId    int    `json:"authorId"`
+	// Link of resource
+	// example: Lorem Ipsum is simply dummy text of the printing and typesetting industry.
+	Link string `json:"link"`
+	// State of resource, can be either PUBLIC or PRIVATE
+	// example: PUBLIC
+	State string `json:"state"`
+	// CategoryId ID of the category that the resource is a part of
+	// example: 1
+	CategoryId *int `json:"categoryId,omitempty"`
+	// AuthorId ID of resource's author
+	// example: 1
+	AuthorId int `json:"authorId,omitempty"`
 }
 
 type DeleteResourceRequest struct {
-	ResourceId int `json:"resourceId"`
+	ResourceId int
 	AccountId  int
 }
 
 type GetResourceRequest struct {
-	ResourceId int `json:"resourceId"`
+	ResourceId int
 	AccountId  int
 }
 
@@ -27,10 +48,14 @@ type GetResourcesRequest struct {
 	AccountId int
 }
 
+// swagger:model GetResourcesFilters
 type GetResourcesFilters struct {
-	Title      string `schema:"title"`
-	Link       string `schema:"link"`
-	Categories []int  `schema:"categories"`
+	// Title
+	Title string `schema:"title"`
+	// Link
+	Link string `schema:"link"`
+	// Categories
+	Categories []int `schema:"categories"`
 }
 
 type UpdateResourceRequest struct {
@@ -51,12 +76,23 @@ type UploadResourceImageRequest struct {
 	Image      io.Reader
 }
 
+// swagger:model UpdateResource
 type UpdateResource struct {
-	Title       *string `json:"title"`
+	// Title of resource
+	// example: Lorem ipsum
+	Title *string `json:"title"`
+	// Description of resource
+	// example: Lorem Ipsum is simply dummy text of the printing and typesetting industry.
 	Description *string `json:"description"`
-	Link        *string `json:"link" validate:"url"`
-	CategoryId  *int    `json:"categoryId"`
-	State       *string `json:"state"`
+	// Link of resource
+	// example: Lorem Ipsum is simply dummy text of the printing and typesetting industry.
+	Link *string `json:"link" validate:"url"`
+	// Id of the category that the resource is a part of
+	// example: 1
+	CategoryId *int `json:"categoryId"`
+	// State of resource, can be either PUBLIC or PRIVATE
+	// example: PUBLIC
+	State *string `json:"state"`
 }
 
 type CreateResourceRequest struct {
@@ -64,10 +100,37 @@ type CreateResourceRequest struct {
 	AccountId int
 }
 
+// swagger:model CreateResource
 type CreateResource struct {
-	Title       string `json:"title" validate:"required"`
+	// Title of resource
+	// example: Lorem ipsum
+	// required: true
+	Title string `json:"title" validate:"required"`
+	// Description of resource
+	// example: Lorem Ipsum is simply dummy text of the printing and typesetting industry.
 	Description string `json:"description"`
-	Link        string `json:"link" validate:"required,url"`
-	CategoryId  int    `json:"categoryId"`
-	State       string `json:"state"`
+	// Link of resource
+	// example: Lorem Ipsum is simply dummy text of the printing and typesetting industry.
+	// required: true
+	Link string `json:"link" validate:"required,url"`
+	// Id of the category that the resource is a part of
+	// example: 1
+	CategoryId int `json:"categoryId"`
+	// State of resource, can be either PUBLIC or PRIVATE
+	// example: PUBLIC
+	State string `json:"state"`
+}
+
+type Resource struct {
+	ID          uint `gorm:"column:category_id"`
+	Title       string
+	Description string
+	Link        string
+	State       string
+	Image       string
+	AuthorId    uint
+	CategoryId  *uint
+	Category    model.Category
+	CreatedAt   time.Time
+	UpdatedAt   time.Time
 }

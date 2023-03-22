@@ -2,8 +2,12 @@ package model
 
 import "io"
 
+// swagger:model CreateProfile
 type CreateProfile struct {
-	Name  string  `json:"name"`
+	// Name Real name used to show to other people
+	// required: true
+	Name string `json:"name"`
+	// Alias An additional or assumed name
 	Alias *string `json:"alias"`
 }
 
@@ -12,8 +16,12 @@ type CreateProfileRequest struct {
 	AccountId int
 }
 
+// swagger:model ProfileResponse
 type UpdateProfile struct {
-	Name  *string `json:"name"`
+	// Name Real name used to show to other people
+	// required: true
+	Name *string `json:"name"`
+	// Alias An additional or assumed name
 	Alias *string `json:"alias"`
 }
 
@@ -36,8 +44,13 @@ type GetProfileRequest struct {
 	AccountId int
 }
 
+// swagger:model ProfileResponse
 type ProfileResponse struct {
-	Name       string  `json:"name"`
-	Alias      *string `json:"alias,omitempty"`
+	// Name Real name used to show to other people
+	// required: true
+	Name string `json:"name"`
+	// Alias An additional or assumed name
+	Alias *string `json:"alias,omitempty"`
+	// PictureUrl path of the profile picture
 	PictureUrl *string `json:"pictureUrl,omitempty"`
 }

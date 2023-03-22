@@ -6,7 +6,7 @@ import (
 
 	"miniWiki/domain/resource/model"
 	"miniWiki/middleware"
-	"miniWiki/utils"
+	"miniWiki/transport"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/sirupsen/logrus"
@@ -20,11 +20,11 @@ func uploadResourceImageHandler(service resourceService) func(w http.ResponseWri
 			return
 		}
 
-		file, header, err := utils.GetImage(r)
+		file, header, err := transport.GetImage(r)
 
 		if err != nil {
 			logrus.WithContext(r.Context()).Infof("Can't get file: %v", err)
-			utils.HandleErrorResponse(w, err)
+			transport.HandleErrorResponse(w, err)
 			return
 		}
 
@@ -37,10 +37,10 @@ func uploadResourceImageHandler(service resourceService) func(w http.ResponseWri
 
 		err = service.UploadResourceImage(r.Context(), req)
 		if err != nil {
-			utils.HandleErrorResponse(w, err)
+			transport.HandleErrorResponse(w, err)
 			return
 		}
 
-		utils.Respond(w, http.StatusCreated, nil)
+		transport.Respond(w, http.StatusCreated, nil)
 	}
 }

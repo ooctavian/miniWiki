@@ -5,8 +5,31 @@ import (
 
 	"miniWiki/domain/profile/model"
 	"miniWiki/middleware"
-	"miniWiki/utils"
+	"miniWiki/transport"
 )
+
+// swagger:operation GET /account/profile Profile getProfile
+//
+// Get current logged in account profile.
+//
+// ---
+// responses:
+//   '200':
+//     description: 'Profile info'
+//     schema:
+//         "$ref": "#/definitions/ProfileResponse"
+//   '400':
+//     description: Invalid body request.
+//     schema:
+//       "$ref": "#/definitions/ErrorResponse"
+//   '401':
+//     description: Unauthorized.
+//     schema:
+//       "$ref": "#/definitions/ErrorResponse"
+//   '500':
+//     description: Internal server error.
+//     schema:
+//       "$ref": "#/definitions/ErrorResponse"
 
 func getProfileHandler(service profileService) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
@@ -16,10 +39,10 @@ func getProfileHandler(service profileService) func(w http.ResponseWriter, r *ht
 
 		res, err := service.GetProfile(r.Context(), request)
 		if err != nil {
-			utils.HandleErrorResponse(w, err)
+			transport.HandleErrorResponse(w, err)
 			return
 		}
 
-		utils.Respond(w, http.StatusOK, res)
+		transport.Respond(w, http.StatusOK, res)
 	}
 }

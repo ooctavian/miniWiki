@@ -1,7 +1,6 @@
-package integrationtests
+package integrationtests_test
 
 import (
-	"encoding/json"
 	"net/http"
 	"testing"
 
@@ -18,12 +17,14 @@ func (s *ResourceRetrievalSuite) TestResourceRetrieval() {
 	c := s.GetAuthenticatedClient()
 	res := c.Post("/categories", testCreateCategory)
 	s.Equal(http.StatusCreated, res.StatusCode)
+	id := s.parseId(res, 2)
+	testCreateResource.CategoryId = id
 	res = c.Post("/resources", testCreateResource)
 	s.Equal(http.StatusCreated, res.StatusCode)
 
-	res = c.Get("/resources/1")
-	s.Equal(res.StatusCode, 200)
-	body, err := json.Marshal(model.ResourceResponse{
+	res = c.Get(res.Header.Get("Location"))
+	s.Equal(http.StatusOK, res.StatusCode)
+	body := s.encode(model.ResourceResponse{
 		ResourceId:  1,
 		Title:       testCreateResource.Title,
 		Description: testCreateResource.Description,
@@ -31,8 +32,7 @@ func (s *ResourceRetrievalSuite) TestResourceRetrieval() {
 		CategoryId:  &testCreateResource.CategoryId,
 		AuthorId:    1,
 	})
-	s.NoError(err)
-	s.JSONEq(c.GetBody(res), string(body))
+	s.JSONEq(c.GetBody(res), body)
 }
 
 func TestResourceRetrievalSuite(t *testing.T) {

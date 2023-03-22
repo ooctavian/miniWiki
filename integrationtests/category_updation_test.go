@@ -1,4 +1,4 @@
-package integrationtests
+package integrationtests_test
 
 import (
 	"net/http"
@@ -20,7 +20,7 @@ func (s *CategoryUpdationSuite) TestCategoryUpdation() {
 	req := model.UpdateCategory{
 		Title: "Updated",
 	}
-	res = c.Patch("/categories/1", req)
+	res = c.Patch(res.Header.Get("Location"), req)
 	s.Equal(res.StatusCode, http.StatusNoContent)
 }
 

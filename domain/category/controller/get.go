@@ -3,23 +3,42 @@ package controller
 import (
 	"net/http"
 
-	"miniWiki/domain/category/model"
-	"miniWiki/middleware"
-	"miniWiki/utils"
+	"miniWiki/transport"
 )
+
+// swagger:operation GET /categories Category getCategories
+//
+// Get list of categories.
+//
+// ---
+// responses:
+//   '200':
+//     description: 'List of categories.'
+//     schema:
+//       type: array
+//       items:
+//         "$ref": "#/definitions/Category"
+//   '400':
+//     description: Invalid body request.
+//     schema:
+//       "$ref": "#/definitions/ErrorResponse"
+//   '401':
+//     description: Unauthorized.
+//     schema:
+//       "$ref": "#/definitions/ErrorResponse"
+//   '500':
+//     description: Internal server error.
+//     schema:
+//       "$ref": "#/definitions/ErrorResponse"
 
 func getResourcesHandler(service categoryService) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
-		req := model.GetCategoriesRequest{
-			AccountId: middleware.GetAccountId(r),
-		}
-
-		categories, err := service.GetCategories(r.Context(), req)
+		categories, err := service.GetCategories(r.Context())
 		if err != nil {
-			utils.HandleErrorResponse(w, err)
+			transport.HandleErrorResponse(w, err)
 			return
 		}
 
-		utils.Respond(w, http.StatusOK, categories)
+		transport.Respond(w, http.StatusOK, categories)
 	}
 }

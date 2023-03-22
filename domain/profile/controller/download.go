@@ -5,7 +5,7 @@ import (
 
 	"miniWiki/domain/profile/model"
 	"miniWiki/middleware"
-	"miniWiki/utils"
+	"miniWiki/transport"
 
 	"github.com/sirupsen/logrus"
 )
@@ -20,10 +20,10 @@ func downloadProfilePictureHandler(service profileService) func(w http.ResponseW
 		f, err := service.DownloadResourceImage(r.Context(), req)
 		if err != nil {
 			logrus.Errorf("Error downloading image %v:", err)
-			utils.HandleErrorResponse(w, err)
+			transport.HandleErrorResponse(w, err)
 			return
 		}
 
-		utils.RespondWithFile(w, f)
+		transport.RespondWithFile(w, f)
 	}
 }

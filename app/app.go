@@ -2,7 +2,7 @@ package app
 
 import (
 	"context"
-	"log"
+	"errors"
 	"net/http"
 	"os"
 	"os/signal"
@@ -13,6 +13,9 @@ import (
 	"github.com/jackc/pgx/v4/pgxpool"
 	"github.com/joho/godotenv"
 	"github.com/sirupsen/logrus"
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
+	"gorm.io/gorm/schema"
 )
 
 type Application struct {
@@ -33,26 +36,26 @@ func New() (*Application, error) {
 		return nil, err
 	}
 
-	err = initLogger(*cfg)
-	if err != nil {
-		panic(err)
-		return nil, err
-	}
-
 	ctx := context.Background()
-
 	pool, err := pgxpool.Connect(ctx, cfg.Database.DatabaseURL)
+	db, err := gorm.Open(postgres.Open(cfg.Database.DatabaseURL), &gorm.Config{
+		NamingStrategy: schema.NamingStrategy{
+			SingularTable: true,
+		},
+	})
+
 	if err != nil {
-		log.Fatal(err)
+		logrus.Fatal(err)
 		return nil, err
 	}
+
 	app := &Application{
 		Config:   cfg,
 		Database: pool,
 		Server: &http.Server{
 			Addr:              ":" + cfg.Server.Port,
 			ReadHeaderTimeout: cfg.Server.Timeout,
-			Handler:           InitRouter(pool, *cfg),
+			Handler:           InitRouter(pool, db, *cfg),
 		},
 		Context: ctx,
 	}
@@ -75,7 +78,7 @@ func (app *Application) Start() error {
 
 		go func() {
 			<-shutdownCtx.Done()
-			if shutdownCtx.Err() == context.DeadlineExceeded {
+			if errors.Is(shutdownCtx.Err(), context.DeadlineExceeded) {
 				logrus.Fatal("shutdown timed out.. forcing exit.")
 			}
 		}()

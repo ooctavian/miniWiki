@@ -6,7 +6,7 @@ import (
 	"strconv"
 
 	"miniWiki/domain/profile/model"
-	"miniWiki/utils"
+	"miniWiki/transport"
 
 	"github.com/jackc/pgx/v4"
 	"github.com/sirupsen/logrus"
@@ -21,7 +21,7 @@ func (s *Profile) GetProfile(ctx context.Context, request model.GetProfileReques
 			logrus.WithContext(ctx).
 				WithField("account_id", profile.AccountID).
 				Errorf("Profile not found: %v", err)
-			return nil, utils.NotFoundError{
+			return nil, transport.NotFoundError{
 				Item: "profile",
 				Id:   strconv.Itoa(request.AccountId),
 			}

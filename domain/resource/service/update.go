@@ -10,7 +10,8 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-func (s *Resource) UpdateResource(ctx context.Context, request model.UpdateResourceRequest) (*model.ResourceResponse, error) {
+func (s *Resource) UpdateResource(ctx context.Context,
+	request model.UpdateResourceRequest) (*model.ResourceResponse, error) {
 	resource, err := s.getResource(ctx, request.ResourceId, request.AccountId)
 	if err != nil {
 		return nil, err
@@ -27,10 +28,6 @@ func (s *Resource) UpdateResource(ctx context.Context, request model.UpdateResou
 	}
 
 	if request.Resource.CategoryId != nil {
-		err = s.validateCategoryOwner(ctx, *request.Resource.CategoryId, request.AccountId)
-		if err != nil {
-			return nil, err
-		}
 		params.CategoryID = *request.Resource.CategoryId
 	}
 

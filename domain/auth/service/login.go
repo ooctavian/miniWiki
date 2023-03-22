@@ -9,7 +9,7 @@ import (
 
 	"miniWiki/domain/auth/model"
 	"miniWiki/domain/auth/query"
-	"miniWiki/utils"
+	"miniWiki/transport"
 
 	"github.com/sirupsen/logrus"
 )
@@ -18,7 +18,7 @@ func (s *Auth) Login(ctx context.Context, request model.LoginRequest) (*model.Se
 	acc, err := s.accountQuerier.GetAccount(ctx, request.Account.Email)
 	if err != nil {
 		logrus.WithContext(ctx).Error(err)
-		return nil, utils.NotFoundError{
+		return nil, transport.NotFoundError{
 			Id:   request.Account.Email,
 			Item: "account",
 		}
@@ -54,6 +54,15 @@ func (s *Auth) Login(ctx context.Context, request model.LoginRequest) (*model.Se
 		logrus.WithContext(ctx).Errorf("Failed creating session: %v", err)
 		return nil, err
 	}
+
+	if *acc.Active == false {
+		_, err = s.accountQuerier.UpdateAccountStatus(ctx, true, acc.AccountID)
+		if err != nil {
+			logrus.WithContext(ctx).Errorf("Failed creating session: %v", err)
+			return nil, err
+		}
+	}
+
 	return &model.SessionResponse{
 		SessionId: sessionID,
 		ExpiresAt: expiresAt,

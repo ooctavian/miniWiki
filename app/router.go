@@ -11,7 +11,6 @@ import (
 	auQuery "miniWiki/domain/auth/query"
 	auService "miniWiki/domain/auth/service"
 	cController "miniWiki/domain/category/controller"
-	cQuery "miniWiki/domain/category/query"
 	cService "miniWiki/domain/category/service"
 	iService "miniWiki/domain/image/service"
 	pController "miniWiki/domain/profile/controller"
@@ -20,19 +19,20 @@ import (
 	rController "miniWiki/domain/resource/controller"
 	rQuery "miniWiki/domain/resource/query"
 	rService "miniWiki/domain/resource/service"
+	"miniWiki/domain/swagger"
 	"miniWiki/middleware"
 	"miniWiki/security"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/jackc/pgx/v4/pgxpool"
+	"gorm.io/gorm"
 )
 
-func InitRouter(conn *pgxpool.Pool, cfg config.Config) http.Handler {
-	categoryQuerier := cQuery.NewQuerier(conn)
+func InitRouter(conn *pgxpool.Pool, db *gorm.DB, cfg config.Config) http.Handler {
 	resourceQuerier := rQuery.NewQuerier(conn)
 	imageService := iService.NewImage(cfg.Database.ImageDir)
-	resourceService := rService.NewResource(resourceQuerier, categoryQuerier, imageService)
-	categoryService := cService.NewCategory(categoryQuerier)
+	resourceService := rService.NewResource(resourceQuerier, imageService)
+	categoryService := cService.NewCategory(db)
 	argon2id := security.NewArgon2id(
 		cfg.Argon2id.Memory,
 		cfg.Argon2id.Iterations,
@@ -50,9 +50,10 @@ func InitRouter(conn *pgxpool.Pool, cfg config.Config) http.Handler {
 	)
 	profileService := pService.NewProfile(pQuery.NewQuerier(conn), imageService)
 
-	sessionMiddleware := middleware.SessionMiddleware(authQuerier)
+	sessionMiddleware := middleware.SessionMiddleware(authService)
 
 	r := chi.NewRouter()
+	r.Get("/swagger/*", swagger.Handler())
 	r.Group(func(gr chi.Router) {
 		gr.Route("/resources", func(rr chi.Router) {
 			rr.Use(sessionMiddleware)

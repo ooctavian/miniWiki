@@ -53,7 +53,15 @@ func (a Argon2id) GenerateFormatted(password string) (string, error) {
 	b64Salt := base64.RawStdEncoding.EncodeToString(salt)
 	b64Key := base64.RawStdEncoding.EncodeToString(key)
 
-	hash := fmt.Sprintf("$argon2id$v=%d$m=%d,t=%d,p=%d$%s$%s", argon2.Version, a.memory, a.iterations, a.parallelism, b64Salt, b64Key)
+	hash := fmt.Sprintf(
+		"$argon2id$v=%d$m=%d,t=%d,p=%d$%s$%s",
+		argon2.Version,
+		a.memory,
+		a.iterations,
+		a.parallelism,
+		b64Salt,
+		b64Key,
+	)
 	return hash, nil
 }
 

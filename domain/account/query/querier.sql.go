@@ -43,6 +43,20 @@ type Querier interface {
 	GetAccountByIDBatch(batch genericBatch, accountID int)
 	// GetAccountByIDScan scans the result of an executed GetAccountByIDBatch query.
 	GetAccountByIDScan(results pgx.BatchResults) (GetAccountByIDRow, error)
+
+	GetAccountStatus(ctx context.Context, accountID int) (*bool, error)
+	// GetAccountStatusBatch enqueues a GetAccountStatus query into batch to be executed
+	// later by the batch.
+	GetAccountStatusBatch(batch genericBatch, accountID int)
+	// GetAccountStatusScan scans the result of an executed GetAccountStatusBatch query.
+	GetAccountStatusScan(results pgx.BatchResults) (*bool, error)
+
+	UpdateAccountStatus(ctx context.Context, status bool, accountID int) (pgconn.CommandTag, error)
+	// UpdateAccountStatusBatch enqueues a UpdateAccountStatus query into batch to be executed
+	// later by the batch.
+	UpdateAccountStatusBatch(batch genericBatch, status bool, accountID int)
+	// UpdateAccountStatusScan scans the result of an executed UpdateAccountStatusBatch query.
+	UpdateAccountStatusScan(results pgx.BatchResults) (pgconn.CommandTag, error)
 }
 
 type DBQuerier struct {
@@ -132,6 +146,12 @@ func PrepareAllQueries(ctx context.Context, p preparer) error {
 	if _, err := p.Prepare(ctx, getAccountByIDSQL, getAccountByIDSQL); err != nil {
 		return fmt.Errorf("prepare query 'GetAccountByID': %w", err)
 	}
+	if _, err := p.Prepare(ctx, getAccountStatusSQL, getAccountStatusSQL); err != nil {
+		return fmt.Errorf("prepare query 'GetAccountStatus': %w", err)
+	}
+	if _, err := p.Prepare(ctx, updateAccountStatusSQL, updateAccountStatusSQL); err != nil {
+		return fmt.Errorf("prepare query 'UpdateAccountStatus': %w", err)
+	}
 	return nil
 }
 
@@ -171,10 +191,11 @@ func (tr *typeResolver) setValue(vt pgtype.ValueTranscoder, val interface{}) pgt
 }
 
 const createAccountSQL = `INSERT INTO
-    account(email, password)
+    account(email, password, active)
 VALUES(
        $1,
-       $2
+       $2,
+       true
        );`
 
 // CreateAccount implements Querier.CreateAccount.
@@ -205,7 +226,6 @@ const updateAccountSQL = `UPDATE account
 SET email = $1,
     password = $2,
     updated_at = NOW()
-FROM session
 WHERE
     account.account_id = $3;`
 
@@ -239,7 +259,7 @@ func (q *DBQuerier) UpdateAccountScan(results pgx.BatchResults) (pgconn.CommandT
 	return cmdTag, err
 }
 
-const getAccountSQL = `SELECT account_id, email::TEXT, password
+const getAccountSQL = `SELECT account_id, email::TEXT, password, active
 FROM account
 WHERE email = $1::domain_email;`
 
@@ -247,6 +267,7 @@ type GetAccountRow struct {
 	AccountID int     `json:"account_id"`
 	Email     string  `json:"email"`
 	Password  *string `json:"password"`
+	Active    *bool   `json:"active"`
 }
 
 // GetAccount implements Querier.GetAccount.
@@ -254,7 +275,7 @@ func (q *DBQuerier) GetAccount(ctx context.Context, email string) (GetAccountRow
 	ctx = context.WithValue(ctx, "pggen_query_name", "GetAccount")
 	row := q.conn.QueryRow(ctx, getAccountSQL, email)
 	var item GetAccountRow
-	if err := row.Scan(&item.AccountID, &item.Email, &item.Password); err != nil {
+	if err := row.Scan(&item.AccountID, &item.Email, &item.Password, &item.Active); err != nil {
 		return item, fmt.Errorf("query GetAccount: %w", err)
 	}
 	return item, nil
@@ -269,7 +290,7 @@ func (q *DBQuerier) GetAccountBatch(batch genericBatch, email string) {
 func (q *DBQuerier) GetAccountScan(results pgx.BatchResults) (GetAccountRow, error) {
 	row := results.QueryRow()
 	var item GetAccountRow
-	if err := row.Scan(&item.AccountID, &item.Email, &item.Password); err != nil {
+	if err := row.Scan(&item.AccountID, &item.Email, &item.Password, &item.Active); err != nil {
 		return item, fmt.Errorf("scan GetAccountBatch row: %w", err)
 	}
 	return item, nil
@@ -310,6 +331,64 @@ func (q *DBQuerier) GetAccountByIDScan(results pgx.BatchResults) (GetAccountByID
 		return item, fmt.Errorf("scan GetAccountByIDBatch row: %w", err)
 	}
 	return item, nil
+}
+
+const getAccountStatusSQL = `SELECT active
+FROM account
+WHERE account_id = $1;`
+
+// GetAccountStatus implements Querier.GetAccountStatus.
+func (q *DBQuerier) GetAccountStatus(ctx context.Context, accountID int) (*bool, error) {
+	ctx = context.WithValue(ctx, "pggen_query_name", "GetAccountStatus")
+	row := q.conn.QueryRow(ctx, getAccountStatusSQL, accountID)
+	var item *bool
+	if err := row.Scan(&item); err != nil {
+		return item, fmt.Errorf("query GetAccountStatus: %w", err)
+	}
+	return item, nil
+}
+
+// GetAccountStatusBatch implements Querier.GetAccountStatusBatch.
+func (q *DBQuerier) GetAccountStatusBatch(batch genericBatch, accountID int) {
+	batch.Queue(getAccountStatusSQL, accountID)
+}
+
+// GetAccountStatusScan implements Querier.GetAccountStatusScan.
+func (q *DBQuerier) GetAccountStatusScan(results pgx.BatchResults) (*bool, error) {
+	row := results.QueryRow()
+	var item *bool
+	if err := row.Scan(&item); err != nil {
+		return item, fmt.Errorf("scan GetAccountStatusBatch row: %w", err)
+	}
+	return item, nil
+}
+
+const updateAccountStatusSQL = `UPDATE account
+SET active = $1
+WHERE account_id = $2;`
+
+// UpdateAccountStatus implements Querier.UpdateAccountStatus.
+func (q *DBQuerier) UpdateAccountStatus(ctx context.Context, status bool, accountID int) (pgconn.CommandTag, error) {
+	ctx = context.WithValue(ctx, "pggen_query_name", "UpdateAccountStatus")
+	cmdTag, err := q.conn.Exec(ctx, updateAccountStatusSQL, status, accountID)
+	if err != nil {
+		return cmdTag, fmt.Errorf("exec query UpdateAccountStatus: %w", err)
+	}
+	return cmdTag, err
+}
+
+// UpdateAccountStatusBatch implements Querier.UpdateAccountStatusBatch.
+func (q *DBQuerier) UpdateAccountStatusBatch(batch genericBatch, status bool, accountID int) {
+	batch.Queue(updateAccountStatusSQL, status, accountID)
+}
+
+// UpdateAccountStatusScan implements Querier.UpdateAccountStatusScan.
+func (q *DBQuerier) UpdateAccountStatusScan(results pgx.BatchResults) (pgconn.CommandTag, error) {
+	cmdTag, err := results.Exec()
+	if err != nil {
+		return cmdTag, fmt.Errorf("exec UpdateAccountStatusBatch: %w", err)
+	}
+	return cmdTag, err
 }
 
 // textPreferrer wraps a pgtype.ValueTranscoder and sets the preferred encoding
