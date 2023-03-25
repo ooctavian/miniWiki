@@ -154,18 +154,21 @@
         }
       }
     },
-    "/account/profile": {
+    "/account/{id}": {
       "get": {
         "tags": [
-          "Profile"
+          "Account"
         ],
-        "summary": "Get current logged in account profile.",
-        "operationId": "getProfile",
+        "summary": "Get details of current logged account.",
+        "operationId": "getAccount",
         "responses": {
           "200": {
-            "description": "Profile info",
+            "description": "Account info",
             "schema": {
-              "$ref": "#/definitions/ProfileResponse"
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/AccountResponse"
+              }
             }
           },
           "400": {
@@ -176,96 +179,6 @@
           },
           "401": {
             "description": "Unauthorized.",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "500": {
-            "description": "Internal server error.",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          }
-        }
-      },
-      "post": {
-        "tags": [
-          "Profile"
-        ],
-        "summary": "Create a profile for the current logged in user.",
-        "operationId": "createProfile",
-        "parameters": [
-          {
-            "name": "Profile",
-            "in": "body",
-            "schema": {
-              "$ref": "#/definitions/CreateProfile"
-            }
-          }
-        ],
-        "responses": {
-          "201": {
-            "description": "Resource created."
-          },
-          "400": {
-            "description": "Invalid body request.",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "401": {
-            "description": "Unauthorized.",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "403": {
-            "description": "Forbidden.",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "500": {
-            "description": "Internal server error.",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          }
-        }
-      },
-      "patch": {
-        "tags": [
-          "Profile"
-        ],
-        "summary": "Update the profile current logged in account.",
-        "operationId": "updateProfile",
-        "parameters": [
-          {
-            "name": "Profile",
-            "in": "body",
-            "schema": {
-              "$ref": "#/definitions/UpdateProfile"
-            }
-          }
-        ],
-        "responses": {
-          "204": {
-            "description": "Profile updated."
-          },
-          "400": {
-            "description": "Invalid body request.",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "401": {
-            "description": "Unauthorized.",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "403": {
-            "description": "Forbidden.",
             "schema": {
               "$ref": "#/definitions/ErrorResponse"
             }
@@ -535,83 +448,6 @@
         }
       }
     },
-    "/profile/{id}": {
-      "get": {
-        "tags": [
-          "Profile"
-        ],
-        "summary": "Get profile by id.",
-        "operationId": "getProfileById",
-        "parameters": [
-          {
-            "type": "string",
-            "description": "profile ID",
-            "name": "id",
-            "in": "path",
-            "required": true
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Profile info",
-            "schema": {
-              "$ref": "#/definitions/ProfileResponse"
-            }
-          },
-          "400": {
-            "description": "Invalid body request.",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "401": {
-            "description": "Unauthorized.",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "500": {
-            "description": "Internal server error.",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          }
-        }
-      }
-    },
-    "/refresh": {
-      "post": {
-        "tags": [
-          "Auth"
-        ],
-        "summary": "Refersh session token.",
-        "operationId": "refresh",
-        "responses": {
-          "200": {
-            "description": "Token refreshed.",
-            "headers": {
-              "Set-Cookie": {
-                "type": "string",
-                "example": "session_id=abcde12345; Path=/; HttpOnly",
-                "description": "A cookie with session id."
-              }
-            }
-          },
-          "400": {
-            "description": "Invalid body request.",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          },
-          "500": {
-            "description": "Internal server error.",
-            "schema": {
-              "$ref": "#/definitions/ErrorResponse"
-            }
-          }
-        }
-      }
-    },
     "/resources": {
       "get": {
         "tags": [
@@ -867,9 +703,23 @@
     }
   },
   "definitions": {
-    "AccountResponse": {
+    "Account": {
       "type": "object",
       "properties": {
+        "ID": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "active": {
+          "description": "Status of account",
+          "type": "boolean",
+          "x-go-name": "Active"
+        },
+        "alias": {
+          "description": "Alias An additional or assumed name",
+          "type": "string",
+          "x-go-name": "Alias"
+        },
         "createdAt": {
           "description": "CreatedAt the date it was created",
           "type": "string",
@@ -881,14 +731,73 @@
           "type": "string",
           "x-go-name": "Email"
         },
-        "updateAt": {
+        "name": {
+          "description": "Real name used to show to other people",
+          "type": "string",
+          "x-go-name": "Name"
+        },
+        "password": {
+          "description": "Password",
+          "type": "string",
+          "x-go-name": "Password",
+          "example": "verysecurepassword"
+        },
+        "pictureUrl": {
+          "description": "PictureUrl path of the profile picture",
+          "type": "string",
+          "x-go-name": "PictureUrl"
+        },
+        "updatedAt": {
           "description": "UpdatedAt the last date it was modified",
           "type": "string",
           "format": "date-time",
-          "x-go-name": "UpdateAt"
+          "x-go-name": "UpdatedAt"
         }
       },
-      "x-go-package": "miniWiki/domain/account/model"
+      "x-go-package": "miniWiki/internal/domain/account/model"
+    },
+    "AccountResponse": {
+      "type": "object",
+      "properties": {
+        "active": {
+          "description": "Status of account",
+          "type": "boolean",
+          "x-go-name": "Active"
+        },
+        "alias": {
+          "description": "Alias An additional or assumed name",
+          "type": "string",
+          "x-go-name": "Alias"
+        },
+        "createdAt": {
+          "description": "CreatedAt the date it was created",
+          "type": "string",
+          "format": "date-time",
+          "x-go-name": "CreatedAt"
+        },
+        "email": {
+          "description": "Email of the account",
+          "type": "string",
+          "x-go-name": "Email"
+        },
+        "name": {
+          "description": "Real name used to show to other people",
+          "type": "string",
+          "x-go-name": "Name"
+        },
+        "pictureUrl": {
+          "description": "PictureUrl path of the profile picture",
+          "type": "string",
+          "x-go-name": "PictureUrl"
+        },
+        "updatedAt": {
+          "description": "UpdatedAt the last date it was modified",
+          "type": "string",
+          "format": "date-time",
+          "x-go-name": "UpdatedAt"
+        }
+      },
+      "x-go-package": "miniWiki/internal/domain/account/model"
     },
     "Category": {
       "type": "object",
@@ -914,29 +823,45 @@
           "example": "backend"
         }
       },
-      "x-go-package": "miniWiki/domain/category/model"
+      "x-go-package": "miniWiki/internal/domain/category/model"
     },
     "CreateAccount": {
       "type": "object",
       "required": [
         "email",
-        "password"
+        "password",
+        "name"
       ],
       "properties": {
+        "alias": {
+          "description": "Alias An additional or assumed name",
+          "type": "string",
+          "x-go-name": "Alias"
+        },
         "email": {
           "description": "Email of the account",
           "type": "string",
           "x-go-name": "Email",
           "example": "lorem@example.com"
         },
+        "name": {
+          "description": "Real name used to show to other people",
+          "type": "string",
+          "x-go-name": "Name"
+        },
         "password": {
           "description": "Password",
           "type": "string",
           "x-go-name": "Password",
           "example": "verysecurepassword"
+        },
+        "pictureUrl": {
+          "description": "PictureUrl path of the profile picture",
+          "type": "string",
+          "x-go-name": "PictureUrl"
         }
       },
-      "x-go-package": "miniWiki/domain/account/model"
+      "x-go-package": "miniWiki/internal/domain/account/model"
     },
     "CreateCategory": {
       "description": "CreateCategory Category creation request",
@@ -960,26 +885,7 @@
           "example": "backend"
         }
       },
-      "x-go-package": "miniWiki/domain/category/model"
-    },
-    "CreateProfile": {
-      "type": "object",
-      "required": [
-        "name"
-      ],
-      "properties": {
-        "alias": {
-          "description": "Alias An additional or assumed name",
-          "type": "string",
-          "x-go-name": "Alias"
-        },
-        "name": {
-          "description": "Name Real name used to show to other people",
-          "type": "string",
-          "x-go-name": "Name"
-        }
-      },
-      "x-go-package": "miniWiki/domain/profile/model"
+      "x-go-package": "miniWiki/internal/domain/category/model"
     },
     "CreateResource": {
       "type": "object",
@@ -1020,7 +926,7 @@
           "example": "Lorem ipsum"
         }
       },
-      "x-go-package": "miniWiki/domain/resource/model"
+      "x-go-package": "miniWiki/internal/domain/resource/model"
     },
     "ErrorResponse": {
       "type": "object",
@@ -1042,7 +948,7 @@
           "x-go-name": "Status"
         }
       },
-      "x-go-package": "miniWiki/transport"
+      "x-go-package": "miniWiki/pkg/transport"
     },
     "GetResourcesFilters": {
       "type": "object",
@@ -1064,7 +970,7 @@
           "type": "string"
         }
       },
-      "x-go-package": "miniWiki/domain/resource/model"
+      "x-go-package": "miniWiki/internal/domain/resource/model"
     },
     "LoginAccount": {
       "type": "object",
@@ -1086,13 +992,10 @@
           "example": "verysecurepassword"
         }
       },
-      "x-go-package": "miniWiki/domain/auth/model"
+      "x-go-package": "miniWiki/internal/auth/model"
     },
-    "ProfileResponse": {
+    "PublicAccountResponse": {
       "type": "object",
-      "required": [
-        "name"
-      ],
       "properties": {
         "alias": {
           "description": "Alias An additional or assumed name",
@@ -1100,13 +1003,17 @@
           "x-go-name": "Alias"
         },
         "name": {
-          "description": "Name Real name used to show to other people",
+          "description": "Real name used to show to other people",
           "type": "string",
           "x-go-name": "Name"
+        },
+        "pictureUrl": {
+          "description": "PictureUrl path of the profile picture",
+          "type": "string",
+          "x-go-name": "PictureUrl"
         }
       },
-      "x-go-name": "UpdateProfile",
-      "x-go-package": "miniWiki/domain/profile/model"
+      "x-go-package": "miniWiki/internal/domain/account/model"
     },
     "ResourceResponse": {
       "description": "ResourceResponse Resource information",
@@ -1158,25 +1065,44 @@
           "example": "Lorem ipsum"
         }
       },
-      "x-go-package": "miniWiki/domain/resource/model"
+      "x-go-package": "miniWiki/internal/domain/resource/model"
     },
     "UpdateAccount": {
       "type": "object",
       "properties": {
+        "Active": {
+          "description": "Status of account",
+          "type": "boolean"
+        },
+        "alias": {
+          "description": "Alias An additional or assumed name",
+          "type": "string",
+          "x-go-name": "Alias"
+        },
         "email": {
           "description": "Email of the account",
           "type": "string",
           "x-go-name": "Email",
           "example": "lorem@example.com"
         },
+        "name": {
+          "description": "Real name used to show to other people",
+          "type": "string",
+          "x-go-name": "Name"
+        },
         "password": {
           "description": "Password",
           "type": "string",
           "x-go-name": "Password",
           "example": "verysecurepassword"
+        },
+        "pictureUrl": {
+          "description": "PictureUrl path of the profile picture",
+          "type": "string",
+          "x-go-name": "PictureUrl"
         }
       },
-      "x-go-package": "miniWiki/domain/account/model"
+      "x-go-package": "miniWiki/internal/domain/account/model"
     },
     "UpdateCategory": {
       "description": "UpdateCategory Category update request",
@@ -1196,7 +1122,7 @@
           "example": "backend"
         }
       },
-      "x-go-package": "miniWiki/domain/category/model"
+      "x-go-package": "miniWiki/internal/domain/category/model"
     },
     "UpdateResource": {
       "type": "object",
@@ -1233,7 +1159,7 @@
           "example": "Lorem ipsum"
         }
       },
-      "x-go-package": "miniWiki/domain/resource/model"
+      "x-go-package": "miniWiki/internal/domain/resource/model"
     }
   }
 }

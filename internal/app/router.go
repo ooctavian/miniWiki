@@ -3,22 +3,25 @@ package app
 import (
 	"net/http"
 
+	auController "miniWiki/internal/auth/controller"
+	auQuery "miniWiki/internal/auth/query"
+	auService "miniWiki/internal/auth/service"
+	accController "miniWiki/internal/domain/account/controller"
+	accQuery "miniWiki/internal/domain/account/query"
+	aRepository "miniWiki/internal/domain/account/repository"
+	accService "miniWiki/internal/domain/account/service"
+	cController "miniWiki/internal/domain/category/controller"
+	cRepository "miniWiki/internal/domain/category/repository"
+	cService "miniWiki/internal/domain/category/service"
+	iService "miniWiki/internal/domain/image/service"
+	rController "miniWiki/internal/domain/resource/controller"
+	rQuery "miniWiki/internal/domain/resource/query"
+	rRepository "miniWiki/internal/domain/resource/repository"
+	rService "miniWiki/internal/domain/resource/service"
+	"miniWiki/internal/domain/swagger"
+	"miniWiki/internal/middleware"
 	"miniWiki/pkg/config"
-	accController "miniWiki/pkg/domain/account/controller"
-	accQuery "miniWiki/pkg/domain/account/query"
-	accService "miniWiki/pkg/domain/account/service"
-	auController "miniWiki/pkg/domain/auth/controller"
-	auQuery "miniWiki/pkg/domain/auth/query"
-	auService "miniWiki/pkg/domain/auth/service"
-	cController "miniWiki/pkg/domain/category/controller"
-	cService "miniWiki/pkg/domain/category/service"
-	iService "miniWiki/pkg/domain/image/service"
-	rController "miniWiki/pkg/domain/resource/controller"
-	rQuery "miniWiki/pkg/domain/resource/query"
-	rService "miniWiki/pkg/domain/resource/service"
-	"miniWiki/pkg/domain/swagger"
-	"miniWiki/pkg/middleware"
-	security2 "miniWiki/pkg/security"
+	"miniWiki/pkg/security"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/jackc/pgx/v4/pgxpool"
@@ -29,16 +32,17 @@ func InitRouter(conn *pgxpool.Pool, db *gorm.DB, cfg config.Config) http.Handler
 	resourceQuerier := rQuery.NewQuerier(conn)
 	imageService := iService.NewImage(cfg.Database.ImageDir)
 	resourceService := rService.NewResource(resourceQuerier, imageService)
-	categoryService := cService.NewCategory(db)
-	argon2id := security2.NewArgon2id(
+	resourceRepository := rRepository.NewResourceRepository(db)
+	categoryService := cService.NewCategory(cRepository.NewCategoryRepository(db), resourceRepository)
+	argon2id := security.NewArgon2id(
 		cfg.Argon2id.Memory,
 		cfg.Argon2id.Iterations,
 		cfg.Argon2id.Parallelism,
 		cfg.Argon2id.SaltLength,
 		cfg.Argon2id.KeyLength,
-		security2.GenerateRandomBytes,
+		security.GenerateRandomBytes,
 	)
-	accountService := accService.NewAccount(db, argon2id, imageService)
+	accountService := accService.NewAccount(aRepository.NewAccountRepository(db), resourceRepository, argon2id, imageService)
 	authQuerier := auQuery.NewQuerier(conn)
 	authService := auService.NewAuth(
 		authQuerier,

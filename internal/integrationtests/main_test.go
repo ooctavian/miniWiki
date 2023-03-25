@@ -9,9 +9,9 @@ import (
 	"strings"
 
 	"miniWiki/internal/app"
+	"miniWiki/internal/auth/model"
+	model2 "miniWiki/internal/domain/account/model"
 	"miniWiki/pkg/config"
-	model2 "miniWiki/pkg/domain/account/model"
-	"miniWiki/pkg/domain/auth/model"
 
 	"github.com/jackc/pgx/v4/pgxpool"
 	"github.com/joho/godotenv"

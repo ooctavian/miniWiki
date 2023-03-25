@@ -11,7 +11,7 @@ install-deps: vendor
 	go install github.com/go-swagger/go-swagger/cmd/swagger
 
 start-db:
-	docker-compose up --remove-orphans -d 2>/dev/null
+	docker-compose -f ./deployments/docker-compose.yaml up --remove-orphans -d 2>/dev/null
 	until pg_isready -qh localhost -U postgres; do sleep 0.1; done
 
 create-migration:
@@ -25,14 +25,14 @@ migrate-down:
 
 generate-queries:
 	${BIN}/pggen gen go --schema-glob "migrations/*.up.sql" --query-glob "pkg/domain/resource/query/*.sql"
-	${BIN}/pggen gen go --schema-glob "migrations/*.up.sql" --query-glob "pkg/domain/auth/query/*.sql" --go-type 'domain_email=string' --go-type 'timestamp=time.Time' --go-type 'varchar=string'
+	${BIN}/pggen gen go --schema-glob "migrations/*.up.sql" --query-glob "pkg/auth/query/*.sql" --go-type 'domain_email=string' --go-type 'timestamp=time.Time' --go-type 'varchar=string'
 	${BIN}/pggen gen go --schema-glob "migrations/*.up.sql" --query-glob "pkg/domain/account/query/*.sql" --go-type 'domain_email=string' --go-type 'timestamp=time.Time' --go-type 'varchar=string'
 
 lint:
 	${BIN}/golangci-lint run
 
 generate-swagger:
-	${BIN}/swagger generate spec -o ./docs/swagger.json --scan-models
+	${BIN}/swagger generate spec -o ./api/swagger.json --scan-models
 
 run:
 	go run cmd/miniwiki/miniwiki.go

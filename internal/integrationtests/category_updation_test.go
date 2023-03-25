@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"testing"
 
-	"miniWiki/pkg/domain/category/model"
+	"miniWiki/internal/domain/category/model"
 
 	"github.com/stretchr/testify/suite"
 )
