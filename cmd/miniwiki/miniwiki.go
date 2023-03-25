@@ -1,7 +1,7 @@
 package main
 
 import (
-	"miniWiki/app"
+	"miniWiki/internal/app"
 
 	"github.com/sirupsen/logrus"
 )
