@@ -9,6 +9,8 @@ import (
 	"net/http"
 	"reflect"
 
+	"miniWiki/pkg/security"
+
 	"github.com/go-playground/validator/v10"
 	"github.com/gorilla/schema"
 	"github.com/sirupsen/logrus"
@@ -66,6 +68,14 @@ func HandleErrorResponse(w http.ResponseWriter, err error) {
 		return
 	}
 
+	if err == security.InvalidPasswordLength ||
+		err == security.InvalidPasswordLower ||
+		err == security.InvalidPasswordDigit ||
+		err == security.InvalidPasswordUpper ||
+		err == security.InvalidPasswordSpecial {
+		ErrorRespond(w, http.StatusBadRequest, "Weak password", err)
+		return
+	}
 	if ok := errors.As(err, &unsupportedContentTypeError{}); ok {
 		ErrorRespond(w, http.StatusBadRequest, "Invalid request", err)
 		return

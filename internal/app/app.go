@@ -12,6 +12,7 @@ import (
 
 	"github.com/jackc/pgx/v4/pgxpool"
 	"github.com/joho/godotenv"
+	"github.com/onrik/gorm-logrus"
 	"github.com/sirupsen/logrus"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -32,28 +33,27 @@ func New() (*Application, error) {
 	}
 	cfg, err := config.InitConfig()
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 
 	err = initLogger(*cfg)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 
 	ctx := context.Background()
 	pool, err := pgxpool.Connect(ctx, cfg.Database.DatabaseURL)
 	if err != nil {
-		logrus.Fatal(err)
 		return nil, err
 	}
 	db, err := gorm.Open(postgres.Open(cfg.Database.DatabaseURL), &gorm.Config{
 		NamingStrategy: schema.NamingStrategy{
 			SingularTable: true,
 		},
+		Logger: gorm_logrus.New(),
 	})
 
 	if err != nil {
-		logrus.Fatal(err)
 		return nil, err
 	}
 

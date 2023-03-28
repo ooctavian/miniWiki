@@ -18,7 +18,7 @@ import (
 func main() {
 	application, err := app.New()
 	if err != nil {
-		logrus.Fatal(err)
+		panic(err)
 	}
 
 	err = application.Start()
