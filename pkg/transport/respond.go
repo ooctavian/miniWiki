@@ -68,11 +68,11 @@ func HandleErrorResponse(w http.ResponseWriter, err error) {
 		return
 	}
 
-	if err == security.InvalidPasswordLength ||
-		err == security.InvalidPasswordLower ||
-		err == security.InvalidPasswordDigit ||
-		err == security.InvalidPasswordUpper ||
-		err == security.InvalidPasswordSpecial {
+	if err == security.InvalidPasswordLengthErr ||
+		err == security.InvalidPasswordLowerErr ||
+		err == security.InvalidPasswordDigitErr ||
+		err == security.InvalidPasswordUpperErr ||
+		err == security.InvalidPasswordSpecialErr {
 		ErrorRespond(w, http.StatusBadRequest, "Weak password", err)
 		return
 	}

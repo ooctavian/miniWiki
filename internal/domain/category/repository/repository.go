@@ -18,9 +18,9 @@ type CategoryRepository struct {
 }
 
 type CategoryRepositoryInterface interface {
-	CreateCategory(ctx context.Context, category model.CreateCategory) (*model.CreateCategory, error)
+	CreateCategory(ctx context.Context, category model.CreateCategory) (model.CreateCategory, error)
 	GetCategories(ctx context.Context) ([]model.Category, error)
-	GetCategory(ctx context.Context, id int) (*model.Category, error)
+	GetCategory(ctx context.Context, id int) (model.Category, error)
 	DeleteCategory(ctx context.Context, id int) error
 	CountCategories(ctx context.Context, id int) (int64, error)
 }
@@ -31,12 +31,12 @@ func NewCategoryRepository(db *gorm.DB) *CategoryRepository {
 	}
 }
 
-func (r CategoryRepository) CreateCategory(ctx context.Context, category model.CreateCategory) (*model.CreateCategory, error) {
+func (r CategoryRepository) CreateCategory(ctx context.Context, category model.CreateCategory) (model.CreateCategory, error) {
 	err := r.db.WithContext(ctx).Create(category).Error
 	if err != nil {
-		return nil, err
+		return model.CreateCategory{}, err
 	}
-	return &category, nil
+	return category, nil
 }
 
 func (r CategoryRepository) GetCategories(ctx context.Context) ([]model.Category, error) {
@@ -48,14 +48,14 @@ func (r CategoryRepository) GetCategories(ctx context.Context) ([]model.Category
 	return categories, nil
 }
 
-func (r CategoryRepository) GetCategory(ctx context.Context, id int) (*model.Category, error) {
+func (r CategoryRepository) GetCategory(ctx context.Context, id int) (model.Category, error) {
 	var c model.Category
 	err := r.db.WithContext(ctx).First(&c, id).Error
 	if err != nil {
-		return nil, err
+		return model.Category{}, err
 	}
 
-	return &c, nil
+	return c, nil
 }
 
 func (r CategoryRepository) DeleteCategory(ctx context.Context, id int) error {

@@ -6,32 +6,32 @@ import (
 )
 
 var (
-	InvalidPasswordUpper   = errors.New("password should have at least one upper character")
-	InvalidPasswordLower   = errors.New("password should have at least one lower character")
-	InvalidPasswordDigit   = errors.New("password should have at least one digit")
-	InvalidPasswordSpecial = errors.New("password should have at least one special character")
-	InvalidPasswordLength  = errors.New("password should be at least 8 characters long")
+	InvalidPasswordUpperErr   = errors.New("password should have at least one upper character")
+	InvalidPasswordLowerErr   = errors.New("password should have at least one lower character")
+	InvalidPasswordDigitErr   = errors.New("password should have at least one digit")
+	InvalidPasswordSpecialErr = errors.New("password should have at least one special character")
+	InvalidPasswordLengthErr  = errors.New("password should be at least 8 characters long")
 )
 
 func ValidatePassword(password []byte) error {
 	if len(password) < 8 {
-		return InvalidPasswordLength
+		return InvalidPasswordLengthErr
 	}
 	re := regexp.MustCompile("[A-Z]")
 	if !re.Match(password) {
-		return InvalidPasswordUpper
+		return InvalidPasswordUpperErr
 	}
 	re = regexp.MustCompile("[a-z]")
 	if !re.Match(password) {
-		return InvalidPasswordLower
+		return InvalidPasswordLowerErr
 	}
 	re = regexp.MustCompile("[0-9]")
 	if !re.Match(password) {
-		return InvalidPasswordDigit
+		return InvalidPasswordDigitErr
 	}
 	re = regexp.MustCompile(`\W`)
 	if !re.Match(password) {
-		return InvalidPasswordSpecial
+		return InvalidPasswordSpecialErr
 	}
 	return nil
 }

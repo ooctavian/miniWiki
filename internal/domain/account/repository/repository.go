@@ -12,14 +12,14 @@ var (
 	account = model.Account{}
 )
 
-type AccountRepository struct {
-	db *gorm.DB
-}
-
 type AccountRepositoryInterface interface {
 	CreateAccount(ctx context.Context, acc model.CreateAccount) error
 	UpdateAccount(ctx context.Context, id int, acc model.UpdateAccount) error
 	GetAccount(ctx context.Context, id int) (model.Account, error)
+}
+
+type AccountRepository struct {
+	db *gorm.DB
 }
 
 func NewAccountRepository(db *gorm.DB) *AccountRepository {

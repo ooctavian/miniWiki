@@ -34,5 +34,8 @@ lint:
 generate-swagger:
 	${BIN}/swagger generate spec -o ./api/swagger.json --scan-models
 
+test-unit: vendor
+	go test $$(go list ./... | grep -v integrationtest)
+
 run:
 	go run cmd/miniwiki/miniwiki.go

@@ -21,9 +21,9 @@ func (s *Category) GetCategory(ctx context.Context, request model.GetCategoryReq
 				Id:   strconv.Itoa(request.CategoryId),
 			}
 		}
-		logrus.WithContext(ctx).Infof("Error getting category by id: %v", err)
+		logrus.WithContext(ctx).Infof("Error getting category by categoryId: %v", err)
 		return nil, err
 	}
 
-	return category, nil
+	return &category, nil
 }
