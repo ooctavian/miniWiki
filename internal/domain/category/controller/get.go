@@ -31,7 +31,7 @@ import (
 //     schema:
 //       "$ref": "#/definitions/ErrorResponse"
 
-func getResourcesHandler(service categoryService) func(w http.ResponseWriter, r *http.Request) {
+func getResourcesHandler(service CategoryService) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		categories, err := service.GetCategories(r.Context())
 		if err != nil {

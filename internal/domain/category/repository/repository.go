@@ -10,7 +10,7 @@ import (
 )
 
 var (
-	category = model.Category{}
+	mCategory = model.Category{}
 )
 
 type CategoryRepository struct {
@@ -32,7 +32,7 @@ func NewCategoryRepository(db *gorm.DB) *CategoryRepository {
 }
 
 func (r CategoryRepository) CreateCategory(ctx context.Context, category model.CreateCategory) (model.CreateCategory, error) {
-	err := r.db.WithContext(ctx).Create(category).Error
+	err := r.db.WithContext(ctx).Create(&category).Error
 	if err != nil {
 		return model.CreateCategory{}, err
 	}
@@ -59,7 +59,7 @@ func (r CategoryRepository) GetCategory(ctx context.Context, id int) (model.Cate
 }
 
 func (r CategoryRepository) DeleteCategory(ctx context.Context, id int) error {
-	err := r.db.WithContext(ctx).Delete(category, id).Error
+	err := r.db.WithContext(ctx).Delete(mCategory, id).Error
 	if err != nil {
 		return err
 	}
@@ -68,7 +68,7 @@ func (r CategoryRepository) DeleteCategory(ctx context.Context, id int) error {
 
 func (r CategoryRepository) CountCategories(ctx context.Context, id int) (int64, error) {
 	var count int64
-	err := r.db.WithContext(ctx).Model(&category).
+	err := r.db.WithContext(ctx).Model(&mCategory).
 		Where("parent_id = ?", id).
 		Count(&count).Error
 	if err != nil {

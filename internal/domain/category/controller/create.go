@@ -45,7 +45,7 @@ import (
 //     schema:
 //       "$ref": "#/definitions/ErrorResponse"
 
-func createCategoryHandler(service categoryService) func(w http.ResponseWriter, r *http.Request) {
+func createCategoryHandler(service CategoryService) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		createCategory := model.CreateCategory{}
 		err := utils.DecodeJson(r.Body, &createCategory)

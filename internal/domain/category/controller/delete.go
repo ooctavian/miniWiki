@@ -42,7 +42,7 @@ import (
 //     schema:
 //       "$ref": "#/definitions/ErrorResponse"
 
-func deleteResourceHandler(service categoryService) func(w http.ResponseWriter, r *http.Request) {
+func deleteResourceHandler(service CategoryService) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		categoryId, err := strconv.Atoi(chi.URLParam(r, "id"))
 		if err != nil {

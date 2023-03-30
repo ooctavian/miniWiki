@@ -18,8 +18,6 @@ import (
 	"github.com/stretchr/testify/suite"
 )
 
-// Integration tests are now on hold till I write user
-
 type IntegrationTestSuite struct {
 	suite.Suite
 	ctx context.Context

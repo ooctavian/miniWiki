@@ -7,7 +7,6 @@ import (
 
 	"miniWiki/internal/domain/account/model"
 	aRepository "miniWiki/internal/domain/account/repository"
-	rRepository "miniWiki/internal/domain/resource/repository"
 	"miniWiki/pkg/security"
 
 	"github.com/stretchr/testify/suite"
@@ -30,7 +29,6 @@ type CreateAccountTestSuite struct {
 	suite.Suite
 	hash    *security.HashMock
 	aRepo   *aRepository.AccountRepositoryMock
-	rRepo   *rRepository.ResourceRepositoryMock
 	ctx     context.Context
 	service *Account
 }
@@ -38,9 +36,9 @@ type CreateAccountTestSuite struct {
 func (s *CreateAccountTestSuite) SetupSuite() {
 	s.hash = &security.HashMock{}
 	s.aRepo = &aRepository.AccountRepositoryMock{}
-	s.rRepo = &rRepository.ResourceRepositoryMock{}
 	s.ctx = context.Background()
-	s.service = NewAccount(s.aRepo, s.rRepo, s.hash, nil)
+
+	s.service = NewAccount(s.aRepo, nil, s.hash, nil)
 }
 
 func (s *CreateAccountTestSuite) TestCreateAccount_Successful() {

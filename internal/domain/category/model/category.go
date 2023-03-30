@@ -16,6 +16,10 @@ type CreateCategory struct {
 	ParentId *int `json:"parentId"`
 }
 
+func (CreateCategory) TableName() string {
+	return "category"
+}
+
 type CreateCategoryRequest struct {
 	Category CreateCategory
 }

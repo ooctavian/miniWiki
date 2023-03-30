@@ -31,9 +31,9 @@ import (
 func InitRouter(conn *pgxpool.Pool, db *gorm.DB, cfg config.Config) http.Handler {
 	resourceQuerier := rQuery.NewQuerier(conn)
 	imageService := iService.NewImage(cfg.Database.ImageDir)
-	resourceService := rService.NewResource(resourceQuerier, imageService)
 	resourceRepository := rRepository.NewResourceRepository(db)
 	categoryService := cService.NewCategory(cRepository.NewCategoryRepository(db), resourceRepository)
+	resourceService := rService.NewResource(resourceQuerier, categoryService, imageService)
 	argon2id := security.NewArgon2id(
 		cfg.Argon2id.Memory,
 		cfg.Argon2id.Iterations,

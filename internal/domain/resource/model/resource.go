@@ -116,6 +116,9 @@ type CreateResource struct {
 	// Id of the category that the resource is a part of
 	// example: 1
 	CategoryId int `json:"categoryId"`
+	// Name of the category that will be created for resource
+	// example: back-end
+	CategoryName *string `json:"categoryName"`
 	// State of resource, can be either PUBLIC or PRIVATE
 	// example: PUBLIC
 	State string `json:"state"`
