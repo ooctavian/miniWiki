@@ -205,7 +205,7 @@
             "schema": {
               "type": "array",
               "items": {
-                "$ref": "#/definitions/Category"
+                "$ref": "#/definitions/Pagination"
               }
             }
           },
@@ -901,6 +901,12 @@
           "x-go-name": "CategoryId",
           "example": 1
         },
+        "categoryName": {
+          "description": "Name of the category that will be created for resource",
+          "type": "string",
+          "x-go-name": "CategoryName",
+          "example": "back-end"
+        },
         "description": {
           "description": "Description of resource",
           "type": "string",
@@ -993,6 +999,44 @@
         }
       },
       "x-go-package": "miniWiki/internal/auth/model"
+    },
+    "Pagination": {
+      "type": "object",
+      "properties": {
+        "data": {
+          "description": "The data returned accordingly to the parameters\nschema:\ntype: array",
+          "x-go-name": "Data"
+        },
+        "limit": {
+          "description": "Maximum of elements per page",
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "Limit",
+          "example": 10
+        },
+        "page": {
+          "description": "Number of page",
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "Page",
+          "example": 1
+        },
+        "total_pages": {
+          "description": "Total number of pages",
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "TotalPages",
+          "example": 10
+        },
+        "total_rows": {
+          "description": "Total number of elements",
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "TotalRows",
+          "example": 200
+        }
+      },
+      "x-go-package": "miniWiki/pkg/utils"
     },
     "PublicAccountResponse": {
       "type": "object",

@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"miniWiki/internal/domain/category/model"
+	"miniWiki/pkg/utils"
 
 	"github.com/stretchr/testify/mock"
 )
@@ -17,9 +18,9 @@ func (s *CategoryRepositoryMock) CreateCategory(_ context.Context, category mode
 	return args.Get(0).(model.CreateCategory), args.Error(1)
 }
 
-func (s *CategoryRepositoryMock) GetCategories(_ context.Context) ([]model.Category, error) {
-	args := s.Called()
-	return args.Get(0).([]model.Category), args.Error(1)
+func (s *CategoryRepositoryMock) GetCategories(ctx context.Context, pagination utils.Pagination) (utils.Pagination, error) {
+	args := s.Called(ctx, pagination)
+	return args.Get(0).(utils.Pagination), args.Error(1)
 }
 
 func (s *CategoryRepositoryMock) GetCategory(_ context.Context, id int) (model.Category, error) {

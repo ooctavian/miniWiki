@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"miniWiki/internal/domain/category/model"
+	"miniWiki/pkg/utils"
 
 	"github.com/sirupsen/logrus"
 	"gorm.io/gorm"
@@ -19,7 +20,7 @@ type CategoryRepository struct {
 
 type CategoryRepositoryInterface interface {
 	CreateCategory(ctx context.Context, category model.CreateCategory) (model.CreateCategory, error)
-	GetCategories(ctx context.Context) ([]model.Category, error)
+	GetCategories(ctx context.Context, pagination utils.Pagination) (utils.Pagination, error)
 	GetCategory(ctx context.Context, id int) (model.Category, error)
 	DeleteCategory(ctx context.Context, id int) error
 	CountCategories(ctx context.Context, id int) (int64, error)
@@ -39,13 +40,14 @@ func (r CategoryRepository) CreateCategory(ctx context.Context, category model.C
 	return category, nil
 }
 
-func (r CategoryRepository) GetCategories(ctx context.Context) ([]model.Category, error) {
+func (r CategoryRepository) GetCategories(ctx context.Context, pagination utils.Pagination) (utils.Pagination, error) {
 	var categories []model.Category
-	err := r.db.WithContext(ctx).Find(&categories).Error
+	err := r.db.WithContext(ctx).Scopes(pagination.Paginate(categories, r.db)).Find(&categories).Error
 	if err != nil {
-		return nil, err
+		return pagination, err
 	}
-	return categories, nil
+	pagination.Data = categories
+	return pagination, nil
 }
 
 func (r CategoryRepository) GetCategory(ctx context.Context, id int) (model.Category, error) {

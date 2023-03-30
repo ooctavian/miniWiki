@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"miniWiki/pkg/transport"
+	"miniWiki/pkg/utils"
 )
 
 // swagger:operation GET /categories Category getCategories
@@ -17,7 +18,7 @@ import (
 //     schema:
 //       type: array
 //       items:
-//         "$ref": "#/definitions/Category"
+//         "$ref": "#/definitions/Pagination"
 //   '400':
 //     description: Invalid body request.
 //     schema:
@@ -33,7 +34,14 @@ import (
 
 func getResourcesHandler(service CategoryService) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
-		categories, err := service.GetCategories(r.Context())
+		pagination := utils.Pagination{}
+		err := utils.DecodeQuery(&pagination, r.URL.Query())
+		if err != nil {
+			transport.HandleErrorResponse(w, err)
+			return
+		}
+
+		categories, err := service.GetCategories(r.Context(), pagination)
 		if err != nil {
 			transport.HandleErrorResponse(w, err)
 			return
