@@ -22,6 +22,7 @@ type CreateCategorySuite struct {
 var (
 	title      = "backend"
 	categoryId = 1
+	testError  = errors.New("test")
 )
 
 func (s *CreateCategorySuite) SetupSuite() {
@@ -47,7 +48,7 @@ func (s *CreateCategorySuite) TestCreateCategory_Successful() {
 func (s *CreateCategorySuite) TestCreateCategory_Invalid() {
 	cat := model.CreateCategory{Title: title}
 	s.cRepo.On("CreateCategory", cat).
-		Return(model.CreateCategory{}, errors.New("test")).
+		Return(model.CreateCategory{}, testError).
 		Once()
 	req := model.CreateCategoryRequest{
 		Category: cat,
