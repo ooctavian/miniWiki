@@ -19,8 +19,9 @@ type DatabaseConfig struct {
 }
 
 type ServerConfig struct {
-	Port    string        `env:"PORT" envDefault:"4444"`
-	Timeout time.Duration `env:"TIMEOUT" envDefault:"10s"`
+	Port        string        `env:"PORT" envDefault:"4444"`
+	Timeout     time.Duration `env:"TIMEOUT" envDefault:"10s"`
+	AllowOrigin string        `env:"ALLOW_ORIGIN" envDefault:"http://*,https://*"`
 }
 
 type LoggerConfig struct {

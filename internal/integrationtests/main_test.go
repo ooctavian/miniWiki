@@ -3,6 +3,7 @@ package integrationtests_test
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"strconv"
@@ -10,8 +11,8 @@ import (
 
 	"miniWiki/internal/app"
 	"miniWiki/internal/auth/model"
-	model2 "miniWiki/internal/domain/account/model"
 	"miniWiki/pkg/config"
+	"miniWiki/pkg/security"
 
 	"github.com/jackc/pgx/v4/pgxpool"
 	"github.com/joho/godotenv"
@@ -20,10 +21,11 @@ import (
 
 type IntegrationTestSuite struct {
 	suite.Suite
-	ctx context.Context
-	db  *pgxpool.Pool
-	srv *httptest.Server
-	clt *testClient
+	ctx  context.Context
+	db   *pgxpool.Pool
+	srv  *httptest.Server
+	clt  *testClient
+	hash security.Hash
 }
 
 func (s *IntegrationTestSuite) SetupSuite() {
@@ -31,22 +33,35 @@ func (s *IntegrationTestSuite) SetupSuite() {
 	s.NoError(err)
 	cfg, err := config.InitConfig()
 	s.NoError(err)
+	s.hash = security.NewArgon2id(
+		cfg.Argon2id.Memory,
+		cfg.Argon2id.Iterations,
+		cfg.Argon2id.Parallelism,
+		cfg.Argon2id.SaltLength,
+		cfg.Argon2id.KeyLength,
+		security.GenerateRandomBytes,
+	)
 
 	s.ctx = context.Background()
 	db, err := pgxpool.Connect(s.ctx, cfg.Database.DatabaseURL)
 	s.NoError(err)
 	s.db = db
 	s.srv = httptest.NewServer(app.InitRouter(db, nil, *cfg))
-	s.clt = newTestClient(s.srv.URL, s.T())
+	s.clt = newTestClient(s.srv.URL, s.T(), s.ctx)
 	s.CreateAccount()
 }
 
 func (s *IntegrationTestSuite) CreateAccount() {
-	account := model2.CreateAccount{
-		Email:    testAccountEmail,
-		Password: testAccountPassword,
-	}
-	s.clt.Post("/account", account)
+	pass, err := s.hash.GenerateFormatted(testAccountPassword)
+	s.NoError(err)
+	_, err = s.db.Exec(s.ctx,
+		fmt.Sprintf("INSERT INTO account(email,password,name) VALUES ('%s','%s','%s');",
+			testAccountEmail,
+			pass,
+			"Test",
+		),
+	)
+	s.NoError(err)
 }
 
 func (s *IntegrationTestSuite) GetAuthenticatedClient() testClient {
@@ -74,7 +89,9 @@ func (s *IntegrationTestSuite) TearDownTest() {
 }
 
 func (s *IntegrationTestSuite) TearDownSuite() {
-	_, err := s.db.Exec(s.ctx, "DELETE FROM account")
+	_, err := s.db.Exec(s.ctx, "DELETE FROM session")
+	s.NoError(err)
+	_, err = s.db.Exec(s.ctx, "DELETE FROM account")
 	s.NoError(err)
 	_, err = s.db.Exec(s.ctx, "UPDATE resource SET resource_id=nextval('resource_resource_id_seq');")
 	s.NoError(err)

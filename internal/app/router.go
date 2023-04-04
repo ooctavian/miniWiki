@@ -2,6 +2,7 @@ package app
 
 import (
 	"net/http"
+	"strings"
 
 	auController "miniWiki/internal/auth/controller"
 	auQuery "miniWiki/internal/auth/query"
@@ -24,6 +25,7 @@ import (
 	"miniWiki/pkg/security"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/cors"
 	"github.com/jackc/pgx/v4/pgxpool"
 	"gorm.io/gorm"
 )
@@ -53,6 +55,15 @@ func InitRouter(conn *pgxpool.Pool, db *gorm.DB, cfg config.Config) http.Handler
 	sessionMiddleware := middleware.SessionMiddleware(authService)
 
 	r := chi.NewRouter()
+	r.Use(cors.Handler(cors.Options{
+		AllowedOrigins:   strings.Split(cfg.Server.AllowOrigin, ","),
+		AllowedMethods:   []string{"GET", "POST", "PUT", "PATCH", "DELETE"},
+		AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type", "Cookie"},
+		ExposedHeaders:   []string{"Link", "Location", "Set-Cookie"},
+		AllowCredentials: true,
+		MaxAge:           300, // Maximum value not ignored by any of major browsers
+	}))
+
 	r.Get("/swagger/*", swagger.Handler())
 	r.Group(func(gr chi.Router) {
 		gr.Route("/resources", func(rr chi.Router) {

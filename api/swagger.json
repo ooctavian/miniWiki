@@ -834,7 +834,7 @@
       ],
       "properties": {
         "alias": {
-          "description": "Alias An additional or assumed name",
+          "description": "An additional or assumed name",
           "type": "string",
           "x-go-name": "Alias"
         },
@@ -856,7 +856,7 @@
           "example": "verysecurepassword"
         },
         "pictureUrl": {
-          "description": "PictureUrl path of the profile picture",
+          "description": "path of the profile picture",
           "type": "string",
           "x-go-name": "PictureUrl"
         }
@@ -1004,7 +1004,7 @@
       "type": "object",
       "properties": {
         "data": {
-          "description": "The data returned accordingly to the parameters\nschema:\ntype: array",
+          "description": "The data returned accordingly to the parameters",
           "x-go-name": "Data"
         },
         "limit": {
@@ -1052,7 +1052,7 @@
           "x-go-name": "Name"
         },
         "pictureUrl": {
-          "description": "PictureUrl path of the profile picture",
+          "description": "path of the profile picture",
           "type": "string",
           "x-go-name": "PictureUrl"
         }
@@ -1141,7 +1141,7 @@
           "example": "verysecurepassword"
         },
         "pictureUrl": {
-          "description": "PictureUrl path of the profile picture",
+          "description": "path of the profile picture",
           "type": "string",
           "x-go-name": "PictureUrl"
         }

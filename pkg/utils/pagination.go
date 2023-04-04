@@ -23,8 +23,6 @@ type Pagination struct {
 	// example: 10
 	TotalPages int `json:"total_pages"`
 	// The data returned accordingly to the parameters
-	// schema:
-	//   type: array
 	Data interface{} `json:"data"`
 }
 

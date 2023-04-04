@@ -18,10 +18,10 @@ type CreateAccount struct {
 	// Real name used to show to other people
 	// required: true
 	Name string `json:"name" validate:"required"`
-	// Alias An additional or assumed name
-	Alias *string `json:"alias"`
-	// PictureUrl path of the profile picture
-	PictureUrl *string `json:"pictureUrl,omitempty"`
+	// An additional or assumed name
+	Alias string `json:"alias"`
+	// path of the profile picture
+	PictureUrl string `json:"pictureUrl,omitempty"`
 }
 
 func (CreateAccount) TableName() string {
@@ -46,7 +46,7 @@ type UpdateAccount struct {
 	Alias *string `json:"alias"`
 	// Status of account
 	Active *bool
-	// PictureUrl path of the profile picture
+	// path of the profile picture
 	PictureUrl *string `json:"pictureUrl,omitempty"`
 }
 
@@ -87,7 +87,7 @@ type PublicAccountResponse struct {
 	Name string `json:"name"`
 	// Alias An additional or assumed name
 	Alias *string `json:"alias,omitempty"`
-	// PictureUrl path of the profile picture
+	// path of the profile picture
 	PictureUrl *string `json:"pictureUrl,omitempty"`
 }
 

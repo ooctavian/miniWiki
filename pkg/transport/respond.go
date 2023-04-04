@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"reflect"
 
+	"miniWiki/internal/auth/model"
 	"miniWiki/pkg/security"
 
 	"github.com/go-playground/validator/v10"
@@ -76,6 +77,12 @@ func HandleErrorResponse(w http.ResponseWriter, err error) {
 		ErrorRespond(w, http.StatusBadRequest, "Weak password", err)
 		return
 	}
+
+	if err == model.PasswordMismatchError {
+		ErrorRespond(w, http.StatusUnauthorized, "Invalid credentials", err)
+		return
+	}
+
 	if ok := errors.As(err, &unsupportedContentTypeError{}); ok {
 		ErrorRespond(w, http.StatusBadRequest, "Invalid request", err)
 		return

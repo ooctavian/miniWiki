@@ -1,6 +1,13 @@
 package model
 
-import "time"
+import (
+	"errors"
+	"time"
+)
+
+var (
+	PasswordMismatchError = errors.New("password mismatch")
+)
 
 // swagger:model LoginAccount
 type LoginAccount struct {

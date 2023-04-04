@@ -9,5 +9,5 @@ var (
 	testResourceCategoryId  = 1
 	testResourceState       = "PUBLIC"
 	testAccountEmail        = "example@gmail.com"
-	testAccountPassword     = "verysecurepassword"
+	testAccountPassword     = "Verysecurepa$$w0rd"
 )

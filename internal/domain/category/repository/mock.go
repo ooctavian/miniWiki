@@ -13,9 +13,9 @@ type CategoryRepositoryMock struct {
 	mock.Mock
 }
 
-func (s *CategoryRepositoryMock) CreateCategory(_ context.Context, category model.CreateCategory) (model.CreateCategory, error) {
+func (s *CategoryRepositoryMock) CreateCategory(ctx context.Context, category model.CreateCategory) (int, error) {
 	args := s.Called(category)
-	return args.Get(0).(model.CreateCategory), args.Error(1)
+	return args.Int(0), args.Error(1)
 }
 
 func (s *CategoryRepositoryMock) GetCategories(ctx context.Context, pagination utils.Pagination) (utils.Pagination, error) {

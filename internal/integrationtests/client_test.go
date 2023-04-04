@@ -2,6 +2,7 @@ package integrationtests_test
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"io"
 	"net/http"
@@ -17,15 +18,17 @@ type testClient struct {
 	test   *testing.T
 	client *http.Client
 	url    string
+	ctx    context.Context
 }
 
-func newTestClient(url string, t *testing.T) *testClient {
+func newTestClient(url string, t *testing.T, ctx context.Context) *testClient {
 	return &testClient{
 		client: &http.Client{
 			Timeout: 10 * time.Second,
 		},
 		url:  url,
 		test: t,
+		ctx:  ctx,
 	}
 }
 
@@ -37,6 +40,7 @@ func (t testClient) newRequest(method string, path string, body interface{}) *ht
 		bodyReader = bytes.NewReader(bodyJson)
 	}
 	req, err := http.NewRequest(method, t.url+path, bodyReader)
+	req = req.WithContext(t.ctx)
 	req.Header.Set("content-type", "application/json")
 	assert.NoError(t.test, err)
 	res, err := t.client.Do(req)

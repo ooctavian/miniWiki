@@ -19,7 +19,7 @@ type CategoryRepository struct {
 }
 
 type CategoryRepositoryInterface interface {
-	CreateCategory(ctx context.Context, category model.CreateCategory) (model.CreateCategory, error)
+	CreateCategory(ctx context.Context, category model.CreateCategory) (int, error)
 	GetCategories(ctx context.Context, pagination utils.Pagination) (utils.Pagination, error)
 	GetCategory(ctx context.Context, id int) (model.Category, error)
 	DeleteCategory(ctx context.Context, id int) error
@@ -32,12 +32,12 @@ func NewCategoryRepository(db *gorm.DB) *CategoryRepository {
 	}
 }
 
-func (r CategoryRepository) CreateCategory(ctx context.Context, category model.CreateCategory) (model.CreateCategory, error) {
+func (r CategoryRepository) CreateCategory(ctx context.Context, category model.CreateCategory) (int, error) {
 	err := r.db.WithContext(ctx).Create(&category).Error
 	if err != nil {
-		return model.CreateCategory{}, err
+		return 0, err
 	}
-	return category, nil
+	return category.ID, nil
 }
 
 func (r CategoryRepository) GetCategories(ctx context.Context, pagination utils.Pagination) (utils.Pagination, error) {

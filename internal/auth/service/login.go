@@ -3,7 +3,6 @@ package service
 import (
 	"context"
 	"encoding/base64"
-	"errors"
 	"strconv"
 	"time"
 
@@ -31,7 +30,7 @@ func (s *Auth) Login(ctx context.Context, request model.LoginRequest) (*model.Se
 
 	if !match {
 		logrus.WithContext(ctx).Error(err)
-		return nil, errors.New("password mismatch")
+		return nil, model.PasswordMismatchError
 	}
 
 	sessionID, err := s.generateSessionId(strconv.Itoa(acc.AccountID), request.IpAddress)
