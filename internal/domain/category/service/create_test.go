@@ -35,7 +35,7 @@ func (s *CreateCategorySuite) SetupSuite() {
 func (s *CreateCategorySuite) TestCreateCategory_Successful() {
 	cat := model.CreateCategory{Title: title}
 	s.cRepo.On("CreateCategory", cat).
-		Return(model.CreateCategory{ID: categoryId, Title: title}, nil).
+		Return(categoryId, nil).
 		Once()
 	req := model.CreateCategoryRequest{
 		Category: cat,
@@ -48,7 +48,7 @@ func (s *CreateCategorySuite) TestCreateCategory_Successful() {
 func (s *CreateCategorySuite) TestCreateCategory_Invalid() {
 	cat := model.CreateCategory{Title: title}
 	s.cRepo.On("CreateCategory", cat).
-		Return(model.CreateCategory{}, testError).
+		Return(categoryId, testError).
 		Once()
 	req := model.CreateCategoryRequest{
 		Category: cat,
