@@ -30,7 +30,7 @@ import (
 //     schema:
 //       type: array
 //       items:
-//         "$ref": "#/definitions/ResourceResponse"
+//         "$ref": "#/definitions/Pagination"
 //   '401':
 //     description: Unauthorized
 //     schema:
@@ -42,8 +42,15 @@ import (
 
 func getResourcesHandler(service resourceService) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
+		params := r.URL.Query()
 		filters := model.GetResourcesFilters{}
-		err := utils.DecodeQuery(&filters, r.URL.Query())
+		err := utils.DecodeQuery(&filters, params)
+		if err != nil {
+			transport.HandleErrorResponse(w, err)
+			return
+		}
+		pagination := utils.Pagination{}
+		err = utils.DecodeQuery(&pagination, params)
 		if err != nil {
 			transport.HandleErrorResponse(w, err)
 			return
@@ -51,8 +58,9 @@ func getResourcesHandler(service resourceService) func(w http.ResponseWriter, r 
 
 		resources, err := service.GetResources(r.Context(),
 			model.GetResourcesRequest{
-				Filters:   filters,
-				AccountId: middleware.GetAccountId(r),
+				Filters:    filters,
+				Pagination: pagination,
+				AccountId:  middleware.GetAccountId(r),
 			})
 
 		if err != nil {

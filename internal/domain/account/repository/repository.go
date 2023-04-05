@@ -12,12 +12,6 @@ var (
 	account = model.Account{}
 )
 
-type AccountRepositoryInterface interface {
-	CreateAccount(ctx context.Context, acc model.CreateAccount) error
-	UpdateAccount(ctx context.Context, id int, acc model.UpdateAccount) error
-	GetAccount(ctx context.Context, id int) (model.Account, error)
-}
-
 type AccountRepository struct {
 	db *gorm.DB
 }
@@ -43,7 +37,22 @@ func (r AccountRepository) UpdateAccount(ctx context.Context, id int, acc model.
 }
 
 func (r AccountRepository) GetAccount(ctx context.Context, id int) (model.Account, error) {
-	acc := model.Account{}
-	err := r.db.WithContext(ctx).Model(&model.Account{}).First(&account, id).Error
+	var acc model.Account
+	err := r.db.WithContext(ctx).Model(&model.Account{}).First(&acc, id).Error
 	return acc, err
+}
+
+func (r AccountRepository) GetAccountByEmail(ctx context.Context, email string) (model.Account, error) {
+	var acc model.Account
+	err := r.db.WithContext(ctx).Take(&acc, "email = ?", email).Error
+	return acc, err
+}
+
+func (r AccountRepository) UpdateAccountStatus(ctx context.Context, id int, status bool) error {
+	err := r.db.WithContext(ctx).
+		Model(&model.Account{}).
+		Where("account_id = ?", id).
+		Update("active", status).
+		Error
+	return err
 }

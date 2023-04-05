@@ -9,7 +9,7 @@ import (
 )
 
 func (s *Auth) Logout(ctx context.Context, request model.LogoutRequest) error {
-	_, err := s.sessionQuerier.DeleteSession(ctx, request.SessionId)
+	err := s.authRepository.DeleteSession(ctx, request.SessionId)
 	if err != nil {
 		logrus.WithContext(ctx).Errorf("Failed deleting session: ")
 	}

@@ -6,7 +6,6 @@ vendor:
 
 install-deps: vendor
 	go install -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate@v4.15.2
-	go install github.com/jschaf/pggen/cmd/pggen@2023-01-27
 	go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.51.2
 	go get -u github.com/go-swagger/go-swagger/cmd/swagger
 
@@ -22,11 +21,6 @@ migrate-up:
 
 migrate-down:
 	${BIN}/migrate -path migrations/ -database ${DATABASE_URL} down
-
-generate-queries:
-	${BIN}/pggen gen go --schema-glob "migrations/*.up.sql" --query-glob "pkg/domain/resource/query/*.sql"
-	${BIN}/pggen gen go --schema-glob "migrations/*.up.sql" --query-glob "pkg/auth/query/*.sql" --go-type 'domain_email=string' --go-type 'timestamp=time.Time' --go-type 'varchar=string'
-	${BIN}/pggen gen go --schema-glob "migrations/*.up.sql" --query-glob "pkg/domain/account/query/*.sql" --go-type 'domain_email=string' --go-type 'timestamp=time.Time' --go-type 'varchar=string'
 
 lint:
 	${BIN}/golangci-lint run

@@ -4,7 +4,7 @@ import (
 	"io"
 	"time"
 
-	"miniWiki/internal/domain/category/model"
+	"miniWiki/pkg/utils"
 )
 
 // ResourceResponse Resource information
@@ -12,7 +12,7 @@ import (
 type ResourceResponse struct {
 	// Id of resource
 	// example: 1
-	ResourceId int `json:"resourceId"`
+	ResourceId uint `json:"resourceId"`
 	// Title of resource
 	// example: Lorem ipsum
 	Title string `json:"title"`
@@ -46,8 +46,9 @@ type GetResourceRequest struct {
 }
 
 type GetResourcesRequest struct {
-	Filters   GetResourcesFilters
-	AccountId int
+	Filters    GetResourcesFilters
+	Pagination utils.Pagination
+	AccountId  int
 }
 
 // swagger:model GetResourcesFilters
@@ -94,10 +95,15 @@ type UpdateResource struct {
 	CategoryId *int `json:"categoryId"`
 	// Name of the category that will be created for resource
 	// example: back-end
-	CategoryName *string `json:"categoryName"`
+	CategoryName *string `json:"categoryName" gorm:"-"`
 	// State of resource, can be either PUBLIC or PRIVATE
 	// example: PUBLIC
-	State *string `json:"state"`
+	State    *string `json:"state"`
+	AuthorId int
+}
+
+func (UpdateResource) TableName() string {
+	return "resource"
 }
 
 type CreateResourceRequest struct {
@@ -107,6 +113,7 @@ type CreateResourceRequest struct {
 
 // swagger:model CreateResource
 type CreateResource struct {
+	ID uint `gorm:"column:category_id"`
 	// Title of resource
 	// example: Lorem ipsum
 	// required: true
@@ -123,22 +130,41 @@ type CreateResource struct {
 	CategoryId int `json:"categoryId"`
 	// Name of the category that will be created for resource
 	// example: back-end
-	CategoryName *string `json:"categoryName"`
+	CategoryName *string `json:"categoryName" gorm:"-"`
 	// State of resource, can be either PUBLIC or PRIVATE
 	// example: PUBLIC
-	State string `json:"state"`
+	State    string `json:"state"`
+	AuthorId int
+}
+
+func (CreateResource) TableName() string {
+	return "resource"
 }
 
 type Resource struct {
-	ID          uint `gorm:"column:category_id"`
-	Title       string
-	Description string
-	Link        string
-	State       string
-	Image       string
-	AuthorId    uint
-	CategoryId  *uint
-	Category    model.Category
-	CreatedAt   time.Time
-	UpdatedAt   time.Time
+	// Id of resource
+	// example: 1
+	ID uint `gorm:"column:resource_id" json:"resourceId"`
+	// Title of resource
+	// example: Lorem ipsum
+	Title string `json:"title"`
+	// Description of resource
+	// example: Lorem Ipsum is simply dummy text of the printing and typesetting industry.
+	Description string `json:"description,omitempty"`
+	// Link of resource
+	// example: Lorem Ipsum is simply dummy text of the printing and typesetting industry.
+	Link string `json:"link"`
+	// State of resource, can be either PUBLIC or PRIVATE
+	// example: PUBLIC
+	State string `json:"state"`
+	// Path to the resource Image
+	PictureUrl string `json:"pictureUrl,omitempty"`
+	// CategoryId ID of the category that the resource is a part of
+	// example: 1
+	CategoryId *int `json:"categoryId,omitempty"`
+	// AuthorId ID of resource's author
+	// example: 1
+	AuthorId  uint      `json:"authorId,omitempty"`
+	CreatedAt time.Time `json:"-"`
+	UpdatedAt time.Time `json:"-"`
 }

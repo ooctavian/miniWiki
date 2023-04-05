@@ -1,23 +1,36 @@
 package service
 
 import (
-	aRepository "miniWiki/internal/domain/account/repository"
+	"context"
+
+	"miniWiki/internal/domain/account/model"
 	iService "miniWiki/internal/domain/image/service"
-	rRepository "miniWiki/internal/domain/resource/repository"
 	"miniWiki/pkg/security"
 )
 
+type resourceRepositoryInterface interface {
+	MakeResourcesPrivate(ctx context.Context, id int) error
+}
+
+type accountRepositoryInterface interface {
+	CreateAccount(ctx context.Context, acc model.CreateAccount) error
+	UpdateAccount(ctx context.Context, id int, acc model.UpdateAccount) error
+	GetAccount(ctx context.Context, id int) (model.Account, error)
+}
+
 type Account struct {
 	hash               security.Hash
-	accountRepository  aRepository.AccountRepositoryInterface
-	resourceRepository rRepository.ResourceRepositoryInterface
+	accountRepository  accountRepositoryInterface
+	resourceRepository resourceRepositoryInterface
 	imageService       iService.ImageService
 }
 
-func NewAccount(accountRepository aRepository.AccountRepositoryInterface,
-	resourceRepository rRepository.ResourceRepositoryInterface,
+func NewAccount(
+	accountRepository accountRepositoryInterface,
+	resourceRepository resourceRepositoryInterface,
 	hashAlgorithm security.Hash,
-	imageService iService.ImageService) *Account {
+	imageService iService.ImageService,
+) *Account {
 	account := &Account{
 		accountRepository:  accountRepository,
 		resourceRepository: resourceRepository,

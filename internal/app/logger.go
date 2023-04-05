@@ -4,7 +4,7 @@ import (
 	"os"
 	"strings"
 
-	"miniWiki/pkg/config"
+	"miniWiki/internal/config"
 
 	"github.com/sirupsen/logrus"
 )

@@ -3,13 +3,17 @@ package service
 import (
 	"context"
 
-	"miniWiki/internal/auth/query"
+	"miniWiki/internal/auth/model"
 )
 
-func (s *Auth) GetSession(ctx context.Context, sessionId string) (query.GetSessionRow, error) {
-	return s.sessionQuerier.GetSession(ctx, sessionId)
+func (s *Auth) GetSession(ctx context.Context, sessionId string) (*model.Session, error) {
+	return s.authRepository.GetSession(ctx, sessionId)
 }
 
 func (s *Auth) GetAccountStatus(ctx context.Context, accountId int) (*bool, error) {
-	return s.accountQuerier.GetAccountStatus(ctx, accountId)
+	acc, err := s.accountRepository.GetAccount(ctx, accountId)
+	if err != nil {
+		return nil, err
+	}
+	return &acc.Active, nil
 }

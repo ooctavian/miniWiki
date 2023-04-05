@@ -5,9 +5,7 @@ import (
 	"testing"
 
 	"miniWiki/internal/domain/category/model"
-	cRepository "miniWiki/internal/domain/category/repository"
 	"miniWiki/internal/domain/category/service"
-	rRepository "miniWiki/internal/domain/resource/repository"
 	"miniWiki/pkg/transport"
 
 	"github.com/stretchr/testify/suite"
@@ -22,14 +20,14 @@ var (
 type DeleteCategorySuite struct {
 	suite.Suite
 	ctx     context.Context
-	cRepo   *cRepository.CategoryRepositoryMock
-	rRepo   *rRepository.ResourceRepositoryMock
+	cRepo   *CategoryRepositoryMock
+	rRepo   *ResourceRepositoryMock
 	service *service.Category
 }
 
 func (s *DeleteCategorySuite) SetupSuite() {
-	s.cRepo = &cRepository.CategoryRepositoryMock{}
-	s.rRepo = &rRepository.ResourceRepositoryMock{}
+	s.cRepo = &CategoryRepositoryMock{}
+	s.rRepo = &ResourceRepositoryMock{}
 	s.ctx = context.Background()
 
 	s.service = service.NewCategory(s.cRepo, s.rRepo)

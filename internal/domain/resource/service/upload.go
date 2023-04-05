@@ -6,7 +6,6 @@ import (
 
 	model2 "miniWiki/internal/domain/image/model"
 	"miniWiki/internal/domain/resource/model"
-	"miniWiki/internal/domain/resource/query"
 
 	"github.com/google/uuid"
 	"github.com/sirupsen/logrus"
@@ -28,12 +27,11 @@ func (s *Resource) UploadResourceImage(ctx context.Context, request model.Upload
 		return err
 	}
 
-	params := query.UpdateResourceImageParams{
-		ImageUrl:   filename,
-		ResourceID: request.ResourceId,
-		AuthorID:   request.AccountId,
-	}
-	_, err = s.resourceQuerier.UpdateResourceImage(ctx, params)
+	err = s.resourceRepository.UpdateResourcePicture(ctx,
+		request.ResourceId,
+		request.AccountId,
+		filename,
+	)
 	if err != nil {
 		logrus.WithContext(ctx).
 			WithField("resource_id", request.ResourceId).

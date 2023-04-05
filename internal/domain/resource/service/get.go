@@ -4,53 +4,18 @@ import (
 	"context"
 
 	"miniWiki/internal/domain/resource/model"
-	"miniWiki/internal/domain/resource/query"
+	"miniWiki/pkg/utils"
 
 	"github.com/sirupsen/logrus"
 )
 
-func (s *Resource) GetResources(ctx context.Context,
-	request model.GetResourcesRequest) ([]model.ResourceResponse, error) {
-	resources, err := s.resourceQuerier.GetResources(ctx,
-		query.GetResourcesParams{
-			Title:      request.Filters.Title,
-			Link:       request.Filters.Link,
-			Categories: request.Filters.Categories,
-			AccountID:  request.AccountId,
-		},
-	)
+func (s *Resource) GetResources(ctx context.Context, request model.GetResourcesRequest) (utils.Pagination, error) {
+	resources, err := s.resourceRepository.GetResources(ctx, request.AccountId, request.Pagination, request.Filters)
 
 	if err != nil {
 		logrus.WithContext(ctx).Errorf("Failed retrieving resources: %v", err)
-		return nil, err
+		return request.Pagination, err
 	}
 
-	if len(resources) < 1 {
-		return []model.ResourceResponse{}, nil
-	}
-
-	var response []model.ResourceResponse
-
-	for _, r := range resources {
-		response = append(response,
-			model.ResourceResponse{
-				ResourceId:  *r.ResourceID,
-				Title:       *r.Title,
-				Description: *r.Description,
-				Link:        *r.Link,
-				CategoryId:  r.CategoryID,
-				State:       string(r.State),
-				PictureUrl:  stringOrEmpty(r.Image),
-				AuthorId:    *r.AuthorID,
-			})
-	}
-
-	return response, nil
-}
-
-func stringOrEmpty(s *string) string {
-	if s != nil {
-		return *s
-	}
-	return ""
+	return resources, nil
 }

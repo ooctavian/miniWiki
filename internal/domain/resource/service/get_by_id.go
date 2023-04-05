@@ -6,52 +6,31 @@ import (
 	"strconv"
 
 	"miniWiki/internal/domain/resource/model"
-	"miniWiki/internal/domain/resource/query"
 	"miniWiki/pkg/transport"
 
-	"github.com/jackc/pgx/v4"
 	"github.com/sirupsen/logrus"
+	"gorm.io/gorm"
 )
 
-func (s *Resource) GetResource(ctx context.Context, request model.GetResourceRequest) (*model.ResourceResponse, error) {
-	resource, err := s.getResource(ctx, request.ResourceId, request.AccountId)
+func (s *Resource) GetResource(ctx context.Context, request model.GetResourceRequest) (*model.Resource, error) {
+	resource, err := s.resourceRepository.GetResourceById(ctx, request.ResourceId)
+
 	if err != nil {
-		return nil, err
-	}
-
-	response := &model.ResourceResponse{
-		ResourceId:  resource.ResourceID,
-		Title:       *resource.Title,
-		Description: *resource.Description,
-		Link:        resource.Link,
-		State:       string(resource.State),
-		CategoryId:  resource.CategoryID,
-		AuthorId:    *resource.AuthorID,
-	}
-
-	return response, nil
-}
-
-func (s *Resource) getResource(ctx context.Context, resourceId int, accountId int) (*query.GetResourceByIDRow, error) {
-	resource, err := s.resourceQuerier.GetResourceByID(ctx, resourceId)
-
-	//NOTE: Should it be extracted in another function ?
-	if err != nil {
-		if errors.Is(err, pgx.ErrNoRows) {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
 			logrus.WithContext(ctx).Errorf("Resource not found: %v", err)
 			return nil, transport.NotFoundError{
 				Item: "resource",
-				Id:   strconv.Itoa(resourceId),
+				Id:   strconv.Itoa(request.ResourceId),
 			}
 		}
 		logrus.WithContext(ctx).Errorf("Failed retrieving resource: %v", err)
 		return nil, err
 	}
 
-	if resource.State == query.ResourceStatePRIVATE &&
-		*resource.AuthorID != accountId {
+	if resource.State == "PRIVATE" &&
+		resource.AuthorId != uint(request.AccountId) {
 		return nil, transport.ForbiddenError{}
 	}
 
-	return &resource, nil
+	return resource, nil
 }

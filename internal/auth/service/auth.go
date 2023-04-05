@@ -1,25 +1,40 @@
 package service
 
 import (
-	"miniWiki/internal/auth/query"
-	aQuery "miniWiki/internal/domain/account/query"
+	"context"
+
+	"miniWiki/internal/auth/model"
+	model2 "miniWiki/internal/domain/account/model"
 	"miniWiki/pkg/security"
 )
 
+type accountRepositoryInterface interface {
+	GetAccount(ctx context.Context, id int) (model2.Account, error)
+	GetAccountByEmail(ctx context.Context, email string) (model2.Account, error)
+	UpdateAccountStatus(ctx context.Context, id int, status bool) error
+}
+
 type Auth struct {
-	sessionQuerier query.Querier
-	accountQuerier aQuery.Querier
-	hash           security.Hash
+	accountRepository accountRepositoryInterface
+	authRepository    authRepositoryInterface
+	hash              security.Hash
+}
+
+type authRepositoryInterface interface {
+	GetSession(ctx context.Context, sessionID string) (*model.Session, error)
+	DeleteSession(ctx context.Context, sessionID string) error
+	UpdateSession(ctx context.Context, sessionID string, session model.Session) error
+	CreateSession(ctx context.Context, session model.Session) error
 }
 
 func NewAuth(
-	sessionQuerier query.Querier,
-	accountQuerier aQuery.Querier,
+	accountRepository accountRepositoryInterface,
+	authRepository authRepositoryInterface,
 	hash security.Hash,
 ) *Auth {
 	return &Auth{
-		accountQuerier: accountQuerier,
-		sessionQuerier: sessionQuerier,
-		hash:           hash,
+		accountRepository: accountRepository,
+		authRepository:    authRepository,
+		hash:              hash,
 	}
 }

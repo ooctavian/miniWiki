@@ -46,7 +46,7 @@ import (
 //     schema:
 //       "$ref": "#/definitions/ErrorResponse"
 
-func createResourceHandler(resource resourceService) func(w http.ResponseWriter, r *http.Request) {
+func createResourceHandler(service resourceService) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		createResource := model.CreateResource{
 			State: "PUBLIC",
@@ -64,13 +64,13 @@ func createResourceHandler(resource resourceService) func(w http.ResponseWriter,
 			AccountId: middleware.GetAccountId(r),
 		}
 
-		res, err := resource.CreateResource(r.Context(), request)
+		res, err := service.CreateResource(r.Context(), request)
 		if err != nil {
 			transport.HandleErrorResponse(w, err)
 			return
 		}
 
-		w.Header().Add("Location", "/resources/"+strconv.Itoa(res.ResourceId))
+		w.Header().Add("Location", "/resources/"+strconv.FormatUint(uint64(*res), 10))
 		transport.Respond(w, http.StatusCreated, nil)
 	}
 }

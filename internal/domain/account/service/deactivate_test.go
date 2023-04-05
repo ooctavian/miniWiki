@@ -5,8 +5,6 @@ import (
 	"testing"
 
 	"miniWiki/internal/domain/account/model"
-	aRepository "miniWiki/internal/domain/account/repository"
-	rRepository "miniWiki/internal/domain/resource/repository"
 
 	"github.com/stretchr/testify/suite"
 )
@@ -20,15 +18,15 @@ var (
 
 type DeactivateAccountTestSuite struct {
 	suite.Suite
-	aRepo   *aRepository.AccountRepositoryMock
-	rRepo   *rRepository.ResourceRepositoryMock
+	aRepo   *accountRepositoryMock
+	rRepo   *ResourceRepositoryMock
 	ctx     context.Context
 	service *Account
 }
 
 func (s *DeactivateAccountTestSuite) SetupSuite() {
-	s.aRepo = &aRepository.AccountRepositoryMock{}
-	s.rRepo = &rRepository.ResourceRepositoryMock{}
+	s.aRepo = &accountRepositoryMock{}
+	s.rRepo = &ResourceRepositoryMock{}
 	s.ctx = context.Background()
 
 	s.service = NewAccount(s.aRepo, s.rRepo, nil, nil)

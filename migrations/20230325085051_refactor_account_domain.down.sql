@@ -9,3 +9,4 @@ CREATE TABLE profile(
     created_at TIMESTAMP DEFAULT NOW(),
     updated_at TIMESTAMP DEFAULT NOW()
 );
+ALTER TABLE resource RENAME COLUMN picture_url TO image;

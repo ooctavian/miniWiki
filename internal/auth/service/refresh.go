@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"miniWiki/internal/auth/model"
-	"miniWiki/internal/auth/query"
 
 	"github.com/sirupsen/logrus"
 )
@@ -20,11 +19,10 @@ func (s *Auth) Refresh(ctx context.Context, request model.RefreshRequest) (*mode
 
 	expiresAt := time.Now().Add(30 * time.Minute)
 
-	_, err = s.sessionQuerier.UpdateSessionID(ctx,
-		query.UpdateSessionIDParams{
-			NewSessionID: sId,
-			ExpireAt:     expiresAt,
-			OldSessionID: request.SessionId,
+	err = s.authRepository.UpdateSession(ctx, request.SessionId,
+		model.Session{
+			ExpireAt:  expiresAt,
+			SessionID: sId,
 		})
 
 	if err != nil {

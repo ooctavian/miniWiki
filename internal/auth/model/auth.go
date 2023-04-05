@@ -41,3 +41,11 @@ type RefreshRequest struct {
 type LogoutRequest struct {
 	SessionId string
 }
+
+type Session struct {
+	SessionID string
+	AccountID int
+	IpAddress string
+	UserAgent string
+	ExpireAt  time.Time
+}

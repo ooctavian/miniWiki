@@ -18,14 +18,6 @@ type CategoryRepository struct {
 	db *gorm.DB
 }
 
-type CategoryRepositoryInterface interface {
-	CreateCategory(ctx context.Context, category model.CreateCategory) (int, error)
-	GetCategories(ctx context.Context, pagination utils.Pagination) (utils.Pagination, error)
-	GetCategory(ctx context.Context, id int) (model.Category, error)
-	DeleteCategory(ctx context.Context, id int) error
-	CountCategories(ctx context.Context, id int) (int64, error)
-}
-
 func NewCategoryRepository(db *gorm.DB) *CategoryRepository {
 	return &CategoryRepository{
 		db: db,
@@ -42,7 +34,9 @@ func (r CategoryRepository) CreateCategory(ctx context.Context, category model.C
 
 func (r CategoryRepository) GetCategories(ctx context.Context, pagination utils.Pagination) (utils.Pagination, error) {
 	var categories []model.Category
-	err := r.db.WithContext(ctx).Scopes(pagination.Paginate(categories, r.db)).Find(&categories).Error
+	err := r.db.WithContext(ctx).
+		Scopes(pagination.Paginate(categories, r.db)).
+		Find(&categories).Error
 	if err != nil {
 		return pagination, err
 	}

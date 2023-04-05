@@ -74,13 +74,12 @@ func updateResourceHandler(service resourceService) func(w http.ResponseWriter, 
 			AccountId:  middleware.GetAccountId(r),
 		}
 
-		res, err := service.UpdateResource(r.Context(), request)
+		err = service.UpdateResource(r.Context(), request)
 		if err != nil {
 			transport.HandleErrorResponse(w, err)
 			return
 		}
 
-		w.Header().Add("Location", "/resources/"+strconv.Itoa(res.ResourceId))
 		transport.Respond(w, http.StatusNoContent, nil)
 	}
 }

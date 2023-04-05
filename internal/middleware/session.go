@@ -35,14 +35,14 @@ func SessionMiddleware(auth *service.Auth) func(next http.Handler) http.Handler 
 				return
 			}
 
-			if *session.UserAgent != r.UserAgent() {
+			if session.UserAgent != r.UserAgent() {
 				transport.Respond(w, http.StatusUnauthorized, nil)
 				return
 			}
 			var res *model.SessionResponse
 			if session.ExpireAt.Before(time.Now()) {
 				res, err = auth.Refresh(r.Context(), model.RefreshRequest{
-					AccountId: *session.AccountID,
+					AccountId: session.AccountID,
 					SessionId: session.SessionID,
 					IpAddress: r.RemoteAddr,
 				})
@@ -61,7 +61,7 @@ func SessionMiddleware(auth *service.Auth) func(next http.Handler) http.Handler 
 				})
 			}
 
-			status, err := auth.GetAccountStatus(r.Context(), *session.AccountID)
+			status, err := auth.GetAccountStatus(r.Context(), session.AccountID)
 			if err != nil {
 				logrus.WithContext(r.Context()).Error(err)
 			}
@@ -70,7 +70,7 @@ func SessionMiddleware(auth *service.Auth) func(next http.Handler) http.Handler 
 				return
 			}
 
-			ctx := SetAccountId(r.Context(), *session.AccountID)
+			ctx := SetAccountId(r.Context(), session.AccountID)
 			if res != nil {
 				ctx = SetSessionId(ctx, res.SessionId)
 			} else {

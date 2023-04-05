@@ -3,7 +3,6 @@ package integrationtests_test
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"strconv"
@@ -11,18 +10,21 @@ import (
 
 	"miniWiki/internal/app"
 	"miniWiki/internal/auth/model"
-	"miniWiki/pkg/config"
+	"miniWiki/internal/config"
 	"miniWiki/pkg/security"
 
-	"github.com/jackc/pgx/v4/pgxpool"
 	"github.com/joho/godotenv"
+	gorm_logrus "github.com/onrik/gorm-logrus"
 	"github.com/stretchr/testify/suite"
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
+	"gorm.io/gorm/schema"
 )
 
 type IntegrationTestSuite struct {
 	suite.Suite
 	ctx  context.Context
-	db   *pgxpool.Pool
+	db   *gorm.DB
 	srv  *httptest.Server
 	clt  *testClient
 	hash security.Hash
@@ -43,10 +45,15 @@ func (s *IntegrationTestSuite) SetupSuite() {
 	)
 
 	s.ctx = context.Background()
-	db, err := pgxpool.Connect(s.ctx, cfg.Database.DatabaseURL)
+	db, err := gorm.Open(postgres.Open(cfg.Database.DatabaseURL), &gorm.Config{
+		NamingStrategy: schema.NamingStrategy{
+			SingularTable: true,
+		},
+		Logger: gorm_logrus.New(),
+	})
 	s.NoError(err)
 	s.db = db
-	s.srv = httptest.NewServer(app.InitRouter(db, nil, *cfg))
+	s.srv = httptest.NewServer(app.InitRouter(db, *cfg))
 	s.clt = newTestClient(s.srv.URL, s.T(), s.ctx)
 	s.CreateAccount()
 }
@@ -54,13 +61,11 @@ func (s *IntegrationTestSuite) SetupSuite() {
 func (s *IntegrationTestSuite) CreateAccount() {
 	pass, err := s.hash.GenerateFormatted(testAccountPassword)
 	s.NoError(err)
-	_, err = s.db.Exec(s.ctx,
-		fmt.Sprintf("INSERT INTO account(email,password,name) VALUES ('%s','%s','%s');",
-			testAccountEmail,
-			pass,
-			"Test",
-		),
-	)
+	err = s.db.Raw("INSERT INTO account(email,password,name) VALUES (?,?,?);",
+		testAccountEmail,
+		pass,
+		"Test",
+	).Error
 	s.NoError(err)
 }
 
@@ -76,28 +81,28 @@ func (s *IntegrationTestSuite) GetAuthenticatedClient() testClient {
 }
 
 func (s *IntegrationTestSuite) TearDownTest() {
-	_, err := s.db.Exec(s.ctx, "DELETE FROM resource")
+	err := s.db.Exec("DELETE FROM resource").Error
 	s.NoError(err)
-	_, err = s.db.Exec(s.ctx, "DELETE FROM category")
+	err = s.db.Exec("DELETE FROM category").Error
 	s.NoError(err)
-	_, err = s.db.Exec(s.ctx, "ALTER SEQUENCE category_category_id_seq RESTART WITH 1;")
+	err = s.db.Exec("ALTER SEQUENCE category_category_id_seq RESTART WITH 1;").Error
 	s.NoError(err)
-	_, err = s.db.Exec(s.ctx, "UPDATE category SET category_id=nextval('category_category_id_seq');")
+	err = s.db.Exec("UPDATE category SET category_id=nextval('category_category_id_seq');").Error
 	s.NoError(err)
-	_, err = s.db.Exec(s.ctx, "ALTER SEQUENCE resource_resource_id_seq RESTART WITH 1;")
+	err = s.db.Exec("ALTER SEQUENCE resource_resource_id_seq RESTART WITH 1;").Error
 	s.NoError(err)
 }
 
 func (s *IntegrationTestSuite) TearDownSuite() {
-	_, err := s.db.Exec(s.ctx, "DELETE FROM session")
+	err := s.db.Raw("DELETE FROM session").Error
 	s.NoError(err)
-	_, err = s.db.Exec(s.ctx, "DELETE FROM account")
+	err = s.db.Raw("DELETE FROM account").Error
 	s.NoError(err)
-	_, err = s.db.Exec(s.ctx, "UPDATE resource SET resource_id=nextval('resource_resource_id_seq');")
+	err = s.db.Raw("UPDATE resource SET resource_id=nextval('resource_resource_id_seq');").Error
 	s.NoError(err)
-	_, err = s.db.Exec(s.ctx, "ALTER SEQUENCE account_account_id_seq RESTART WITH 1;")
+	err = s.db.Raw("ALTER SEQUENCE account_account_id_seq RESTART WITH 1;").Error
 	s.NoError(err)
-	_, err = s.db.Exec(s.ctx, "UPDATE account SET account_id=nextval('account_account_id_seq');")
+	err = s.db.Raw("UPDATE account SET account_id=nextval('account_account_id_seq');").Error
 	s.NoError(err)
 }
 

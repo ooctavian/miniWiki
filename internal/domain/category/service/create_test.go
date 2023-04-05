@@ -6,7 +6,6 @@ import (
 	"testing"
 
 	"miniWiki/internal/domain/category/model"
-	cRepository "miniWiki/internal/domain/category/repository"
 	"miniWiki/internal/domain/category/service"
 
 	"github.com/stretchr/testify/suite"
@@ -15,7 +14,7 @@ import (
 type CreateCategorySuite struct {
 	suite.Suite
 	ctx     context.Context
-	cRepo   *cRepository.CategoryRepositoryMock
+	cRepo   *CategoryRepositoryMock
 	service *service.Category
 }
 
@@ -26,7 +25,7 @@ var (
 )
 
 func (s *CreateCategorySuite) SetupSuite() {
-	s.cRepo = &cRepository.CategoryRepositoryMock{}
+	s.cRepo = &CategoryRepositoryMock{}
 	s.ctx = context.Background()
 
 	s.service = service.NewCategory(s.cRepo, nil)

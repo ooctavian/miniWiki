@@ -8,9 +8,8 @@ import (
 	"os/signal"
 	"syscall"
 
-	"miniWiki/pkg/config"
+	"miniWiki/internal/config"
 
-	"github.com/jackc/pgx/v4/pgxpool"
 	"github.com/joho/godotenv"
 	"github.com/onrik/gorm-logrus"
 	"github.com/sirupsen/logrus"
@@ -20,10 +19,9 @@ import (
 )
 
 type Application struct {
-	Config   *config.Config
-	Database *pgxpool.Pool
-	Server   *http.Server
-	Context  context.Context
+	Config  *config.Config
+	Server  *http.Server
+	Context context.Context
 }
 
 func New() (*Application, error) {
@@ -42,10 +40,6 @@ func New() (*Application, error) {
 	}
 
 	ctx := context.Background()
-	pool, err := pgxpool.Connect(ctx, cfg.Database.DatabaseURL)
-	if err != nil {
-		return nil, err
-	}
 	db, err := gorm.Open(postgres.Open(cfg.Database.DatabaseURL), &gorm.Config{
 		NamingStrategy: schema.NamingStrategy{
 			SingularTable: true,
@@ -58,12 +52,11 @@ func New() (*Application, error) {
 	}
 
 	app := &Application{
-		Config:   cfg,
-		Database: pool,
+		Config: cfg,
 		Server: &http.Server{
 			Addr:              ":" + cfg.Server.Port,
 			ReadHeaderTimeout: cfg.Server.Timeout,
-			Handler:           InitRouter(pool, db, *cfg),
+			Handler:           InitRouter(db, *cfg),
 		},
 		Context: ctx,
 	}

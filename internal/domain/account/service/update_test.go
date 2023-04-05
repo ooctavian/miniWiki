@@ -5,7 +5,6 @@ import (
 	"testing"
 
 	"miniWiki/internal/domain/account/model"
-	aRepository "miniWiki/internal/domain/account/repository"
 	"miniWiki/pkg/security"
 
 	"github.com/stretchr/testify/suite"
@@ -25,14 +24,14 @@ var (
 type UpdateAccountTestSuite struct {
 	suite.Suite
 	hash    *security.HashMock
-	aRepo   *aRepository.AccountRepositoryMock
+	aRepo   *accountRepositoryMock
 	ctx     context.Context
 	service *Account
 }
 
 func (s *UpdateAccountTestSuite) SetupSuite() {
 	s.hash = &security.HashMock{}
-	s.aRepo = &aRepository.AccountRepositoryMock{}
+	s.aRepo = &accountRepositoryMock{}
 	s.ctx = context.Background()
 
 	s.service = NewAccount(s.aRepo, nil, s.hash, nil)

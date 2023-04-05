@@ -5,10 +5,10 @@ import (
 	"strings"
 
 	auController "miniWiki/internal/auth/controller"
-	auQuery "miniWiki/internal/auth/query"
+	auRepository "miniWiki/internal/auth/repository"
 	auService "miniWiki/internal/auth/service"
+	"miniWiki/internal/config"
 	accController "miniWiki/internal/domain/account/controller"
-	accQuery "miniWiki/internal/domain/account/query"
 	aRepository "miniWiki/internal/domain/account/repository"
 	accService "miniWiki/internal/domain/account/service"
 	cController "miniWiki/internal/domain/category/controller"
@@ -16,26 +16,22 @@ import (
 	cService "miniWiki/internal/domain/category/service"
 	iService "miniWiki/internal/domain/image/service"
 	rController "miniWiki/internal/domain/resource/controller"
-	rQuery "miniWiki/internal/domain/resource/query"
 	rRepository "miniWiki/internal/domain/resource/repository"
 	rService "miniWiki/internal/domain/resource/service"
 	"miniWiki/internal/domain/swagger"
 	"miniWiki/internal/middleware"
-	"miniWiki/pkg/config"
 	"miniWiki/pkg/security"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/cors"
-	"github.com/jackc/pgx/v4/pgxpool"
 	"gorm.io/gorm"
 )
 
-func InitRouter(conn *pgxpool.Pool, db *gorm.DB, cfg config.Config) http.Handler {
-	resourceQuerier := rQuery.NewQuerier(conn)
+func InitRouter(db *gorm.DB, cfg config.Config) http.Handler {
 	imageService := iService.NewImage(cfg.Database.ImageDir)
 	resourceRepository := rRepository.NewResourceRepository(db)
 	categoryService := cService.NewCategory(cRepository.NewCategoryRepository(db), resourceRepository)
-	resourceService := rService.NewResource(resourceQuerier, categoryService, imageService)
+	resourceService := rService.NewResource(resourceRepository, categoryService, imageService)
 	argon2id := security.NewArgon2id(
 		cfg.Argon2id.Memory,
 		cfg.Argon2id.Iterations,
@@ -44,11 +40,12 @@ func InitRouter(conn *pgxpool.Pool, db *gorm.DB, cfg config.Config) http.Handler
 		cfg.Argon2id.KeyLength,
 		security.GenerateRandomBytes,
 	)
-	accountService := accService.NewAccount(aRepository.NewAccountRepository(db), resourceRepository, argon2id, imageService)
-	authQuerier := auQuery.NewQuerier(conn)
+	accountRepository := aRepository.NewAccountRepository(db)
+	authRepository := auRepository.NewAuthRepository(db)
+	accountService := accService.NewAccount(accountRepository, resourceRepository, argon2id, imageService)
 	authService := auService.NewAuth(
-		authQuerier,
-		accQuery.NewQuerier(conn),
+		accountRepository,
+		authRepository,
 		argon2id,
 	)
 

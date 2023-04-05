@@ -1,18 +1,32 @@
 package service
 
 import (
-	cRepository "miniWiki/internal/domain/category/repository"
-	rRepository "miniWiki/internal/domain/resource/repository"
+	"context"
+
+	"miniWiki/internal/domain/category/model"
+	"miniWiki/pkg/utils"
 )
 
+type CategoryRepositoryInterface interface {
+	CreateCategory(ctx context.Context, category model.CreateCategory) (int, error)
+	GetCategories(ctx context.Context, pagination utils.Pagination) (utils.Pagination, error)
+	GetCategory(ctx context.Context, id int) (model.Category, error)
+	DeleteCategory(ctx context.Context, id int) error
+	CountCategories(ctx context.Context, id int) (int64, error)
+}
+
+type ResourceRepositoryInterface interface {
+	CountCategoryResources(ctx context.Context, id int) (int64, error)
+}
+
 type Category struct {
-	categoryRepository cRepository.CategoryRepositoryInterface
-	resourceRepository rRepository.ResourceRepositoryInterface
+	categoryRepository CategoryRepositoryInterface
+	resourceRepository ResourceRepositoryInterface
 }
 
 func NewCategory(
-	categoryRepository cRepository.CategoryRepositoryInterface,
-	resourceRepository rRepository.ResourceRepositoryInterface,
+	categoryRepository CategoryRepositoryInterface,
+	resourceRepository ResourceRepositoryInterface,
 ) *Category {
 	category := &Category{
 		categoryRepository: categoryRepository,
