@@ -1089,6 +1089,11 @@
           "x-go-name": "Link",
           "example": "Lorem Ipsum is simply dummy text of the printing and typesetting industry."
         },
+        "pictureUrl": {
+          "description": "Path to the resource Image",
+          "type": "string",
+          "x-go-name": "PictureUrl"
+        },
         "resourceId": {
           "description": "Id of resource",
           "type": "integer",

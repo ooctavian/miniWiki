@@ -65,6 +65,8 @@ func InitRouter(conn *pgxpool.Pool, db *gorm.DB, cfg config.Config) http.Handler
 	}))
 
 	r.Get("/swagger/*", swagger.Handler())
+	fs := http.FileServer(http.Dir(cfg.Database.ImageDir))
+	r.Handle("/static/*", http.StripPrefix("/static/", fs))
 	r.Group(func(gr chi.Router) {
 		gr.Route("/resources", func(rr chi.Router) {
 			rr.Use(sessionMiddleware)

@@ -26,5 +26,4 @@ func MakeResourceRouter(r chi.Router, rService resourceService) {
 	r.Patch("/{id}", updateResourceHandler(rService))
 	r.Delete("/{id}", deleteResourceHandler(rService))
 	r.Post("/{id}/image", uploadResourceImageHandler(rService))
-	r.Get("/{id}/image", downloadResourceImageHandler(rService))
 }

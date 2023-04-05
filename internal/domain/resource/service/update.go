@@ -4,6 +4,7 @@ import (
 	"context"
 	"strings"
 
+	model2 "miniWiki/internal/domain/category/model"
 	"miniWiki/internal/domain/resource/model"
 	"miniWiki/internal/domain/resource/query"
 
@@ -45,6 +46,20 @@ func (s *Resource) UpdateResource(ctx context.Context,
 
 	if request.Resource.State != nil {
 		params.State = query.ResourceState(strings.ToUpper(*request.Resource.State))
+	}
+
+	if request.Resource.CategoryName != nil {
+		id, err := s.categoryService.CreateCategory(ctx, model2.CreateCategoryRequest{
+			Category: model2.CreateCategory{
+				Title: *request.Resource.CategoryName,
+			},
+		})
+		if err != nil {
+			logrus.WithContext(ctx).
+				Errorf("Failed creating category: %v", err)
+			return nil, err
+		}
+		params.CategoryID = *id
 	}
 
 	_, err = s.resourceQuerier.UpdateResource(ctx, params)

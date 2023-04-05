@@ -53,9 +53,11 @@ func SessionMiddleware(auth *service.Auth) func(next http.Handler) http.Handler 
 				}
 
 				http.SetCookie(w, &http.Cookie{
-					Name:    sessionCookieName,
-					Value:   res.SessionId,
-					Expires: res.ExpiresAt,
+					Name:     sessionCookieName,
+					Value:    res.SessionId,
+					Expires:  res.ExpiresAt,
+					SameSite: http.SameSiteStrictMode,
+					Secure:   true,
 				})
 			}
 
@@ -103,7 +105,8 @@ func LogoutSession(w http.ResponseWriter) {
 		Path:     "/",
 		Expires:  time.Unix(0, 0),
 		MaxAge:   -1,
-		HttpOnly: true,
+		SameSite: http.SameSiteStrictMode,
+		Secure:   true,
 	}
 
 	http.SetCookie(w, c)

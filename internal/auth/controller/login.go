@@ -61,9 +61,11 @@ func loginHandler(service authService) func(w http.ResponseWriter, r *http.Reque
 		}
 
 		http.SetCookie(w, &http.Cookie{
-			Name:    "session_id",
-			Value:   res.SessionId,
-			Expires: res.ExpiresAt,
+			Name:     "session_id",
+			Value:    res.SessionId,
+			Expires:  res.ExpiresAt,
+			SameSite: http.SameSiteNoneMode,
+			Secure:   true,
 		})
 
 		transport.Respond(w, http.StatusOK, nil)

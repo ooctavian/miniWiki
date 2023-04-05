@@ -40,9 +40,17 @@ func (s *Resource) GetResources(ctx context.Context,
 				Link:        *r.Link,
 				CategoryId:  r.CategoryID,
 				State:       string(r.State),
+				PictureUrl:  stringOrEmpty(r.Image),
 				AuthorId:    *r.AuthorID,
 			})
 	}
 
 	return response, nil
+}
+
+func stringOrEmpty(s *string) string {
+	if s != nil {
+		return *s
+	}
+	return ""
 }
