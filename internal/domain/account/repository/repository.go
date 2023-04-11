@@ -8,10 +8,6 @@ import (
 	"gorm.io/gorm"
 )
 
-var (
-	account = model.Account{}
-)
-
 type AccountRepository struct {
 	db *gorm.DB
 }

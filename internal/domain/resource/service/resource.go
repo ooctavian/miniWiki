@@ -3,11 +3,15 @@ package service
 import (
 	"context"
 
-	cController "miniWiki/internal/domain/category/controller"
+	model2 "miniWiki/internal/domain/category/model"
 	iService "miniWiki/internal/domain/image/service"
 	"miniWiki/internal/domain/resource/model"
 	"miniWiki/pkg/utils"
 )
+
+type categoryServiceInterface interface {
+	CreateCategory(ctx context.Context, request model2.CreateCategoryRequest) (*int, error)
+}
 
 type resourceRepositoryInterface interface {
 	GetResourceById(ctx context.Context, id int) (*model.Resource, error)
@@ -21,12 +25,12 @@ type resourceRepositoryInterface interface {
 type Resource struct {
 	resourceRepository resourceRepositoryInterface
 	imageService       iService.ImageService
-	categoryService    cController.CategoryService
+	categoryService    categoryServiceInterface
 }
 
 func NewResource(
 	resourceRepository resourceRepositoryInterface,
-	categoryService cController.CategoryService,
+	categoryService categoryServiceInterface,
 	imageService iService.ImageService,
 ) *Resource {
 	resource := &Resource{

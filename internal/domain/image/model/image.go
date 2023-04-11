@@ -7,8 +7,3 @@ type UploadRequest struct {
 	ImageName   string
 	Image       io.Reader
 }
-
-type DownloadRequest struct {
-	ImageFolder string
-	ImageName   string
-}

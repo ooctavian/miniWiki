@@ -478,7 +478,7 @@
             "schema": {
               "type": "array",
               "items": {
-                "$ref": "#/definitions/ResourceResponse"
+                "$ref": "#/definitions/Pagination"
               }
             }
           },
@@ -805,14 +805,14 @@
         "categoryId": {
           "description": "CategoryId of category",
           "type": "integer",
-          "format": "uint64",
+          "format": "int64",
           "x-go-name": "ID",
           "example": 2
         },
         "parentId": {
           "description": "ParentId of parent category, making it a subcategory",
           "type": "integer",
-          "format": "uint64",
+          "format": "int64",
           "x-go-name": "ParentId",
           "example": 1
         },
@@ -894,6 +894,14 @@
         "link"
       ],
       "properties": {
+        "AuthorId": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "ID": {
+          "type": "integer",
+          "format": "int64"
+        },
         "categoryId": {
           "description": "Id of the category that the resource is a part of",
           "type": "integer",
@@ -1176,12 +1184,22 @@
     "UpdateResource": {
       "type": "object",
       "properties": {
+        "AuthorId": {
+          "type": "integer",
+          "format": "int64"
+        },
         "categoryId": {
           "description": "Id of the category that the resource is a part of",
           "type": "integer",
           "format": "int64",
           "x-go-name": "CategoryId",
           "example": 1
+        },
+        "categoryName": {
+          "description": "Name of the category that will be created for resource",
+          "type": "string",
+          "x-go-name": "CategoryName",
+          "example": "back-end"
         },
         "description": {
           "description": "Description of resource",

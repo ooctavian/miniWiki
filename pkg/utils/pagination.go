@@ -47,9 +47,8 @@ func (p *Pagination) Paginate(value interface{}, db *gorm.DB) func(db *gorm.DB) 
 	var totalRows int64
 	db.Model(value).Count(&totalRows)
 	p.TotalRows = totalRows
-	totalPages := int(math.Ceil(float64(totalRows) / float64(p.Limit)))
-	p.TotalPages = totalPages
-	if totalPages < 0 {
+	p.TotalPages = int(math.Ceil(float64(totalRows) / float64(p.Limit)))
+	if p.TotalPages < 0 {
 		p.TotalPages = 1
 	}
 	return func(db *gorm.DB) *gorm.DB {

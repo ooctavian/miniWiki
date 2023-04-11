@@ -2,7 +2,6 @@ package service
 
 import (
 	"context"
-	"io"
 
 	"miniWiki/internal/domain/image/model"
 )
@@ -19,5 +18,4 @@ func NewImage(destination string) *Image {
 
 type ImageService interface {
 	Upload(ctx context.Context, request model.UploadRequest) error
-	Download(ctx context.Context, request model.DownloadRequest) (io.Reader, error)
 }

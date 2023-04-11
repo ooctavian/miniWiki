@@ -61,7 +61,7 @@ func (s *IntegrationTestSuite) SetupSuite() {
 func (s *IntegrationTestSuite) CreateAccount() {
 	pass, err := s.hash.GenerateFormatted(testAccountPassword)
 	s.NoError(err)
-	err = s.db.Raw("INSERT INTO account(email,password,name) VALUES (?,?,?);",
+	err = s.db.Exec("INSERT INTO account(email,password,name) VALUES (?,?,?);",
 		testAccountEmail,
 		pass,
 		"Test",
@@ -94,15 +94,15 @@ func (s *IntegrationTestSuite) TearDownTest() {
 }
 
 func (s *IntegrationTestSuite) TearDownSuite() {
-	err := s.db.Raw("DELETE FROM session").Error
+	err := s.db.Exec("DELETE FROM session").Error
 	s.NoError(err)
-	err = s.db.Raw("DELETE FROM account").Error
+	err = s.db.Exec("DELETE FROM account").Error
 	s.NoError(err)
-	err = s.db.Raw("UPDATE resource SET resource_id=nextval('resource_resource_id_seq');").Error
+	err = s.db.Exec("UPDATE resource SET resource_id=nextval('resource_resource_id_seq');").Error
 	s.NoError(err)
-	err = s.db.Raw("ALTER SEQUENCE account_account_id_seq RESTART WITH 1;").Error
+	err = s.db.Exec("ALTER SEQUENCE account_account_id_seq RESTART WITH 1;").Error
 	s.NoError(err)
-	err = s.db.Raw("UPDATE account SET account_id=nextval('account_account_id_seq');").Error
+	err = s.db.Exec("UPDATE account SET account_id=nextval('account_account_id_seq');").Error
 	s.NoError(err)
 }
 
