@@ -103,6 +103,11 @@ func (s *DeleteCategorySuite) TestDeleteCategory_DeleteCategory_Fails() {
 	s.Error(err)
 }
 
+func (s *DeleteCategorySuite) AfterTest(_, _ string) {
+	s.cRepo.AssertExpectations(s.T())
+	s.rRepo.AssertExpectations(s.T())
+}
+
 func TestDeleteCategorySuite(t *testing.T) {
 	suite.Run(t, new(DeleteCategorySuite))
 }

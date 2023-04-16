@@ -17,6 +17,7 @@ func (s *Resource) CreateResource(ctx context.Context, request model.CreateResou
 				Title: *request.Resource.CategoryName,
 			},
 		})
+
 		if err != nil {
 			logrus.WithContext(ctx).
 				Errorf("Failed creating category: %v", err)

@@ -72,6 +72,10 @@ func (s *GetResourceSuite) TestGetResource_PrivateResource() {
 	s.Nil(res)
 }
 
+func (s *GetResourceSuite) AfterTest(_, _ string) {
+	s.rRepo.AssertExpectations(s.T())
+}
+
 func TestGetResourceSuite(t *testing.T) {
 	suite.Run(t, new(GetResourceSuite))
 }

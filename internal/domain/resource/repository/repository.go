@@ -38,7 +38,7 @@ func (r ResourceRepository) CountCategoryResources(ctx context.Context, id int) 
 func (r ResourceRepository) MakeResourcesPrivate(ctx context.Context, id int) error {
 	err := r.db.WithContext(ctx).
 		Model(rModel).
-		Where("account_id = ?", id).
+		Where("author_id = ?", id).
 		Update("state", "PRIVATE").
 		Error
 	return err
@@ -60,7 +60,7 @@ func (r ResourceRepository) GetResources(ctx context.Context, accountId int, pag
 	err := r.db.WithContext(ctx).
 		Where(`(?::TEXT IS NULL OR title LIKE '%' || ? || '%') 
 AND (?::TEXT IS NULL OR link LIKE '%'|| ? ||'%')
-AND (?::TEXT IS NULL or category_id = ANY(?))
+AND (? IS NULL or category_id = ANY(?))
 AND (state = 'PUBLIC' OR author_id = ?)`,
 			filters.Title, filters.Title, filters.Link, filters.Link,
 			filters.Categories, filters.Categories, accountId).
@@ -75,12 +75,9 @@ AND (state = 'PUBLIC' OR author_id = ?)`,
 }
 
 func (r ResourceRepository) DeleteResourceById(ctx context.Context, resourceId uint, accountId uint) error {
-	resource := model.Resource{
-		ID:       resourceId,
-		AuthorId: accountId,
-	}
 	err := r.db.WithContext(ctx).
-		Delete(&resource).
+		Where("resource_id = ? AND author_id = ?", resourceId, accountId).
+		Delete(&rModel).
 		Error
 	return err
 }
@@ -106,6 +103,7 @@ func (r ResourceRepository) UpdateResource(ctx context.Context, request model.Up
 
 func (r ResourceRepository) UpdateResourcePicture(ctx context.Context, resourceId int, accountId int, path string) error {
 	err := r.db.WithContext(ctx).
+		Model(&rModel).
 		Where("resource_id = ? AND author_id = ?",
 			resourceId, accountId).
 		Update("picture_url", path).

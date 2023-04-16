@@ -57,6 +57,10 @@ func (s *CreateCategorySuite) TestCreateCategory_Invalid() {
 	s.Error(err)
 }
 
+func (s *CreateCategorySuite) AfterTest(_, _ string) {
+	s.cRepo.AssertExpectations(s.T())
+}
+
 func TestCreateCategorySuite(t *testing.T) {
 	suite.Run(t, new(CreateCategorySuite))
 }

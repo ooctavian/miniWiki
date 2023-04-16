@@ -85,6 +85,10 @@ func (s *CreateAccountTestSuite) TestCreateAccount_InvalidPassword() {
 	s.Error(err)
 }
 
+func (s *CreateAccountTestSuite) AfterTest(_, _ string) {
+	s.aRepo.AssertExpectations(s.T())
+}
+
 func TestCreateAccountSuite(t *testing.T) {
 	suite.Run(t, new(CreateAccountTestSuite))
 }

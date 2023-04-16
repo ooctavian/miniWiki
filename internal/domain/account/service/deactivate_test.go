@@ -65,6 +65,11 @@ func (s *DeactivateAccountTestSuite) TestDeactivateAccount_AccountRepoFail() {
 	s.Error(err)
 }
 
+func (s *DeactivateAccountTestSuite) AfterTest(_, _ string) {
+	s.aRepo.AssertExpectations(s.T())
+	s.rRepo.AssertExpectations(s.T())
+}
+
 func TestDeactivateAccountSuite(t *testing.T) {
 	suite.Run(t, new(DeactivateAccountTestSuite))
 }

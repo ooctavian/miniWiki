@@ -88,6 +88,10 @@ func (s *UpdateAccountTestSuite) TestUpdateAccount_Successful() {
 	s.NoError(err)
 }
 
+func (s *UpdateAccountTestSuite) AfterTest(_, _ string) {
+	s.aRepo.AssertExpectations(s.T())
+}
+
 func TestUpdateAccountSuite(t *testing.T) {
 	suite.Run(t, new(UpdateAccountTestSuite))
 }

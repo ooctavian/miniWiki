@@ -110,6 +110,11 @@ func (s *CreateResourceSuite) TestCreateResource_NewCategory_Failed() {
 	s.Nil(id)
 }
 
+func (s *CreateResourceSuite) AfterTest(_, _ string) {
+	s.rRepo.AssertExpectations(s.T())
+	s.cService.AssertExpectations(s.T())
+}
+
 func TestCreateResourceSuite(t *testing.T) {
 	suite.Run(t, new(CreateResourceSuite))
 }

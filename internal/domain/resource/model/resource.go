@@ -113,7 +113,7 @@ type CreateResourceRequest struct {
 
 // swagger:model CreateResource
 type CreateResource struct {
-	ID uint `gorm:"column:category_id"`
+	ID uint `gorm:"column:resource_id"`
 	// Title of resource
 	// example: Lorem ipsum
 	// required: true
