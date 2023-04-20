@@ -1,0 +1,1232 @@
+{
+  "swagger": "2.0",
+  "info": {},
+  "paths": {
+    "/account": {
+      "get": {
+        "tags": [
+          "Account"
+        ],
+        "summary": "Get details of current logged account.",
+        "operationId": "getAccount",
+        "responses": {
+          "200": {
+            "description": "Account info",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/AccountResponse"
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid body request.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal server error.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Account"
+        ],
+        "summary": "Create a Account.",
+        "operationId": "createAccount",
+        "parameters": [
+          {
+            "name": "Account",
+            "in": "body",
+            "schema": {
+              "$ref": "#/definitions/CreateAccount"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Account created."
+          },
+          "400": {
+            "description": "Invalid body request.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal server error.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Account"
+        ],
+        "summary": "Deactivate account. All posts become private.",
+        "operationId": "deactivateAccount",
+        "responses": {
+          "200": {
+            "description": "Account deleted."
+          },
+          "400": {
+            "description": "Invalid body request.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Forbidden.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal server error.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "Account"
+        ],
+        "summary": "Update the current logged in account.",
+        "operationId": "updateAccount",
+        "parameters": [
+          {
+            "name": "Account",
+            "in": "body",
+            "schema": {
+              "$ref": "#/definitions/UpdateAccount"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Account updated."
+          },
+          "400": {
+            "description": "Invalid body request.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Forbidden.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal server error.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        }
+      }
+    },
+    "/account/{id}": {
+      "get": {
+        "tags": [
+          "Account"
+        ],
+        "summary": "Get details of current logged account.",
+        "operationId": "getAccount",
+        "responses": {
+          "200": {
+            "description": "Account info",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/AccountResponse"
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid body request.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal server error.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        }
+      }
+    },
+    "/categories": {
+      "get": {
+        "tags": [
+          "Category"
+        ],
+        "summary": "Get list of categories.",
+        "operationId": "getCategories",
+        "responses": {
+          "200": {
+            "description": "List of categories.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Pagination"
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid body request.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal server error.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Category"
+        ],
+        "summary": "Create a category.",
+        "operationId": "createCategory",
+        "parameters": [
+          {
+            "name": "Category",
+            "in": "body",
+            "schema": {
+              "$ref": "#/definitions/CreateCategory"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Category created.",
+            "headers": {
+              "Location": {
+                "type": "string",
+                "description": "The path of the new category created ."
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid body request.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Forbidden.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal server error.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        }
+      }
+    },
+    "/categories/{id}": {
+      "get": {
+        "tags": [
+          "Category"
+        ],
+        "summary": "Get a category by id.",
+        "operationId": "getCategory",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "category ID",
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Category details.",
+            "schema": {
+              "$ref": "#/definitions/Category"
+            }
+          },
+          "400": {
+            "description": "Invalid body request.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal server error.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Category"
+        ],
+        "summary": "Delete a category.",
+        "operationId": "deleteCategory",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "category ID",
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Category deleted."
+          },
+          "400": {
+            "description": "Invalid body request.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Forbidden.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal server error.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        }
+      }
+    },
+    "/login": {
+      "post": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "Login into an existing account.",
+        "operationId": "login",
+        "parameters": [
+          {
+            "name": "Login",
+            "in": "body",
+            "schema": {
+              "$ref": "#/definitions/LoginAccount"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Authenticated.",
+            "headers": {
+              "Set-Cookie": {
+                "type": "string",
+                "example": "session_id=abcde12345; Path=/; HttpOnly",
+                "description": "A cookie with session id."
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid body request.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal server error.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        }
+      }
+    },
+    "/logout": {
+      "post": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "Login into an existing account.",
+        "operationId": "logout",
+        "parameters": [
+          {
+            "name": "Login",
+            "in": "body",
+            "schema": {
+              "$ref": "#/definitions/LoginAccount"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Succesfully logged out.",
+            "headers": {
+              "Set-Cookie": {
+                "type": "string",
+                "example": "session_id=\"\"; Path=/; HttpOnly",
+                "description": "A cookie with session id."
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        }
+      }
+    },
+    "/resources": {
+      "get": {
+        "tags": [
+          "Resource"
+        ],
+        "summary": "Get all available resources filtered. By default, it gives them all.",
+        "operationId": "getResources",
+        "parameters": [
+          {
+            "description": "Match or partial match of title",
+            "name": "title",
+            "in": "query"
+          },
+          {
+            "description": "Match or partial match of link",
+            "name": "link",
+            "in": "query"
+          },
+          {
+            "description": "comma separated list of categories",
+            "name": "categories",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of resources",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Pagination"
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Resource"
+        ],
+        "summary": "Create a resource.",
+        "operationId": "createResource",
+        "parameters": [
+          {
+            "name": "Resource",
+            "in": "body",
+            "schema": {
+              "$ref": "#/definitions/CreateResource"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Resource created.",
+            "headers": {
+              "Location": {
+                "type": "string",
+                "description": "The path of the new resource created."
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid body request.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Forbidden.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal server error.",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        }
+      }
+    },
+    "/resources/{id}": {
+      "get": {
+        "tags": [
+          "Resource"
+        ],
+        "summary": "Get a resource by its id.",
+        "operationId": "getResource",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "resource ID",
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Resource detail",
+            "schema": {
+              "$ref": "#/definitions/ResourceResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Resource"
+        ],
+        "summary": "Delete a resource.",
+        "operationId": "deleteResource",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "resource ID",
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Resource deleted"
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "Resource"
+        ],
+        "summary": "Update an existing resource.",
+        "operationId": "updateResource",
+        "parameters": [
+          {
+            "name": "Resource",
+            "in": "body",
+            "schema": {
+              "$ref": "#/definitions/UpdateResource"
+            }
+          },
+          {
+            "type": "string",
+            "description": "resource ID",
+            "name": "id",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Resource updated"
+          },
+          "400": {
+            "description": "Invalid body request",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "Account": {
+      "type": "object",
+      "properties": {
+        "ID": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "active": {
+          "description": "Status of account",
+          "type": "boolean",
+          "x-go-name": "Active"
+        },
+        "alias": {
+          "description": "Alias An additional or assumed name",
+          "type": "string",
+          "x-go-name": "Alias"
+        },
+        "createdAt": {
+          "description": "CreatedAt the date it was created",
+          "type": "string",
+          "format": "date-time",
+          "x-go-name": "CreatedAt"
+        },
+        "email": {
+          "description": "Email of the account",
+          "type": "string",
+          "x-go-name": "Email"
+        },
+        "name": {
+          "description": "Real name used to show to other people",
+          "type": "string",
+          "x-go-name": "Name"
+        },
+        "password": {
+          "description": "Password",
+          "type": "string",
+          "x-go-name": "Password",
+          "example": "verysecurepassword"
+        },
+        "pictureUrl": {
+          "description": "PictureUrl path of the profile picture",
+          "type": "string",
+          "x-go-name": "PictureUrl"
+        },
+        "updatedAt": {
+          "description": "UpdatedAt the last date it was modified",
+          "type": "string",
+          "format": "date-time",
+          "x-go-name": "UpdatedAt"
+        }
+      },
+      "x-go-package": "miniWiki/internal/domain/account/model"
+    },
+    "AccountResponse": {
+      "type": "object",
+      "properties": {
+        "active": {
+          "description": "Status of account",
+          "type": "boolean",
+          "x-go-name": "Active"
+        },
+        "alias": {
+          "description": "Alias An additional or assumed name",
+          "type": "string",
+          "x-go-name": "Alias"
+        },
+        "createdAt": {
+          "description": "CreatedAt the date it was created",
+          "type": "string",
+          "format": "date-time",
+          "x-go-name": "CreatedAt"
+        },
+        "email": {
+          "description": "Email of the account",
+          "type": "string",
+          "x-go-name": "Email"
+        },
+        "name": {
+          "description": "Real name used to show to other people",
+          "type": "string",
+          "x-go-name": "Name"
+        },
+        "pictureUrl": {
+          "description": "PictureUrl path of the profile picture",
+          "type": "string",
+          "x-go-name": "PictureUrl"
+        },
+        "updatedAt": {
+          "description": "UpdatedAt the last date it was modified",
+          "type": "string",
+          "format": "date-time",
+          "x-go-name": "UpdatedAt"
+        }
+      },
+      "x-go-package": "miniWiki/internal/domain/account/model"
+    },
+    "Category": {
+      "type": "object",
+      "properties": {
+        "categoryId": {
+          "description": "CategoryId of category",
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "ID",
+          "example": 2
+        },
+        "parentId": {
+          "description": "ParentId of parent category, making it a subcategory",
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "ParentId",
+          "example": 1
+        },
+        "title": {
+          "description": "Title of the category",
+          "type": "string",
+          "x-go-name": "Title",
+          "example": "backend"
+        }
+      },
+      "x-go-package": "miniWiki/internal/domain/category/model"
+    },
+    "CreateAccount": {
+      "type": "object",
+      "required": [
+        "email",
+        "password",
+        "name"
+      ],
+      "properties": {
+        "alias": {
+          "description": "An additional or assumed name",
+          "type": "string",
+          "x-go-name": "Alias"
+        },
+        "email": {
+          "description": "Email of the account",
+          "type": "string",
+          "x-go-name": "Email",
+          "example": "lorem@example.com"
+        },
+        "name": {
+          "description": "Real name used to show to other people",
+          "type": "string",
+          "x-go-name": "Name"
+        },
+        "password": {
+          "description": "Password",
+          "type": "string",
+          "x-go-name": "Password",
+          "example": "verysecurepassword"
+        },
+        "pictureUrl": {
+          "description": "path of the profile picture",
+          "type": "string",
+          "x-go-name": "PictureUrl"
+        }
+      },
+      "x-go-package": "miniWiki/internal/domain/account/model"
+    },
+    "CreateCategory": {
+      "description": "CreateCategory Category creation request",
+      "type": "object",
+      "properties": {
+        "ID": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "parentId": {
+          "description": "ID of parent category, making it a subcategory",
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "ParentId",
+          "example": 1
+        },
+        "title": {
+          "description": "Title of the category",
+          "type": "string",
+          "x-go-name": "Title",
+          "example": "backend"
+        }
+      },
+      "x-go-package": "miniWiki/internal/domain/category/model"
+    },
+    "CreateResource": {
+      "type": "object",
+      "required": [
+        "title",
+        "link"
+      ],
+      "properties": {
+        "AuthorId": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "ID": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "categoryId": {
+          "description": "Id of the category that the resource is a part of",
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "CategoryId",
+          "example": 1
+        },
+        "categoryName": {
+          "description": "Name of the category that will be created for resource",
+          "type": "string",
+          "x-go-name": "CategoryName",
+          "example": "back-end"
+        },
+        "description": {
+          "description": "Description of resource",
+          "type": "string",
+          "x-go-name": "Description",
+          "example": "Lorem Ipsum is simply dummy text of the printing and typesetting industry."
+        },
+        "link": {
+          "description": "Link of resource",
+          "type": "string",
+          "x-go-name": "Link",
+          "example": "Lorem Ipsum is simply dummy text of the printing and typesetting industry."
+        },
+        "state": {
+          "description": "State of resource, can be either PUBLIC or PRIVATE",
+          "type": "string",
+          "x-go-name": "State",
+          "example": "PUBLIC"
+        },
+        "title": {
+          "description": "Title of resource",
+          "type": "string",
+          "x-go-name": "Title",
+          "example": "Lorem ipsum"
+        }
+      },
+      "x-go-package": "miniWiki/internal/domain/resource/model"
+    },
+    "ErrorResponse": {
+      "type": "object",
+      "properties": {
+        "detail": {
+          "description": "Detail, more detailed message about the problem",
+          "type": "string",
+          "x-go-name": "Detail"
+        },
+        "message": {
+          "description": "Message, usually for the user",
+          "type": "string",
+          "x-go-name": "Message"
+        },
+        "status": {
+          "description": "Status code of response",
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "Status"
+        }
+      },
+      "x-go-package": "miniWiki/pkg/transport"
+    },
+    "GetResourcesFilters": {
+      "type": "object",
+      "properties": {
+        "Categories": {
+          "description": "Categories",
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        "Link": {
+          "description": "Link",
+          "type": "string"
+        },
+        "Title": {
+          "description": "Title",
+          "type": "string"
+        }
+      },
+      "x-go-package": "miniWiki/internal/domain/resource/model"
+    },
+    "LoginAccount": {
+      "type": "object",
+      "required": [
+        "email",
+        "password"
+      ],
+      "properties": {
+        "email": {
+          "description": "Email of the account",
+          "type": "string",
+          "x-go-name": "Email",
+          "example": "lorem@example.com"
+        },
+        "password": {
+          "description": "Password",
+          "type": "string",
+          "x-go-name": "Password",
+          "example": "verysecurepassword"
+        }
+      },
+      "x-go-package": "miniWiki/internal/auth/model"
+    },
+    "Pagination": {
+      "type": "object",
+      "properties": {
+        "data": {
+          "description": "The data returned accordingly to the parameters",
+          "x-go-name": "Data"
+        },
+        "limit": {
+          "description": "Maximum of elements per page",
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "Limit",
+          "example": 10
+        },
+        "page": {
+          "description": "Number of page",
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "Page",
+          "example": 1
+        },
+        "total_pages": {
+          "description": "Total number of pages",
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "TotalPages",
+          "example": 10
+        },
+        "total_rows": {
+          "description": "Total number of elements",
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "TotalRows",
+          "example": 200
+        }
+      },
+      "x-go-package": "miniWiki/pkg/utils"
+    },
+    "PublicAccountResponse": {
+      "type": "object",
+      "properties": {
+        "alias": {
+          "description": "Alias An additional or assumed name",
+          "type": "string",
+          "x-go-name": "Alias"
+        },
+        "name": {
+          "description": "Real name used to show to other people",
+          "type": "string",
+          "x-go-name": "Name"
+        },
+        "pictureUrl": {
+          "description": "path of the profile picture",
+          "type": "string",
+          "x-go-name": "PictureUrl"
+        }
+      },
+      "x-go-package": "miniWiki/internal/domain/account/model"
+    },
+    "ResourceResponse": {
+      "description": "ResourceResponse Resource information",
+      "type": "object",
+      "properties": {
+        "authorId": {
+          "description": "AuthorId ID of resource's author",
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "AuthorId",
+          "example": 1
+        },
+        "categoryId": {
+          "description": "CategoryId ID of the category that the resource is a part of",
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "CategoryId",
+          "example": 1
+        },
+        "description": {
+          "description": "Description of resource",
+          "type": "string",
+          "x-go-name": "Description",
+          "example": "Lorem Ipsum is simply dummy text of the printing and typesetting industry."
+        },
+        "link": {
+          "description": "Link of resource",
+          "type": "string",
+          "x-go-name": "Link",
+          "example": "Lorem Ipsum is simply dummy text of the printing and typesetting industry."
+        },
+        "pictureUrl": {
+          "description": "Path to the resource Image",
+          "type": "string",
+          "x-go-name": "PictureUrl"
+        },
+        "resourceId": {
+          "description": "Id of resource",
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "ResourceId",
+          "example": 1
+        },
+        "state": {
+          "description": "State of resource, can be either PUBLIC or PRIVATE",
+          "type": "string",
+          "x-go-name": "State",
+          "example": "PUBLIC"
+        },
+        "title": {
+          "description": "Title of resource",
+          "type": "string",
+          "x-go-name": "Title",
+          "example": "Lorem ipsum"
+        }
+      },
+      "x-go-package": "miniWiki/internal/domain/resource/model"
+    },
+    "UpdateAccount": {
+      "type": "object",
+      "properties": {
+        "Active": {
+          "description": "Status of account",
+          "type": "boolean"
+        },
+        "alias": {
+          "description": "Alias An additional or assumed name",
+          "type": "string",
+          "x-go-name": "Alias"
+        },
+        "email": {
+          "description": "Email of the account",
+          "type": "string",
+          "x-go-name": "Email",
+          "example": "lorem@example.com"
+        },
+        "name": {
+          "description": "Real name used to show to other people",
+          "type": "string",
+          "x-go-name": "Name"
+        },
+        "password": {
+          "description": "Password",
+          "type": "string",
+          "x-go-name": "Password",
+          "example": "verysecurepassword"
+        },
+        "pictureUrl": {
+          "description": "path of the profile picture",
+          "type": "string",
+          "x-go-name": "PictureUrl"
+        }
+      },
+      "x-go-package": "miniWiki/internal/domain/account/model"
+    },
+    "UpdateCategory": {
+      "description": "UpdateCategory Category update request",
+      "type": "object",
+      "properties": {
+        "parentId": {
+          "description": "ID of parent category, making it a subcategory",
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "ParentId",
+          "example": 1
+        },
+        "title": {
+          "description": "Title of the category",
+          "type": "string",
+          "x-go-name": "Title",
+          "example": "backend"
+        }
+      },
+      "x-go-package": "miniWiki/internal/domain/category/model"
+    },
+    "UpdateResource": {
+      "type": "object",
+      "properties": {
+        "AuthorId": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "categoryId": {
+          "description": "Id of the category that the resource is a part of",
+          "type": "integer",
+          "format": "int64",
+          "x-go-name": "CategoryId",
+          "example": 1
+        },
+        "categoryName": {
+          "description": "Name of the category that will be created for resource",
+          "type": "string",
+          "x-go-name": "CategoryName",
+          "example": "back-end"
+        },
+        "description": {
+          "description": "Description of resource",
+          "type": "string",
+          "x-go-name": "Description",
+          "example": "Lorem Ipsum is simply dummy text of the printing and typesetting industry."
+        },
+        "link": {
+          "description": "Link of resource",
+          "type": "string",
+          "x-go-name": "Link",
+          "example": "Lorem Ipsum is simply dummy text of the printing and typesetting industry."
+        },
+        "state": {
+          "description": "State of resource, can be either PUBLIC or PRIVATE",
+          "type": "string",
+          "x-go-name": "State",
+          "example": "PUBLIC"
+        },
+        "title": {
+          "description": "Title of resource",
+          "type": "string",
+          "x-go-name": "Title",
+          "example": "Lorem ipsum"
+        }
+      },
+      "x-go-package": "miniWiki/internal/domain/resource/model"
+    }
+  }
+}

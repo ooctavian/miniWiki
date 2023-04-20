@@ -26,3 +26,6 @@ else edit `DATABASE_URL` in `.env` file to yours instance connection url.
 ```shell 
 make run
 ```
+
+# Database schema
+![Database schema](./docs/database_schema.png)
