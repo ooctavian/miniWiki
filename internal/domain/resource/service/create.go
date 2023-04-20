@@ -2,10 +2,13 @@ package service
 
 import (
 	"context"
+	"errors"
 
 	model2 "miniWiki/internal/domain/category/model"
 	"miniWiki/internal/domain/resource/model"
+	"miniWiki/pkg/transport"
 
+	"github.com/jackc/pgconn"
 	"github.com/sirupsen/logrus"
 )
 
@@ -30,6 +33,13 @@ func (s *Resource) CreateResource(ctx context.Context, request model.CreateResou
 	if err != nil {
 		logrus.WithContext(ctx).
 			Errorf("Failed inserting in database: %v", err)
+		var pgErr *pgconn.PgError
+		// We can assume that duplicated key is thrown only when there is a duplicated link
+		// because there is no other unique constraints on table "resource"
+		if errors.As(err, &pgErr) && pgErr.Code == "23505" {
+			return nil, transport.NewDuplicatedKeyErr("link")
+		}
+
 		return nil, err
 	}
 

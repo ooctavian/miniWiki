@@ -38,13 +38,13 @@ func (s *Auth) Login(ctx context.Context, request model.LoginRequest) (*model.Se
 		return nil, err
 	}
 
-	expiresAt := time.Now().Add(30 * time.Minute)
+	expiresAt := time.Now().Add(s.sessionDuration)
 	session := model.Session{
 		SessionID: sessionID,
 		AccountID: acc.ID,
 		IpAddress: request.IpAddress,
 		UserAgent: request.UserAgent,
-		ExpireAt:  expiresAt,
+		ExpiresAt: expiresAt,
 	}
 
 	err = s.authRepository.CreateSession(ctx, session)
@@ -63,7 +63,6 @@ func (s *Auth) Login(ctx context.Context, request model.LoginRequest) (*model.Se
 
 	return &model.SessionResponse{
 		SessionId: sessionID,
-		ExpiresAt: expiresAt,
 	}, nil
 }
 

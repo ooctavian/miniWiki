@@ -60,7 +60,7 @@ func (r ResourceRepository) GetResources(ctx context.Context, accountId int, pag
 	err := r.db.WithContext(ctx).
 		Where(`(?::TEXT IS NULL OR title LIKE '%' || ? || '%') 
 AND (?::TEXT IS NULL OR link LIKE '%'|| ? ||'%')
-AND (? IS NULL or category_id = ANY(?))
+AND (?::TEXT IS NULL or category_id = ANY(?))
 AND (state = 'PUBLIC' OR author_id = ?)`,
 			filters.Title, filters.Title, filters.Link, filters.Link,
 			filters.Categories, filters.Categories, accountId).

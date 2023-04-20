@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"miniWiki/internal/auth/model"
-	"miniWiki/internal/auth/service"
 	"miniWiki/pkg/transport"
 
 	"github.com/sirupsen/logrus"
@@ -19,7 +18,13 @@ var (
 	sessionCookieName = "session_id"
 )
 
-func SessionMiddleware(auth *service.Auth) func(next http.Handler) http.Handler {
+type authServiceInterface interface {
+	GetSession(ctx context.Context, sessionId string) (*model.Session, error)
+	Refresh(ctx context.Context, request model.RefreshRequest) (*model.SessionResponse, error)
+	GetAccountStatus(ctx context.Context, accountId int) (*bool, error)
+}
+
+func SessionMiddleware(auth authServiceInterface) func(next http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			sCookie, err := r.Cookie(sessionCookieName)
@@ -40,7 +45,7 @@ func SessionMiddleware(auth *service.Auth) func(next http.Handler) http.Handler 
 				return
 			}
 			var res *model.SessionResponse
-			if session.ExpireAt.Before(time.Now()) {
+			if session.ExpiresAt.Before(time.Now()) {
 				res, err = auth.Refresh(r.Context(), model.RefreshRequest{
 					AccountId: session.AccountID,
 					SessionId: session.SessionID,
@@ -55,7 +60,6 @@ func SessionMiddleware(auth *service.Auth) func(next http.Handler) http.Handler 
 				http.SetCookie(w, &http.Cookie{
 					Name:     sessionCookieName,
 					Value:    res.SessionId,
-					Expires:  res.ExpiresAt,
 					SameSite: http.SameSiteStrictMode,
 					Secure:   true,
 				})

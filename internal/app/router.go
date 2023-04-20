@@ -45,6 +45,7 @@ func InitRouter(db *gorm.DB, cfg config.Config) http.Handler {
 		accountRepository,
 		authRepository,
 		argon2id,
+		cfg.Session.Duration,
 	)
 
 	sessionMiddleware := middleware.SessionMiddleware(authService)

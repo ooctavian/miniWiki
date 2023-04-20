@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"time"
 
 	"miniWiki/internal/auth/model"
 	model2 "miniWiki/internal/domain/account/model"
@@ -18,6 +19,7 @@ type Auth struct {
 	accountRepository accountRepositoryInterface
 	authRepository    authRepositoryInterface
 	hash              security.Hash
+	sessionDuration   time.Duration
 }
 
 type authRepositoryInterface interface {
@@ -27,14 +29,11 @@ type authRepositoryInterface interface {
 	CreateSession(ctx context.Context, session model.Session) error
 }
 
-func NewAuth(
-	accountRepository accountRepositoryInterface,
-	authRepository authRepositoryInterface,
-	hash security.Hash,
-) *Auth {
+func NewAuth(accountRepository accountRepositoryInterface, authRepository authRepositoryInterface, hash security.Hash, duration time.Duration) *Auth {
 	return &Auth{
 		accountRepository: accountRepository,
 		authRepository:    authRepository,
 		hash:              hash,
+		sessionDuration:   duration,
 	}
 }

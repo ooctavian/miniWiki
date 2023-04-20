@@ -28,8 +28,7 @@ type LoginRequest struct {
 }
 
 type SessionResponse struct {
-	SessionId string    `json:"sessionId"`
-	ExpiresAt time.Time `json:"expiresAt"`
+	SessionId string
 }
 
 type RefreshRequest struct {
@@ -47,5 +46,5 @@ type Session struct {
 	AccountID int
 	IpAddress string
 	UserAgent string
-	ExpireAt  time.Time
+	ExpiresAt time.Time
 }

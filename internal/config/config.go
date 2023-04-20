@@ -11,6 +11,7 @@ type Config struct {
 	Server   ServerConfig
 	Logger   LoggerConfig
 	Argon2id Argon2idConfig
+	Session  SessionConfig
 }
 
 type DatabaseConfig struct {
@@ -19,9 +20,12 @@ type DatabaseConfig struct {
 }
 
 type ServerConfig struct {
-	Port        string        `env:"PORT" envDefault:"4444"`
-	Timeout     time.Duration `env:"TIMEOUT" envDefault:"10s"`
-	AllowOrigin string        `env:"ALLOW_ORIGIN" envDefault:"http://*,https://*"`
+	Port    string        `env:"PORT" envDefault:"4444"`
+	Timeout time.Duration `env:"TIMEOUT" envDefault:"10s"`
+}
+
+type SessionConfig struct {
+	Duration time.Duration `env:"SESSION_DURATION" envDefault:"1h"`
 }
 
 type LoggerConfig struct {

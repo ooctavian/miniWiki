@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"reflect"
 
 	"miniWiki/internal/auth/model"
 	"miniWiki/pkg/security"
@@ -98,7 +97,11 @@ func HandleErrorResponse(w http.ResponseWriter, err error) {
 		return
 	}
 
-	logrus.Infof("%v", reflect.TypeOf(err).String())
+	if ok := errors.As(err, &duplicatedKeyErr{}); ok {
+		ErrorRespond(w, http.StatusBadRequest, "Bad request", err)
+		return
+	}
+
 	ErrorRespond(w, http.StatusInternalServerError, "Internal Server Error", err)
 }
 
@@ -150,4 +153,18 @@ func newUnsupportedContentType(contentType string) unsupportedContentTypeError {
 
 func (e unsupportedContentTypeError) Error() string {
 	return fmt.Sprintf("Unsupported content-type : %s", e.contentType)
+}
+
+type duplicatedKeyErr struct {
+	key string
+}
+
+func NewDuplicatedKeyErr(key string) duplicatedKeyErr {
+	return duplicatedKeyErr{
+		key: key,
+	}
+}
+
+func (e duplicatedKeyErr) Error() string {
+	return fmt.Sprintf("duplicate key value: %s", e.key)
 }
