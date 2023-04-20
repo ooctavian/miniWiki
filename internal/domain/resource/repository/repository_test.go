@@ -149,7 +149,7 @@ func (s *ResourceRepositorySuite) Test_Repository_GetResources_Failed() {
 	s.mock.
 		ExpectQuery(regexp.QuoteMeta(`SELECT * FROM "resource" WHERE ($1::TEXT IS NULL OR title LIKE '%' || $2 || '%')
 		AND ($3::TEXT IS NULL OR link LIKE '%'|| $4 ||'%')
-		AND ($5 IS NULL or category_id = ANY($6))
+		AND ($5::TEXT IS NULL or category_id = ANY($6))
 		AND (state = 'PUBLIC' OR author_id = $7) LIMIT 5`)).
 		WithArgs(testFilters.Title, testFilters.Title,
 			testFilters.Link, testFilters.Link,
