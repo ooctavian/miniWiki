@@ -46,5 +46,5 @@ type Session struct {
 	AccountID int
 	IpAddress string
 	UserAgent string
-	ExpiresAt time.Time
+	ExpireAt  time.Time
 }

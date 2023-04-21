@@ -45,7 +45,7 @@ func SessionMiddleware(auth authServiceInterface) func(next http.Handler) http.H
 				return
 			}
 			var res *model.SessionResponse
-			if session.ExpiresAt.Before(time.Now()) {
+			if session.ExpireAt.Before(time.Now()) {
 				res, err = auth.Refresh(r.Context(), model.RefreshRequest{
 					AccountId: session.AccountID,
 					SessionId: session.SessionID,

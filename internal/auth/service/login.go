@@ -44,7 +44,7 @@ func (s *Auth) Login(ctx context.Context, request model.LoginRequest) (*model.Se
 		AccountID: acc.ID,
 		IpAddress: request.IpAddress,
 		UserAgent: request.UserAgent,
-		ExpiresAt: expiresAt,
+		ExpireAt:  expiresAt,
 	}
 
 	err = s.authRepository.CreateSession(ctx, session)
