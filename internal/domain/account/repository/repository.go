@@ -25,16 +25,15 @@ func (r AccountRepository) CreateAccount(ctx context.Context, acc model.CreateAc
 
 func (r AccountRepository) UpdateAccount(ctx context.Context, id int, acc model.UpdateAccount) error {
 	err := r.db.WithContext(ctx).
-		Model(&model.Account{}).
 		Where("account_id = ?", id).
-		Updates(acc).
+		Updates(&acc).
 		Error
 	return err
 }
 
 func (r AccountRepository) GetAccount(ctx context.Context, id int) (model.Account, error) {
 	var acc model.Account
-	err := r.db.WithContext(ctx).Model(&model.Account{}).First(&acc, id).Error
+	err := r.db.WithContext(ctx).Model(&model.Account{}).Take(&acc, id).Error
 	return acc, err
 }
 

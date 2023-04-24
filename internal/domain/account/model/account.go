@@ -50,6 +50,10 @@ type UpdateAccount struct {
 	PictureUrl *string `json:"pictureUrl,omitempty"`
 }
 
+func (UpdateAccount) TableName() string {
+	return "account"
+}
+
 type UpdateAccountRequest struct {
 	Account   UpdateAccount
 	AccountId int
