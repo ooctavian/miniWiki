@@ -20,7 +20,7 @@ func uploadResourceImageHandler(service resourceService) func(w http.ResponseWri
 			return
 		}
 
-		file, header, err := transport2.GetImage(r)
+		file, contentType, header, err := transport2.GetImage(r)
 
 		if err != nil {
 			logrus.WithContext(r.Context()).Infof("Can't get file: %v", err)
@@ -29,10 +29,11 @@ func uploadResourceImageHandler(service resourceService) func(w http.ResponseWri
 		}
 
 		req := model.UploadResourceImageRequest{
-			ResourceId: resourceId,
-			Image:      file,
-			ImageName:  header.Filename,
-			AccountId:  middleware.GetAccountId(r),
+			ResourceId:  resourceId,
+			Image:       file,
+			ImageName:   header.Filename,
+			ContentType: *contentType,
+			AccountId:   middleware.GetAccountId(r),
 		}
 
 		err = service.UploadResourceImage(r.Context(), req)

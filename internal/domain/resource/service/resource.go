@@ -4,7 +4,7 @@ import (
 	"context"
 
 	model2 "miniWiki/internal/domain/category/model"
-	iService "miniWiki/internal/domain/image/service"
+	iService "miniWiki/internal/domain/filemanager/service"
 	"miniWiki/internal/domain/resource/model"
 	"miniWiki/pkg/utils"
 )
@@ -24,19 +24,22 @@ type resourceRepositoryInterface interface {
 
 type Resource struct {
 	resourceRepository resourceRepositoryInterface
-	imageService       iService.ImageService
+	uploader           iService.Uploader
 	categoryService    categoryServiceInterface
+	imageFolder        string
 }
 
 func NewResource(
 	resourceRepository resourceRepositoryInterface,
 	categoryService categoryServiceInterface,
-	imageService iService.ImageService,
+	imageService iService.Uploader,
+	imageFolder string,
 ) *Resource {
 	resource := &Resource{
 		resourceRepository: resourceRepository,
-		imageService:       imageService,
 		categoryService:    categoryService,
+		uploader:           imageService,
+		imageFolder:        imageFolder,
 	}
 	return resource
 }

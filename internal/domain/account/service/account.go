@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"miniWiki/internal/domain/account/model"
-	iService "miniWiki/internal/domain/image/service"
+	iService "miniWiki/internal/domain/filemanager/service"
 	"miniWiki/pkg/security"
 )
 
@@ -22,20 +22,23 @@ type Account struct {
 	hash               security.Hash
 	accountRepository  accountRepositoryInterface
 	resourceRepository resourceRepositoryInterface
-	imageService       iService.ImageService
+	uploader           iService.Uploader
+	imageFolder        string
 }
 
 func NewAccount(
 	accountRepository accountRepositoryInterface,
 	resourceRepository resourceRepositoryInterface,
 	hashAlgorithm security.Hash,
-	imageService iService.ImageService,
+	imageService iService.Uploader,
+	imageFolder string,
 ) *Account {
 	account := &Account{
 		accountRepository:  accountRepository,
 		resourceRepository: resourceRepository,
 		hash:               hashAlgorithm,
-		imageService:       imageService,
+		uploader:           imageService,
+		imageFolder:        imageFolder,
 	}
 	return account
 }

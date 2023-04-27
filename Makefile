@@ -13,6 +13,10 @@ start-db:
 	docker-compose -f ./deployments/docker-compose.yaml up --remove-orphans -d 2>/dev/null
 	until pg_isready -qh localhost -U postgres; do sleep 0.1; done
 
+create-s3-buckets:
+	aws --endpoint-url=${AWS_ENDPOINT} s3 mb s3://${IMAGE_PROFILE_DIR}
+	aws --endpoint-url=${AWS_ENDPOINT} s3 mb s3://${IMAGE_RESOURCE_DIR}
+
 create-migration:
 	${BIN}/migrate create -ext sql -dir migrations ${name}
 

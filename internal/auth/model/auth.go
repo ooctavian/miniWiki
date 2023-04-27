@@ -14,6 +14,7 @@ type LoginAccount struct {
 	// Email of the account
 	// example: lorem@example.com
 	// required: true
+	// swagger:strfmt email
 	Email string `json:"email"`
 	// Password
 	// example: verysecurepassword

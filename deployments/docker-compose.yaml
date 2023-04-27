@@ -24,6 +24,18 @@ services:
     networks:
       - db
     restart: unless-stopped
+  localstack:
+    image: localstack/localstack
+    ports:
+      - "4566:4566"
+    environment:
+      - SERVICES=s3
+      - DEBUG=1
+      - DATA_DIR=/tmp/localstack/data
+      - DISABLE_CORS_CHECKS=1
+      - DEFAULT_REGION=eu-central-1
+    volumes:
+      - './.localstack:/var/lib/localstack'
 networks:
   db:
     driver: bridge

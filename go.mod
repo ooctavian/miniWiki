@@ -19,7 +19,10 @@ require (
 	gorm.io/gorm v1.24.7-0.20230306060331-85eaf9eeda11
 )
 
+require github.com/jmespath/go-jmespath v0.4.0 // indirect
+
 require (
+	github.com/aws/aws-sdk-go v1.44.249
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/go-playground/locales v0.14.1 // indirect
 	github.com/go-playground/universal-translator v0.18.1 // indirect

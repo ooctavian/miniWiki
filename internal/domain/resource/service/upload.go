@@ -4,7 +4,7 @@ import (
 	"context"
 	"path"
 
-	model2 "miniWiki/internal/domain/image/model"
+	model2 "miniWiki/internal/domain/filemanager/model"
 	"miniWiki/internal/domain/resource/model"
 
 	"github.com/google/uuid"
@@ -14,11 +14,11 @@ import (
 func (s *Resource) UploadResourceImage(ctx context.Context, request model.UploadResourceImageRequest) error {
 	filename := uuid.NewString() + path.Ext(request.ImageName)
 	req := model2.UploadRequest{
-		ImageFolder: "resources",
-		ImageName:   filename,
-		Image:       request.Image,
+		Folder:   s.imageFolder,
+		Filename: filename,
+		File:     request.Image,
 	}
-	err := s.imageService.Upload(ctx, req)
+	err := s.uploader.Upload(ctx, req)
 	if err != nil {
 		logrus.
 			WithContext(ctx).

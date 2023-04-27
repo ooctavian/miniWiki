@@ -48,7 +48,7 @@ func (s *GetResourceSuite) SetupSuite() {
 	s.ctx = context.Background()
 	s.rRepo = &resourceRepositoryMock{}
 
-	s.service = NewResource(s.rRepo, nil, nil)
+	s.service = NewResource(s.rRepo, nil, nil, "")
 }
 
 func (s *GetResourceSuite) TestGetResource_Successful() {

@@ -118,9 +118,10 @@ type Account struct {
 }
 
 type UploadProfilePictureRequest struct {
-	AccountId int
-	ImageName string
-	Image     io.Reader
+	AccountId   int
+	ImageName   string
+	ContentType string
+	Image       io.Reader
 }
 
 type DownloadProfilePictureRequest struct {
