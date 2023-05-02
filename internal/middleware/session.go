@@ -33,6 +33,7 @@ func SessionMiddleware(auth authServiceInterface) func(next http.Handler) http.H
 				transport.Respond(w, http.StatusUnauthorized, nil)
 				return
 			}
+
 			session, err := auth.GetSession(r.Context(), sCookie.Value)
 
 			if err != nil {
@@ -58,10 +59,8 @@ func SessionMiddleware(auth authServiceInterface) func(next http.Handler) http.H
 				}
 
 				http.SetCookie(w, &http.Cookie{
-					Name:     sessionCookieName,
-					Value:    res.SessionId,
-					SameSite: http.SameSiteStrictMode,
-					Secure:   true,
+					Name:  sessionCookieName,
+					Value: res.SessionId,
 				})
 			}
 
@@ -104,13 +103,10 @@ func GetAccountId(r *http.Request) int {
 
 func LogoutSession(w http.ResponseWriter) {
 	c := &http.Cookie{
-		Name:     sessionCookieName,
-		Value:    "",
-		Path:     "/",
-		Expires:  time.Unix(0, 0),
-		MaxAge:   -1,
-		SameSite: http.SameSiteStrictMode,
-		Secure:   true,
+		Name:    sessionCookieName,
+		Value:   "",
+		Expires: time.Unix(0, 0),
+		MaxAge:  -1,
 	}
 
 	http.SetCookie(w, c)
