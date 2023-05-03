@@ -33,7 +33,6 @@ func New() (*Application, error) {
 	if err != nil {
 		return nil, err
 	}
-
 	err = initLogger(*cfg)
 	if err != nil {
 		return nil, err

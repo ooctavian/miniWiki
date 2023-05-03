@@ -64,7 +64,7 @@ jobs:
   deploy:
     needs: [unit-tests,integration-tests]
     runs-on: self-hosted
-    if: github.ref == 'refs/heads/deployment'
+    if: github.ref == 'refs/heads/main'
     steps:
       - uses: actions/checkout@v3
       - name: Set up Go

@@ -3,6 +3,7 @@ package middleware
 import (
 	"context"
 	"net/http"
+	"os"
 	"time"
 
 	"miniWiki/internal/auth/model"
@@ -16,6 +17,7 @@ type sKey struct{}
 
 var (
 	sessionCookieName = "session_id"
+	secure            = os.Getenv("ENV") == "production"
 )
 
 type authServiceInterface interface {
@@ -109,8 +111,9 @@ func LogoutSession(w http.ResponseWriter) {
 
 func SetSessionCookie(w http.ResponseWriter, sessionId string) {
 	http.SetCookie(w, &http.Cookie{
-		Name:  sessionCookieName,
-		Value: sessionId,
-		Path:  "/",
+		Name:   sessionCookieName,
+		Value:  sessionId,
+		Path:   "/",
+		Secure: secure,
 	})
 }
