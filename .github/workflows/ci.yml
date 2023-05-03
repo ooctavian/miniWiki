@@ -1,0 +1,78 @@
+name: MiniWiki CI
+
+on: [push]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      - name: Run golangci-lint
+        uses: golangci/golangci-lint-action@v3.4.0
+  unit-tests:
+    needs: lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: 1.19
+      - name: Unit tests
+        run: make test-unit
+  integration-tests:
+    needs: lint
+    runs-on: ubuntu-latest
+    env:
+      DATABASE_URL: "postgresql://postgres:postgres@localhost:5432/test_db?sslmode=disable"
+      AWS_ENDPOINT: "http://localhost.localstack.cloud:4566"
+      AWS_REGION: "eu-central-1"
+      POSTGRES_DB: "test_db"
+      POSTGRES_USER: "postgres"
+      POSTGRES_PASSWORD: "postgres"
+      AWS_KEY_ID: "test"
+      AWS_SECRET_KEY: "test"
+      PGPASSWORD: "postgres"
+    services:
+      postgres:
+       image: postgres:latest
+       env:
+         POSTGRES_DB: test_db
+         POSTGRES_PASSWORD: postgres
+         POSTGRES_USER: postgres
+       ports:
+         - 5432:5432
+       # Set health checks to wait until postgres has started
+       options: >-
+         --health-cmd pg_isready
+         --health-interval 10s
+         --health-timeout 5s
+         --health-retries 5
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: 1.19
+      - name: Migrate
+        run: |
+          make install-migrate
+          migrate -verbose -path ./migrations -database ${DATABASE_URL} up
+      - name: Integration tests
+        run: go test ./internal/integrationtests
+  deploy:
+    needs: [unit-tests,integration-tests]
+    runs-on: self-hosted
+    if: github.ref == 'refs/heads/deployment'
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: 1.19
+      - name: 'Create env file'
+        run: |
+          echo "${{ secrets.ENV_FILE }}" > .env
+      - name: Run web application
+        run: RUNNER_TRACKING_ID="" && nohup make run >> ~/log.txt &

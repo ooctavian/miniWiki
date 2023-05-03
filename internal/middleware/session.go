@@ -58,10 +58,7 @@ func SessionMiddleware(auth authServiceInterface) func(next http.Handler) http.H
 					return
 				}
 
-				http.SetCookie(w, &http.Cookie{
-					Name:  sessionCookieName,
-					Value: res.SessionId,
-				})
+				SetSessionCookie(w, res.SessionId)
 			}
 
 			status, err := auth.GetAccountStatus(r.Context(), session.AccountID)
@@ -102,12 +99,18 @@ func GetAccountId(r *http.Request) int {
 }
 
 func LogoutSession(w http.ResponseWriter) {
-	c := &http.Cookie{
-		Name:    sessionCookieName,
-		Value:   "",
-		Expires: time.Unix(0, 0),
-		MaxAge:  -1,
-	}
+	http.SetCookie(w, &http.Cookie{
+		Name:   sessionCookieName,
+		Value:  "",
+		MaxAge: -1,
+		Path:   "/",
+	})
+}
 
-	http.SetCookie(w, c)
+func SetSessionCookie(w http.ResponseWriter, sessionId string) {
+	http.SetCookie(w, &http.Cookie{
+		Name:  sessionCookieName,
+		Value: sessionId,
+		Path:  "/",
+	})
 }

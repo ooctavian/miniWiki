@@ -7,12 +7,13 @@ import (
 )
 
 type Config struct {
-	Database DatabaseConfig
-	Server   ServerConfig
-	Logger   LoggerConfig
-	Argon2id Argon2idConfig
-	Session  SessionConfig
-	S3Bucket S3Config
+	Env             string        `env:"ENV" envDefault:"dev"`
+	SessionDuration time.Duration `env:"SESSION_DURATION" envDefault:"1h"`
+	Database        DatabaseConfig
+	Server          ServerConfig
+	Logger          LoggerConfig
+	Argon2id        Argon2idConfig
+	S3Bucket        S3Config
 }
 
 type DatabaseConfig struct {
@@ -25,10 +26,6 @@ type DatabaseConfig struct {
 type ServerConfig struct {
 	Port    string        `env:"PORT" envDefault:"4444"`
 	Timeout time.Duration `env:"TIMEOUT" envDefault:"10s"`
-}
-
-type SessionConfig struct {
-	Duration time.Duration `env:"SESSION_DURATION" envDefault:"1h"`
 }
 
 type S3Config struct {

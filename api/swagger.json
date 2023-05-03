@@ -420,7 +420,7 @@
         "tags": [
           "Auth"
         ],
-        "summary": "Login into an existing account.",
+        "summary": "Log out ouf the account. Deletes session cookie.",
         "operationId": "logout",
         "parameters": [
           {

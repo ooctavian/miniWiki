@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"miniWiki/internal/auth/model"
+	"miniWiki/internal/middleware"
 	"miniWiki/pkg/transport"
 	"miniWiki/pkg/utils"
 
@@ -60,10 +61,7 @@ func loginHandler(service authService) func(w http.ResponseWriter, r *http.Reque
 			return
 		}
 
-		http.SetCookie(w, &http.Cookie{
-			Name:  "session_id",
-			Value: res.SessionId,
-		})
+		middleware.SetSessionCookie(w, res.SessionId)
 
 		transport.Respond(w, http.StatusOK, nil)
 	}

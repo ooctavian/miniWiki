@@ -12,7 +12,7 @@ All example settings are in `.env-example`.
 You should copy it to `.env` and customize it.
 
 ```shell
-cp .env-example .env
+cp .env.example .env
 ```
 
 # Start database

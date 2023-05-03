@@ -30,6 +30,7 @@ func (s *ResourceRetrievalSuite) TestResourceRetrieval() {
 		Description: testCreateResource.Description,
 		Link:        testCreateResource.Link,
 		CategoryId:  &testCreateResource.CategoryId,
+		State:       "PUBLIC",
 		AuthorId:    1,
 	})
 	s.JSONEq(c.GetBody(res), body)
