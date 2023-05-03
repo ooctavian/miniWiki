@@ -39,6 +39,7 @@ type S3Config struct {
 type LoggerConfig struct {
 	Level     string `env:"LOG_LEVEL" envDefault:"info"`
 	Formatter string `env:"LOG_FORMATTER" envDefault:"json"`
+	Output    string `env:"LOG_OUTPUT" envDefault:"stdout"`
 }
 
 type Argon2idConfig struct {

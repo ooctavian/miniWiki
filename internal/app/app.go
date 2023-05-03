@@ -33,7 +33,7 @@ func New() (*Application, error) {
 	if err != nil {
 		return nil, err
 	}
-	err = initLogger(*cfg)
+	err = initLogger(cfg.Logger)
 	if err != nil {
 		return nil, err
 	}
