@@ -21,6 +21,9 @@ func DecodeJson(body io.ReadCloser, v interface{}) error {
 }
 
 func DecodeQuery(v interface{}, query map[string][]string) error {
+	// TODO: do it only once
+	schemaDecoder.IgnoreUnknownKeys(true)
+	
 	err := schemaDecoder.Decode(v, query)
 	if err != nil {
 		return err
