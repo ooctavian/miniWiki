@@ -20,7 +20,7 @@ func (s *Auth) Refresh(ctx context.Context, request model.RefreshRequest) (*mode
 	expiresAt := time.Now().Add(s.sessionDuration)
 	err = s.authRepository.UpdateSession(ctx, request.SessionId,
 		model.Session{
-			ExpiresAt: expiresAt,
+			ExpireAt:  expiresAt,
 			SessionID: sId,
 		})
 

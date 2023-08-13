@@ -7,16 +7,20 @@ import (
 )
 
 type Config struct {
-	Database DatabaseConfig
-	Server   ServerConfig
-	Logger   LoggerConfig
-	Argon2id Argon2idConfig
-	Session  SessionConfig
+	Env             string        `env:"ENV" envDefault:"dev"`
+	SessionDuration time.Duration `env:"SESSION_DURATION" envDefault:"1h"`
+	Database        DatabaseConfig
+	Server          ServerConfig
+	Logger          LoggerConfig
+	Argon2id        Argon2idConfig
+	S3Bucket        S3Config
 }
 
 type DatabaseConfig struct {
-	DatabaseURL string `env:"DATABASE_URL,required"`
-	ImageDir    string `env:"IMAGE_DIR" envDefault:"images/"`
+	DatabaseURL      string `env:"DATABASE_URL,required"`
+	ImageDir         string `env:"IMAGE_DIR" envDefault:"images/"`
+	ResourceImageDir string `env:"IMAGE_RESOURCE_DIR" envDefault:"resource"`
+	ProfileImageDir  string `env:"IMAGE_PROFILE_DIR" envDefault:"profile"`
 }
 
 type ServerConfig struct {
@@ -24,13 +28,18 @@ type ServerConfig struct {
 	Timeout time.Duration `env:"TIMEOUT" envDefault:"10s"`
 }
 
-type SessionConfig struct {
-	Duration time.Duration `env:"SESSION_DURATION" envDefault:"1h"`
+type S3Config struct {
+	Endpoint  string `env:"AWS_ENDPOINT" envDefault:"s3.eu-central-1.amazonaws.com"`
+	Region    string `env:"AWS_REGION" envDefault:"eu-central-1"`
+	KeyID     string `env:"AWS_KEY_ID,required"`
+	SecretKey string `env:"AWS_SECRET_KEY,required"`
+	Token     string `env:"AWS_TOKEN" envDefault:""`
 }
 
 type LoggerConfig struct {
 	Level     string `env:"LOG_LEVEL" envDefault:"info"`
 	Formatter string `env:"LOG_FORMATTER" envDefault:"json"`
+	Output    string `env:"LOG_OUTPUT" envDefault:"stdout"`
 }
 
 type Argon2idConfig struct {

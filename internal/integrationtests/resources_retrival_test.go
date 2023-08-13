@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"miniWiki/internal/domain/resource/model"
+	"miniWiki/pkg/utils"
 
 	"github.com/stretchr/testify/suite"
 )
@@ -23,14 +24,20 @@ func (s *ResourcesRetrievalSuite) TestResourcesRetrieval() {
 
 	res = c.Get("/resources")
 	s.Equal(res.StatusCode, 200)
-	body, err := json.Marshal([]model.ResourceResponse{{
-		ResourceId:  1,
-		Title:       testCreateResource.Title,
-		Description: testCreateResource.Description,
-		Link:        testCreateResource.Link,
-		CategoryId:  &testCreateResource.CategoryId,
-		AuthorId:    1,
-	}})
+	body, err := json.Marshal(utils.Pagination{
+		Limit:      10,
+		Page:       1,
+		TotalPages: 1,
+		TotalRows:  1,
+		Data: []model.ResourceResponse{{
+			ResourceId:  1,
+			Title:       testCreateResource.Title,
+			Description: testCreateResource.Description,
+			Link:        testCreateResource.Link,
+			CategoryId:  &testCreateResource.CategoryId,
+			State:       "PUBLIC",
+			AuthorId:    1,
+		}}})
 	s.NoError(err)
 	s.JSONEq(c.GetBody(res), string(body))
 }

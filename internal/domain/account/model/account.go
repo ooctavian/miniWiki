@@ -50,6 +50,10 @@ type UpdateAccount struct {
 	PictureUrl *string `json:"pictureUrl,omitempty"`
 }
 
+func (UpdateAccount) TableName() string {
+	return "account"
+}
+
 type UpdateAccountRequest struct {
 	Account   UpdateAccount
 	AccountId int
@@ -114,9 +118,10 @@ type Account struct {
 }
 
 type UploadProfilePictureRequest struct {
-	AccountId int
-	ImageName string
-	Image     io.Reader
+	AccountId   int
+	ImageName   string
+	ContentType string
+	Image       io.Reader
 }
 
 type DownloadProfilePictureRequest struct {

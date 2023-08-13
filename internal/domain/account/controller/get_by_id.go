@@ -11,7 +11,7 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-// swagger:operation GET /account/{id} Account getAccount
+// swagger:operation GET /account/{id} Account getAccountById
 //
 // Get details of current logged account.
 //

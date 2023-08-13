@@ -3,6 +3,7 @@ package middleware
 import (
 	"context"
 	"net/http"
+	"os"
 	"time"
 
 	"miniWiki/internal/auth/model"
@@ -16,6 +17,7 @@ type sKey struct{}
 
 var (
 	sessionCookieName = "session_id"
+	secure            = os.Getenv("ENV") == "production"
 )
 
 type authServiceInterface interface {
@@ -33,6 +35,7 @@ func SessionMiddleware(auth authServiceInterface) func(next http.Handler) http.H
 				transport.Respond(w, http.StatusUnauthorized, nil)
 				return
 			}
+
 			session, err := auth.GetSession(r.Context(), sCookie.Value)
 
 			if err != nil {
@@ -45,7 +48,7 @@ func SessionMiddleware(auth authServiceInterface) func(next http.Handler) http.H
 				return
 			}
 			var res *model.SessionResponse
-			if session.ExpiresAt.Before(time.Now()) {
+			if session.ExpireAt.Before(time.Now()) {
 				res, err = auth.Refresh(r.Context(), model.RefreshRequest{
 					AccountId: session.AccountID,
 					SessionId: session.SessionID,
@@ -57,12 +60,7 @@ func SessionMiddleware(auth authServiceInterface) func(next http.Handler) http.H
 					return
 				}
 
-				http.SetCookie(w, &http.Cookie{
-					Name:     sessionCookieName,
-					Value:    res.SessionId,
-					SameSite: http.SameSiteStrictMode,
-					Secure:   true,
-				})
+				SetSessionCookie(w, res.SessionId)
 			}
 
 			status, err := auth.GetAccountStatus(r.Context(), session.AccountID)
@@ -103,15 +101,19 @@ func GetAccountId(r *http.Request) int {
 }
 
 func LogoutSession(w http.ResponseWriter) {
-	c := &http.Cookie{
-		Name:     sessionCookieName,
-		Value:    "",
-		Path:     "/",
-		Expires:  time.Unix(0, 0),
-		MaxAge:   -1,
-		SameSite: http.SameSiteStrictMode,
-		Secure:   true,
-	}
+	http.SetCookie(w, &http.Cookie{
+		Name:   sessionCookieName,
+		Value:  "",
+		MaxAge: -1,
+		Path:   "/",
+	})
+}
 
-	http.SetCookie(w, c)
+func SetSessionCookie(w http.ResponseWriter, sessionId string) {
+	http.SetCookie(w, &http.Cookie{
+		Name:   sessionCookieName,
+		Value:  sessionId,
+		Path:   "/",
+		Secure: secure,
+	})
 }

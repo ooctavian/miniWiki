@@ -13,7 +13,7 @@ import (
 	cController "miniWiki/internal/domain/category/controller"
 	cRepository "miniWiki/internal/domain/category/repository"
 	cService "miniWiki/internal/domain/category/service"
-	iService "miniWiki/internal/domain/image/service"
+	iService "miniWiki/internal/domain/filemanager/service"
 	rController "miniWiki/internal/domain/resource/controller"
 	rRepository "miniWiki/internal/domain/resource/repository"
 	rService "miniWiki/internal/domain/resource/service"
@@ -22,14 +22,18 @@ import (
 	"miniWiki/pkg/security"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/sirupsen/logrus"
 	"gorm.io/gorm"
 )
 
 func InitRouter(db *gorm.DB, cfg config.Config) http.Handler {
-	imageService := iService.NewImage(cfg.Database.ImageDir)
+	s3client, err := iService.NewS3Client(cfg.S3Bucket)
+	if err != nil {
+		logrus.Error(err)
+	}
 	resourceRepository := rRepository.NewResourceRepository(db)
 	categoryService := cService.NewCategory(cRepository.NewCategoryRepository(db), resourceRepository)
-	resourceService := rService.NewResource(resourceRepository, categoryService, imageService)
+	resourceService := rService.NewResource(resourceRepository, categoryService, s3client, cfg.Database.ResourceImageDir)
 	argon2id := security.NewArgon2id(
 		cfg.Argon2id.Memory,
 		cfg.Argon2id.Iterations,
@@ -40,20 +44,20 @@ func InitRouter(db *gorm.DB, cfg config.Config) http.Handler {
 	)
 	accountRepository := aRepository.NewAccountRepository(db)
 	authRepository := auRepository.NewAuthRepository(db)
-	accountService := accService.NewAccount(accountRepository, resourceRepository, argon2id, imageService)
+	accountService := accService.NewAccount(accountRepository, resourceRepository, argon2id, s3client, cfg.Database.ProfileImageDir)
 	authService := auService.NewAuth(
 		accountRepository,
 		authRepository,
 		argon2id,
-		cfg.Session.Duration,
+		cfg.SessionDuration,
 	)
 
 	sessionMiddleware := middleware.SessionMiddleware(authService)
 
 	r := chi.NewRouter()
 	r.Get("/swagger/*", swagger.Handler())
-	fs := http.FileServer(http.Dir(cfg.Database.ImageDir))
-	r.Handle("/static/*", http.StripPrefix("/static/", fs))
+	//fs := http.FileServer(http.Dir(cfg.Database.ImageDir))
+	//r.Handle("/static/*", http.StripPrefix("/static/", fs))
 	r.Group(func(gr chi.Router) {
 		gr.Route("/resources", func(rr chi.Router) {
 			rr.Use(sessionMiddleware)

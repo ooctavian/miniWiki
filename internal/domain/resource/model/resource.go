@@ -73,10 +73,11 @@ type DownloadResourceImageRequest struct {
 }
 
 type UploadResourceImageRequest struct {
-	ResourceId int
-	AccountId  int
-	ImageName  string
-	Image      io.Reader
+	ResourceId  int
+	AccountId   int
+	ImageName   string
+	ContentType string
+	Image       io.Reader
 }
 
 // swagger:model UpdateResource

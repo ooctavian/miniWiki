@@ -1,11 +1,3 @@
-package main
-
-import (
-	"miniWiki/internal/app"
-
-	"github.com/sirupsen/logrus"
-)
-
 // MiniWiki app
 //
 // As I find more and more useful resources both for my job and for my hobbies, simply
@@ -14,6 +6,13 @@ import (
 // for and researching a topic is cut down significantly.
 //
 // swagger:meta
+package main
+
+import (
+	"miniWiki/internal/app"
+
+	"github.com/sirupsen/logrus"
+)
 
 func main() {
 	application, err := app.New()

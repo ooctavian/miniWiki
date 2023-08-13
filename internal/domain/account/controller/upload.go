@@ -12,7 +12,7 @@ import (
 
 func uploadProfilePictureHandler(service accountService) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
-		file, header, err := transport.GetImage(r)
+		file, contentType, header, err := transport.GetImage(r)
 
 		if err != nil {
 			logrus.WithContext(r.Context()).Infof("Can't get file: %v", err)
@@ -21,9 +21,10 @@ func uploadProfilePictureHandler(service accountService) func(w http.ResponseWri
 		}
 
 		req := model.UploadProfilePictureRequest{
-			Image:     file,
-			ImageName: header.Filename,
-			AccountId: middleware.GetAccountId(r),
+			Image:       file,
+			ImageName:   header.Filename,
+			ContentType: *contentType,
+			AccountId:   middleware.GetAccountId(r),
 		}
 
 		err = service.UploadProfilePicture(r.Context(), req)

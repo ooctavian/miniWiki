@@ -47,7 +47,7 @@ func (s *CreateResourceSuite) SetupSuite() {
 	s.rRepo = &resourceRepositoryMock{}
 	s.cService = &categoryServiceMock{}
 
-	s.service = NewResource(s.rRepo, s.cService, nil)
+	s.service = NewResource(s.rRepo, s.cService, nil, "")
 }
 
 func (s *CreateResourceSuite) TestCreateResource_Succesful() {

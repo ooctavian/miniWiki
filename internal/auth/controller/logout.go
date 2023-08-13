@@ -12,7 +12,7 @@ import (
 
 // swagger:operation POST /logout Auth logout
 //
-// Login into an existing account.
+// Log out ouf the account. Deletes session cookie.
 //
 // ---
 // parameters:

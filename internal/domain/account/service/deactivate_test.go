@@ -29,7 +29,7 @@ func (s *DeactivateAccountTestSuite) SetupSuite() {
 	s.rRepo = &ResourceRepositoryMock{}
 	s.ctx = context.Background()
 
-	s.service = NewAccount(s.aRepo, s.rRepo, nil, nil)
+	s.service = NewAccount(s.aRepo, s.rRepo, nil, nil, "")
 }
 
 func (s *DeactivateAccountTestSuite) TestDeactivateAccount_Successful() {

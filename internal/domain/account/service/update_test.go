@@ -34,7 +34,7 @@ func (s *UpdateAccountTestSuite) SetupSuite() {
 	s.aRepo = &accountRepositoryMock{}
 	s.ctx = context.Background()
 
-	s.service = NewAccount(s.aRepo, nil, s.hash, nil)
+	s.service = NewAccount(s.aRepo, nil, s.hash, nil, "")
 }
 
 func (s *UpdateAccountTestSuite) TestUpdateAccount_HashError() {

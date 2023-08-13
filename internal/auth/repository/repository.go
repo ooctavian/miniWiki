@@ -28,10 +28,8 @@ func (r AuthRepository) GetSession(ctx context.Context, sessionID string) (*mode
 }
 
 func (r AuthRepository) DeleteSession(ctx context.Context, sessionID string) error {
-	session := model.Session{
-		SessionID: sessionID,
-	}
-	err := r.db.WithContext(ctx).Delete(&session).Error
+	session := model.Session{}
+	err := r.db.WithContext(ctx).Where("session_id", sessionID).Delete(&session).Error
 	return err
 }
 

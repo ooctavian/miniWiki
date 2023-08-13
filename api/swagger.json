@@ -1,6 +1,9 @@
 {
   "swagger": "2.0",
-  "info": {},
+  "info": {
+    "description": "As I find more and more useful resources both for my job and for my hobbies, simply\nbookmarking links becomes inefficient. I need a space to store summaries of the resources and\ncategorize them by multiple criteria. This way, no resource is lost and the time spent searching\nfor and researching a topic is cut down significantly.",
+    "title": "MiniWiki app"
+  },
   "paths": {
     "/account": {
       "get": {
@@ -160,7 +163,7 @@
           "Account"
         ],
         "summary": "Get details of current logged account.",
-        "operationId": "getAccount",
+        "operationId": "getAccountById",
         "responses": {
           "200": {
             "description": "Account info",
@@ -417,7 +420,7 @@
         "tags": [
           "Auth"
         ],
-        "summary": "Login into an existing account.",
+        "summary": "Log out ouf the account. Deletes session cookie.",
         "operationId": "logout",
         "parameters": [
           {
@@ -805,14 +808,14 @@
         "categoryId": {
           "description": "CategoryId of category",
           "type": "integer",
-          "format": "int64",
+          "format": "uint64",
           "x-go-name": "ID",
           "example": 2
         },
         "parentId": {
           "description": "ParentId of parent category, making it a subcategory",
           "type": "integer",
-          "format": "int64",
+          "format": "uint64",
           "x-go-name": "ParentId",
           "example": 1
         },
@@ -900,7 +903,7 @@
         },
         "ID": {
           "type": "integer",
-          "format": "int64"
+          "format": "uint64"
         },
         "categoryId": {
           "description": "Id of the category that the resource is a part of",
@@ -996,6 +999,7 @@
         "email": {
           "description": "Email of the account",
           "type": "string",
+          "format": "email",
           "x-go-name": "Email",
           "example": "lorem@example.com"
         },
@@ -1105,7 +1109,7 @@
         "resourceId": {
           "description": "Id of resource",
           "type": "integer",
-          "format": "int64",
+          "format": "uint64",
           "x-go-name": "ResourceId",
           "example": 1
         },
